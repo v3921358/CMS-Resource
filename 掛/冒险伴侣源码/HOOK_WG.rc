@@ -1,0 +1,433 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// Chinese (P.R.C.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""res\\HOOK_WG.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""l.chs\\afxres.rc""          // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "0c0404b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "\0"
+            VALUE "FileDescription", "by:乱舞\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "Partner\0"
+            VALUE "LegalCopyright", "版权所有 (C) 2009\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "Partner.DLL\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "Partner Dynamic Link Library\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0xc04, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_DIALOG1 DIALOGEX 0, 0, 223, 263
+STYLE DS_MODALFRAME | WS_MINIMIZEBOX | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "冒险伴侣"
+FONT 8, "Tahoma", 0, 0, 0x1
+BEGIN
+    CONTROL         "Tab1",IDC_TAB1,"SysTabControl32",TCS_FOCUSONBUTTONDOWN,
+                    0,0,223,249,WS_EX_DLGMODALFRAME
+    LTEXT           "user账号：",IDC_STATIC,167,252,9,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT1,179,250,9,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_VISIBLE | WS_DISABLED
+    LTEXT           "use角色：",IDC_STATIC,195,252,15,8,NOT WS_VISIBLE
+    EDITTEXT        IDC_EDIT2,214,250,9,12,ES_CENTER | ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_VISIBLE | WS_DISABLED
+    LTEXT           "冒险伴侣官方论坛:[神马游戏岛]smyxd.com   Admin:乱舞  Sword.",
+                    IDC_STATIC,0,252,223,8
+END
+
+IDD_DIALOG2 DIALOG DISCARDABLE  0, 0, 223, 236
+STYLE WS_POPUP
+FONT 8, "Tahoma"
+BEGIN
+    GROUPBOX        "",IDC_STATIC,1,0,218,232
+    CONTROL         "完全无敌",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,9,48,10
+    CONTROL         "59秒PG无敌",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,10,57,10
+    CONTROL         "物理无敌",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,9,48,10
+    CONTROL         "凤姐定怪",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,18,48,10
+    CONTROL         "怪物不魔攻",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,19,56,10
+    CONTROL         "超级笨怪",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,18,48,10
+    CONTROL         "怪物击退",IDC_CHECK7,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,27,48,10
+    CONTROL         "飓风无限制1[需开启技能 ]",IDC_CHECK8,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,111,106,10
+    CONTROL         "蛋蛋速显",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,27,48,10
+    CONTROL         "定点生怪",IDC_CHECK10,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,36,44,9
+    CONTROL         "全职全屏攻击",IDC_CHECK11,"Button",BS_AUTOCHECKBOX | 
+                    NOT WS_VISIBLE | WS_DISABLED | WS_TABSTOP,107,200,62,10
+    CONTROL         "飓风无限制2[直接启动 ]",IDC_CHECK12,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,114,110,96,10
+    CONTROL         "不显伤害",IDC_CHECK13,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,45,44,10
+    CONTROL         "停止呼吸",IDC_CHECK14,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,47,48,10
+    CONTROL         "原地挂花",IDC_CHECK15,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,45,48,10
+    CONTROL         "原地攻击不停",IDC_CHECK16,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,54,60,10
+    CONTROL         "蓄力秒放",IDC_CHECK17,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,56,48,10
+    CONTROL         "超级捡物",IDC_CHECK18,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,55,48,10
+    CONTROL         "物品速显",IDC_CHECK19,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,64,48,10
+    CONTROL         "自动掉血",IDC_CHECK20,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,65,48,10
+    CONTROL         "怪物不后退",IDC_CHECK21,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,64,70,10
+    CONTROL         "旧宠物慢吸",IDC_CHECK22,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_DISABLED | WS_TABSTOP,40,199,55,10
+    CONTROL         "战神攻击不前进",IDC_CHECK23,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,74,70,10
+    CONTROL         "直接打主体",IDC_CHECK24,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,29,56,10
+    CONTROL         "鼠标赶路[F10] ",IDC_CHECK25,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,83,62,10
+    CONTROL         "鼠标飞行[F8]",IDC_CHECK26,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,83,56,10
+    CONTROL         "拳手反盾",IDC_CHECK27,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,73,48,10
+    CONTROL         "飓风无延迟[请进商城关闭 否则无法使用技能]",IDC_CHECK28,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,120,174,10
+    CONTROL         "智能走动攻击不停[挂机专用]",IDC_CHECK29,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,92,114,10
+    CONTROL         "左右移动",IDC_CHECK30,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,90,161,48,10
+    CONTROL         "攻击加速",IDC_CHECK31,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,161,48,10
+    EDITTEXT        IDC_EDIT1,137,161,24,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT2,57,159,24,12,ES_AUTOHSCROLL
+    CONTROL         "重机枪无冷却",IDC_CHECK32,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,129,62,10
+    CONTROL         "飓风全屏[配合攻击不停]",IDC_CHECK33,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,130,98,10
+    CONTROL         "泰坦反盾",IDC_CHECK34,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,75,101,44,10
+    CONTROL         "泰坦全屏",IDC_CHECK35,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,101,48,10
+    CONTROL         "弓船无延迟",IDC_CHECK36,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,83,56,10
+    CONTROL         "战神无延迟",IDC_CHECK37,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,92,56,10
+    CONTROL         "怪物跟随",IDC_CHECK38,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_DISABLED | WS_TABSTOP,31,183,48,10
+    CONTROL         "一键聚合吸怪[F7]    吸怪范围：",IDC_CHECK39,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,148,120,10
+    CONTROL         "新全屏攻击",IDC_CHECK40,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,145,36,56,10
+    CONTROL         "宠物全屏吸",IDC_CHECK41,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,101,56,10
+    CONTROL         "金币过滤",IDC_CHECK42,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,161,187,48,10
+    CONTROL         "自动捡取地上物品",IDC_CHECK43,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,67,139,80,10
+    CONTROL         "锁定宠物",IDC_CHECK44,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_DISABLED | WS_TABSTOP,160,171,48,10
+    CONTROL         "机械师免变身",IDC_CHECK45,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,7,74,59,10
+    EDITTEXT        IDC_EDIT3,128,148,25,12,ES_AUTOHSCROLL
+END
+
+IDD_DIALOG3 DIALOG DISCARDABLE  0, 0, 225, 255
+STYLE WS_POPUP
+FONT 8, "Tahoma"
+BEGIN
+    GROUPBOX        "",IDC_STATIC,1,0,218,232
+    GROUPBOX        "",IDC_STATIC,5,7,210,52
+    CONTROL         "自动补血 HP：<",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,13,17,72,10
+    CONTROL         "自动补魔 MP：<",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,13,29,73,10
+    CONTROL         "自动喂宠 [End键]",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,13,44,75,10
+    EDITTEXT        IDC_EDIT1,87,16,37,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT2,87,28,37,12,ES_AUTOHSCROLL
+    LTEXT           "%时 [PageUP键]",IDC_STATIC,131,16,57,8
+    LTEXT           "%时 [PageDn键]",IDC_STATIC,131,29,57,8
+    GROUPBOX        "",IDC_STATIC,5,60,210,167
+    GROUPBOX        "所有物品列表-双击加入过滤列表",IDC_STATIC,9,68,202,52
+    LISTBOX         IDC_LIST1,14,77,192,40,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    GROUPBOX        "过滤列表",IDC_STATIC,63,121,147,102
+    LISTBOX         IDC_LIST2,69,133,136,85,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "查找",IDC_BUTTON1,9,137,49,12
+    EDITTEXT        IDC_EDIT3,11,153,46,12,ES_AUTOHSCROLL
+    CONTROL         "过滤开关",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,11,125,44,10
+    CONTROL         "来人停止攻击",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,100,44,64,10
+    PUSHBUTTON      "删除",IDC_BUTTON2,9,169,49,12
+    PUSHBUTTON      "保存",IDC_BUTTON4,9,196,49,12
+    PUSHBUTTON      "加载",IDC_BUTTON6,9,210,49,12
+    PUSHBUTTON      "清空",IDC_BUTTON7,9,183,49,12
+END
+
+IDD_DIALOG4 DIALOG DISCARDABLE  0, 0, 224, 239
+STYLE WS_POPUP
+FONT 8, "Tahoma"
+BEGIN
+    GROUPBOX        "",IDC_STATIC,1,0,218,232
+    GROUPBOX        "",IDC_STATIC,5,7,209,110
+    EDITTEXT        IDC_EDIT1,11,18,196,17,ES_AUTOHSCROLL
+    CONTROL         "开始喊话",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,14,101,45,10
+    EDITTEXT        IDC_EDIT2,62,99,37,12,ES_AUTOHSCROLL
+    LTEXT           "毫秒/次循环",IDC_STATIC,102,101,66,10
+    EDITTEXT        IDC_EDIT4,11,38,196,17,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT5,11,57,196,17,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT6,11,76,196,17,ES_AUTOHSCROLL
+    GROUPBOX        "",IDC_STATIC,7,119,207,107
+    LISTBOX         IDC_LIST3,68,143,141,74,LBS_SORT | LBS_NOINTEGRALHEIGHT | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "启动按键   [攻击技能放A键]",IDC_CHECK2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,14,128,109,10
+    EDITTEXT        IDC_EDIT3,128,126,24,12,ES_AUTOHSCROLL
+    COMBOBOX        IDC_COMBO1,165,126,41,102,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "秒",IDC_STATIC,155,128,9,8
+    PUSHBUTTON      "添加",IDC_BUTTON2,13,146,50,14
+    PUSHBUTTON      "删除",IDC_BUTTON3,13,160,50,14
+    PUSHBUTTON      "清空",IDC_BUTTON4,13,174,50,14
+    PUSHBUTTON      "保存",IDC_BUTTON5,13,188,50,14
+    PUSHBUTTON      "加载",IDC_BUTTON6,13,202,50,14
+    EDITTEXT        IDC_EDIT7,185,76,6,14,ES_AUTOHSCROLL | NOT WS_VISIBLE
+END
+
+IDD_DIALOG5 DIALOG DISCARDABLE  0, 0, 226, 241
+STYLE WS_POPUP
+FONT 8, "Tahoma"
+BEGIN
+    GROUPBOX        "",IDC_STATIC,0,0,218,232
+    GROUPBOX        "",IDC_STATIC,3,4,211,223
+    GROUPBOX        "",IDC_STATIC,8,9,204,72
+    CONTROL         "启动[A为攻击键]",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,13,18,70,10
+    LTEXT           "辅助技能1.请将辅助技能放X键：",IDC_STATIC,20,31,116,8
+    EDITTEXT        IDC_EDIT1,138,29,30,12,ES_AUTOHSCROLL
+    LTEXT           "秒",IDC_STATIC,169,29,9,8
+    LTEXT           "辅助技能2.请将辅助技能放C键：",IDC_STATIC,20,43,116,8
+    LTEXT           "辅助技能3.请将辅助技能放V键：",IDC_STATIC,20,56,115,8
+    EDITTEXT        IDC_EDIT2,138,41,30,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_EDIT3,138,53,30,12,ES_AUTOHSCROLL
+    LTEXT           "秒",IDC_STATIC,170,41,9,8
+    LTEXT           "秒",IDC_STATIC,169,54,34,8
+    CONTROL         "掉线报警",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,68,48,10
+    CONTROL         "测谎报警",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,109,69,48,10
+    CONTROL         "掉线关机",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,61,68,48,10
+    CONTROL         "测谎关机",IDC_CHECK5,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,159,69,48,10
+    CONTROL         "测谎截图",IDC_CHECK6,"Button",BS_AUTOCHECKBOX | NOT 
+                    WS_VISIBLE | WS_TABSTOP,182,54,16,10
+    LTEXT           "账号：",IDC_STATIC,32,174,25,8
+    EDITTEXT        IDC_EDIT4,60,170,106,14,ES_AUTOHSCROLL
+    LTEXT           "密码：",IDC_STATIC,32,190,25,8
+    EDITTEXT        IDC_EDIT5,60,186,105,14,ES_PASSWORD | ES_AUTOHSCROLL
+    CONTROL         "掉线自动登录",IDC_CHECK8,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,12,206,64,10
+    GROUPBOX        "自动登录启动后请勿操作 否则会错误",IDC_STATIC,7,84,205,
+                    139
+    CONTROL         "1区",IDC_RADIO1,"Button",BS_AUTORADIOBUTTON,17,96,28,10
+    CONTROL         "2区",IDC_RADIO2,"Button",BS_AUTORADIOBUTTON,53,96,28,10
+    CONTROL         "3区",IDC_RADIO3,"Button",BS_AUTORADIOBUTTON,89,96,28,10
+    CONTROL         "4区",IDC_RADIO4,"Button",BS_AUTORADIOBUTTON,129,96,28,
+                    10
+    CONTROL         "5区",IDC_RADIO5,"Button",BS_AUTORADIOBUTTON,167,96,28,
+                    10
+    LTEXT           "服务器：",IDC_STATIC,18,153,36,8
+    COMBOBOX        IDC_COMBO1,55,151,48,69,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    COMBOBOX        IDC_COMBO2,144,151,48,71,CBS_DROPDOWNLIST | CBS_SORT | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "频道：",IDC_STATIC,118,154,25,8
+    DEFPUSHBUTTON   "选择大区后点我",IDC_BUTTON1,16,110,190,16
+    CONTROL         "",IDC_CHECK9,"Button",BS_AUTOCHECKBOX | NOT WS_VISIBLE | 
+                    WS_DISABLED | WS_TABSTOP,81,207,123,10
+    LTEXT           "选区后再按上面的按钮 然后选择服务器.频道！",IDC_STATIC,
+                    23,133,176,8
+    CONTROL         "挂机按键(多开)",IDC_RADIO6,"Button",BS_AUTORADIOBUTTON,
+                    88,18,66,10
+    CONTROL         "战神/龙神",IDC_RADIO7,"Button",BS_AUTORADIOBUTTON,157,
+                    18,47,10
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 256
+    END
+
+    IDD_DIALOG2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 216
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 229
+    END
+
+    IDD_DIALOG3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 218
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 248
+    END
+
+    IDD_DIALOG4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 217
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 232
+    END
+
+    IDD_DIALOG5, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 219
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 234
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Chinese (P.R.C.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+#ifdef _WIN32
+LANGUAGE 4, 2
+#pragma code_page(936)
+#endif //_WIN32
+#include "res\HOOK_WG.rc2"  // non-Microsoft Visual C++ edited resources
+#include "l.chs\afxres.rc"          // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

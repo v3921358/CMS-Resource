@@ -1,0 +1,9 @@
+; HOOK_WG.def : Declares the module parameters for the DLL.
+
+LIBRARY      "Partner"
+DESCRIPTION  'Partner Windows Dynamic Link Library'
+
+EXPORTS
+    ; Explicit exports can go here
+Install @1
+Uninstall @2

@@ -1,0 +1,12 @@
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\bin\Debug\TTL冒险岛登录器.exe.config
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\bin\Debug\TTL冒险岛登录器.exe
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\bin\Debug\TTL冒险岛登录器.pdb
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.csprojAssemblyReference.cache
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.主窗体.resources
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.Properties.Resources.resources
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.csproj.GenerateResource.cache
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.csproj.CoreCompileInputs.cache
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.exe
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.pdb
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\Interop.SYNCTRLLib.dll
+E:\TLL登录器\TTL冒险岛登录器\TTL冒险岛登录器\obj\Debug\TTL冒险岛登录器.csproj.ResolveComReference.cache
