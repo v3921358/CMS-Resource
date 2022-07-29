@@ -1,0 +1,80 @@
+嘿嘿 反编译以后 找出了点东西...... 
+我就不限制回复了 因为是别人的东西嘛!!!
+找到pvplibrary.java
+找到:
+Integer mguard = attackedPlayers.getBuffedValue(MapleBuffStat.MAGIC_GUARD); 
+Integer mesoguard = attackedPlayers.getBuffedValue(MapleBuffStat.MESOGUARD); 
+
+上面加入 
+//下面是新加的 VIP PK的翻倍 
+if (player.getVip() == 3) { 
+pvpDamage *= 2; 
+} else if (player.getVip() == 4) { 
+pvpDamage *= 4; 
+} else { 
+pvpDamage *= 1; 
+} 
+
+
+int magicattack = (player.getTotalDex() + player.getTotalInt() + player.getTotalLuk() + player.getTotalStr()) / 300; //4项属性值最后除以3=magicattack K攻击力+magicattack值//新加的 
+pvpDamage += magicattack; 
+
+int reborn = player.getReborns(); //转生 //PK攻击力+reborn值 //新加的 
+pvpDamage += reborn; 
+
+int magicat = (player.getTotalMagic() + player.getTotalWatk()) / 100; //魔法+物理攻击除以100=magicat值 PK攻击力+magicat值 //新加的 
+pvpDamage += magicat; 
+
+if (player.getGMLevel() == 5) { //如果是GM等级5 PK攻击力*2000 //新加的 
+pvpDamage *= 2000; 
+} 
+
+
+-------------------------------------------------------------------------------------------
+
+
+
+
+
+
+找到
+MapleMonster pvpMob = MapleLifeFactory.getMonster(9400711); 
+
+上面加入 
+if (player.haveItem(5221000) == true) { //如果有5221000 那么PK增加4倍攻击力 
+pvpDamage *= 4; 
+} 
+pvpDamage /= 2; 
+
+int selec = (int)Math.floor(Math.random() * 2.0D) + 1; //新加的 
+int randomed = (int)Math.floor(Math.random() * 88.0D) + 1; //新加的 
+
+
+
+注意下面的掉落装备的我还没法准确的知道添加某些参数来完善他的功能(Java编程才刚开始学习....还不知道怎么加....) 所以下面的这个掉落装备的并不完善 只做参考 
+找到 
+attackedPlayers.gainPvpDeath(); 
+下面加入 
+//下面的是PK掉落装备的 
+if (selec == 1) { 
+ii = MapleItemInformationProvider.getInstance(); 
+itemedid = attackedPlayers.getInventory(MapleInventoryType.EQUIP).getItem((byte)randomed).copy(); 
+if (attackedPlayers.getlockitem(randomed) == 0) { 
+MapleInventoryManipulator.removeFromSlot(attackedPlayers.getClient(), MapleInventoryType.EQUIP, (byte)randomed, 1, true); 
+attackedPlayers.getMap().spawnItemDrop(attackedPlayers, attackedPlayers, itemedid, attackedPlayers.getPosition(), true, false); 
+} 
+} 
+else { 
+ii = MapleItemInformationProvider.getInstance(); 
+itemedid = attackedPlayers.getInventory(MapleInventoryType.ETC).getItem((byte)randomed); 
+IItem tradeItem = itemedid.copy(); 
+MapleInventoryManipulator.removeFromSlot(attackedPlayers.getClient(), MapleInventoryType.ETC, (byte)randomed, 1, true); 
+attackedPlayers.getMap().spawnItemDrop(attackedPlayers, attackedPlayers, ii.getEquipById(tradeItem.getItemId()), attackedPlayers.getPosition(), true, false); 
+} 
+
+int random = (int)Math.floor(Math.random() * 30000000.0D) + 1000000; 
+if (attackedPlayers.getMeso() >= random) { 
+attackedPlayers.getMap().spawnMesoDrop(random, random, attackedPlayers.getPosition(), attackedPlayers, attackedPlayers, false); 
+attackedPlayers.gainMeso(-random, true); 
+} 
+//以上到此结束掉落装备的

@@ -1,0 +1,125 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+MaplePacketCreator
+添加
+public static MaplePacket giveEnergyCharge(int barammount, int test2) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.write(HexTool.getByteArrayFromHexString("1D 00 00 00 00 00 00 00 00 00 00 00 00 08 00 00 00 00 00 00"));
+        mplew.writeShort(barammount); // 0=no bar, 10000=full bar
+        mplew.writeShort(0);
+        mplew.writeShort(0);
+        mplew.writeShort(0);
+        mplew.writeInt(test2);
+        mplew.writeShort(0);
+        mplew.writeShort(0);
+        return mplew.getPacket();
+    }
+
+
+MapleCharacter
+
+添加
+
+public void handleEnergyChargeGain() {
+        ISkill energycharge = SkillFactory.getSkill(5110001);
+        int energyChargeSkillLevel = getSkillLevel(energycharge);
+        MapleStatEffect ceffect = null;
+        ceffect = energycharge.getEffect(energyChargeSkillLevel);
+        if (energyChargeSkillLevel > 0) {
+            if (energybar < 10000) {
+
+                energybar = (energybar + 102);
+                if (energybar > 10000) {
+                    energybar = 10000;
+                }
+            getClient().getSession().write(MaplePacketCreator.giveEnergyCharge(energybar * getClient().getChannelServer().getEnergyRate(), 0));
+            }
+            if (energybar >= 10000 && energybar < 11000) {
+                energybar = 15000;
+                TimerManager tMan = TimerManager.getInstance();
+                tMan.schedule(new Runnable() {
+                    @Override
+                    public void run() {
+                        getClient().getSession().write(MaplePacketCreator.giveEnergyCharge(0, 0));
+                        energybar = 0;
+                    }
+               }, ceffect.getDuration());
+            }
+
+        }
+    }
+
+
+
+
+
+CloseRangeDamageHandler.java
+类似部分
+替换
+// handle combo orbconsume
+        int numFinisherOrbs = 0;
+        Integer comboBuff = player.getBuffedValue(MapleBuffStat.COMBO);
+        ISkill energycharge = SkillFactory.getSkill(5110001);
+        int energyChargeSkillLevel = player.getSkillLevel(energycharge);
+        if (isFinisher(attack.skill)) {
+            if (comboBuff != null) {
+                numFinisherOrbs = comboBuff.intValue() - 1;
+            }
+            player.handleOrbconsume();
+        } else if (attack.numAttacked > 0) {
+            // handle combo orbgain
+            if (attack.skill != 1111008 && comboBuff != null) { // shout should not give orbs
+                player.handleOrbgain();
+            }
+            if (energyChargeSkillLevel > 0) {
+                for (int i = 0; i < attack.numAttacked; i++) {
+                   player.handleEnergyChargeGain();
+                }
+            }
+        }
+        // handle sacrifice hp loss
+
+
+然后在
+AbstractDealDamageHandle
+添加
+
+                 if (attack.skill == 5111004) { // Energy Drain
+                                                        ISkill edrain = SkillFactory.getSkill(5111004);
+                                                        gainhp = (int) ((double) totDamage *
+                                                        (double) edrain.getEffect(player.getSkillLevel(edrain)).getX() / 100.0);
+                                                     gainhp = Math.min(monster.getMaxHp(), Math.min(gainhp, player.getMaxHp() / 2));
+                                                    player.addHP(gainhp);
+                                                }
+
+然后打开
+ChannelServer.java
+
+private int channel;
+下添加
+private int energyRate;
+在expRate = Integer.parseInt(props.getProperty("net.sf.odinms.world.exp"));
+添加
+energyRate = Integer.parseInt(props.getProperty("net.sf.odinms.world.energy"));
+上面的要添加2处
+
+然后在
+public int getExpRate() 
+上面添加
+  public int getEnergyRate() {
+        return energyRate;
+    }
+
+在public void setExpRate(int expRate) 
+上面添加
+  public void setEnergyRate(int energyRate) {
+        this.energyRate = energyRate;
+    }
+
+
+在world.properties 
+添加
+net.sf.odinms.world.energy=能量获取倍数

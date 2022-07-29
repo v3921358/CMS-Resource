@@ -1,0 +1,61 @@
+========================第一个Java修改================================
+首先打开net.sf.odinms.scripting.npc.AbstractPlayerInteraction.java
+查找private class AbstractPlayerInteraction {
+    public MapleClient c;
+将本句改为public class AbstractPlayerInteraction {
+    public MapleClient c;
+========================第二个Java修改================================
+打开NPCConverstationManager.java
+适当地方增加import net.sf.odinms.net.channel.ChannelServer;
+适当地方增加  public void callGM(String Text) {
+                        for (ChannelServer cservs : ChannelServer.getAllInstances()) {
+                            for (MapleCharacter players : cservs.getPlayerStorage().getAllCharacters()) {
+                                if (players.isGM()) {
+                                    players.getClient().getSession().write(MaplePacketCreator.serverNotice(6, c.getPlayer().getName() + " sent you a message : " + Text));
+                                }
+                            }
+                        }
+                }
+
+
+==========================以下NPC JS转外国====================================
+ var status = 0;
+var price = 10000000;
+
+function start() {
+status = -1;
+action(1, 0, 0);
+}
+function action(mode, type, selection) {
+if (mode == -1) {
+cm.sendOK("How dare you cancel our conversation!");
+  cm.dispose();
+} else {
+  if (mode == 0) {
+   cm.sendOk("Okay nevermind.");
+   cm.dispose();
+   return;
+  }
+  if (mode == 1)
+   status++;
+  else
+   status--;
+  if (status == 0) {
+   cm.sendNext("Hey #b#h ##k, wanna send your messages to online GMs?");
+  } else if (status == 1) {
+   cm.sendGetText("Okay, type in your messages below.");
+  } else if (status == 2) {
+   message = cm.getText();
+   cm.sendYesNo("You sure you wanna sent the message \r\n<#b" + message + "#k>\r\n to GMs? \r\nYou'll get jail if you abuse this.");
+  } else if (status == 3) {
+   if (cm.getMeso() >= price) {
+    cm.callGM(message);
+    cm.gainMeso(-price);
+    cm.sendOk("Sent.");
+   } else {
+    cm.sendOk("You don't have " + price + " mesos.");
+    cm.dispose();
+   }
+  }
+}
+}

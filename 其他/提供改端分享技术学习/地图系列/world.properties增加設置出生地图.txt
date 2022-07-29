@@ -1,0 +1,25 @@
+
+找到：ChannelServer.java 
+增加
+private int mapid; 
+
+mapid = Integer.parseInt(props.getProperty("net.sf.odinms.world.mapid")); 
+
+public int getStarterMap() { 
+return mapid; 
+} 
+
+找到：MapleCharacter.java 
+找到原文：
+ret.map = mapFactory.getMap(ret.mapid);  
+
+
+替换为： 
+ret.map = mapFactory.getMap(client.getChannelServer().getStarterMap()); 
+
+编译。。 
+
+找到：world.properties 
+增加
+net.sf.odinms.world.mapid=0 
+

@@ -1,0 +1,1449 @@
+这个是雇佣商店专用的记事本
+大家请注意了、修复完商店后有BUG、解决方法在下面
+首先让大家修复雇佣商店、方法如下....
+--------------------------------------------------------------------------------------
+打开MaplePacketCreator.java
+找到
+=private static void addAnnounceBox
+相似部分替换成
+private static void addAnnounceBox(MaplePacketLittleEndianWriter mplew, MaplePlayerShop shop, int availability) {
+        // 00: no game
+        // 01: omok game
+        // 02: card game
+        // 04: shop
+        mplew.write(4);
+        mplew.writeInt(shop.getObjectId()); // gameid/shopid
+
+        mplew.writeMapleAsciiString(shop.getDescription()); // desc
+        // 00: public
+        // 01: private
+
+        mplew.write(0);
+        // 00: red 4x3
+        // 01: green 5x4
+        // 02: blue 6x5
+        // omok:
+        // 00: normal
+        mplew.write(0);
+        // first slot: 1/2/3/4
+        // second slot: 1/2/3/4
+        mplew.write(1);
+        mplew.write(availability);
+        // 0: open
+        // 1: in progress
+        mplew.write(0);
+    }
+
+找到
+public static MaplePacket updateCharBox
+相似部分替换成
+public static MaplePacket addCharBox(MapleCharacter c, int type) {
+                MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_BOX.getValue());
+                mplew.writeInt(c.getId());
+                addAnnounceBox(mplew, c.getPlayerShop(), type);
+                return mplew.getPacket();
+    }
+        
+        public static MaplePacket removeCharBox(MapleCharacter c) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_BOX.getValue());
+        mplew.writeInt(c.getId());
+                mplew.write(0);
+        return mplew.getPacket();
+    }
+
+找到
+public static MaplePacket getPlayerShopNewVisitor
+
+还是相似部分
+
+public static MaplePacket getPlayerShopNewVisitor(MapleCharacter c, int slot) {
+                MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(HexTool.getByteArrayFromHexString("04 0"+slot));
+        addCharLook(mplew, c, false);
+        mplew.writeMapleAsciiString(c.getName());
+        log.info("player shop send packet: \n" + mplew.toString());
+                return mplew.getPacket();
+    }
+        
+        public static MaplePacket getPlayerShopRemoveVisitor(int slot) {
+                MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(HexTool.getByteArrayFromHexString("0A 0"+slot));
+                log.info("player shop send packet: \n" + mplew.toString());
+                return mplew.getPacket();
+    }
+再找到
+public static MaplePacket getPlayerShop
+继续相似替换
+public static MaplePacket getPlayerShop(MapleClient c, MaplePlayerShop shop, boolean owner) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(HexTool.getByteArrayFromHexString("05 04 04"));
+        mplew.write(owner ? 0 : 1);
+        mplew.write(0);
+        addCharLook(mplew, shop.getOwner(), false);
+        mplew.writeMapleAsciiString(shop.getOwner().getName());
+                /*
+        MapleCharacter[] visitors = shop.getVisitors();
+        for (int i = 0; i < visitors.length; i++) {
+            if (visitors[i] != null) {
+                mplew.write(i + 1);
+                addCharLook(mplew, visitors[i], false);
+                mplew.writeMapleAsciiString(visitors[i].getName());
+            }
+        } */
+        mplew.write(1);
+                addCharLook(mplew, shop.getOwner(), false);
+                mplew.writeMapleAsciiString(shop.getOwner().getName());
+        mplew.write(0xFF);
+        mplew.writeMapleAsciiString(shop.getDescription());
+        List<MaplePlayerShopItem> items = shop.getItems();
+        mplew.write(0x10);
+        mplew.write(items.size());
+        for (MaplePlayerShopItem item : items) {
+            mplew.writeShort(item.getBundles());
+            mplew.writeShort(item.getItem().getQuantity());
+            mplew.writeInt(item.getPrice());
+            addItemInfo(mplew, item.getItem(), true, true);
+        }
+        // mplew.write(HexTool.getByteArrayFromHexString("01 60 BF 0F 00 00 00
+        // 80 05 BB 46 E6 17 02 05 00 00 00 00 00 00
+        // 00 00 00 1D 00 16 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 1B 7F 00 00 0D 00 00
+        // 40 01 00 01 00 FF 34 0C 00 01 E6 D0 10 00 00 00 80 05 BB 46 E6 17 02
+        // 04 01 00 00 00 00 00 00 00 00 0A 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 0F 00 00 00 00 00 00 00 00 00 00 00
+        // 63 CF 07 01 00 00 00 7C 01 00 01 00 5F
+        // AE 0A 00 01 79 16 15 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00
+        // 00 00 00 00 66 00 00 00 21 00 2F 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 A4 82 7A 01 00 00
+        // 00 7C 01 00 01 00 5F AE 0A 00 01 79 16
+        // 15 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00 00 00 00 00 66 00
+        // 00 00 23 00 2C 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 FE AD 88 01 00 00 00 7C 01 00 01 00
+        // DF 67 35 00 01 E5 D0 10 00 00 00 80 05
+        // BB 46 E6 17 02 01 03 00 00 00 00 07 00 00 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 0A 00 00 00 00 00 00
+        // 00 00 00 00 00 CE D4 F1 00 00 00 00 7C 01 00 01 00 7F 1A 06 00 01 4C
+        // BF 0F 00 00 00 80 05 BB 46 E6 17 02 05
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1D 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 00 38
+        // CE AF 00 00 00 00 7C 01 00 01 00 BF 27 09 00 01 07 76 16 00 00 00 80
+        // 05 BB 46 E6 17 02 00 07 00 00 00 00 00
+        // 00 00 00 00 00 00 00 17 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 7C 02 00 00 1E 00 00
+        // 48 01 00 01 00 5F E3 16 00 01 11 05 14 00 00 00 80 05 BB 46 E6 17 02
+        // 07 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 21 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 1C 8A 00 00 39 00 00 10 01 00 01 00 7F
+        // 84 1E 00 01 05 DE 13 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 0C 00 00 00 00 00 00 00 00 E5 07 01 00 00
+        // 00 7C 2B 00 01 00 AF B3 00 00 02 FC 0C
+        // 3D 00 00 00 80 05 BB 46 E6 17 02 2B 00 00 00 00 00 00 00 01 00 0F 27
+        // 00 00 02 D1 ED 2D 00 00 00 80 05 BB 46
+        // E6 17 02 01 00 00 00 00 00 0A 00 01 00 9F 0F 00 00 02 84 84 1E 00 00
+        // 00 80 05 BB 46 E6 17 02 0A 00 00 00 00
+        // 00 01 00 01 00 FF 08 3D 00 01 02 05 14 00 00 00 80 05 BB 46 E6 17 02
+        // 07 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 25 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 78 36 00 00 1D 00 00 14 01 00 01 00 9F
+        // 25 26 00 01 2B 2C 14 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 34 00 00 00 06
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E8 76 00 00 1F 00
+        // 00 24 01 00 01 00 BF 0E 16 02 01 D9 D0
+        // 10 00 00 00 80 05 BB 46 E6 17 02 00 04 00 00 00 00 00 00 07 00 00 00
+        // 00 00 02 00 00 00 06 00 08 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 23 02 00 00 1C 00 00 1C 5A 00 01 00
+        // 0F 27 00 00 02 B8 14 3D 00 00 00 80 05
+        // BB 46 E6 17 02 5A 00 00 00 00 00"));
+        /*
+        * 10 10 01 00 01 00 3F 42 0F 00 01 60 BF 0F 00 00 00 80 05 BB /* ||||||||||| OMG ITS THE PRICE ||||| PROBABLY
+        * THA QUANTITY ||||||||||| itemid
+        * 
+        */
+        // mplew.writeInt(0);
+        return mplew.getPacket();
+    }
+
+
+打开
+MaplePlayerShop.java
+把下面的全覆盖进去
+/*
+    This file is part of the OdinMS Maple Story Server
+    Copyright (C) 2008 Patrick Huy <[email]patrick.huy@frz.cc[/email]> 
+                      Matthias Butz <[email]matze@odinms.de[/email]>
+                      Jan Christian Meyer <[email]vimes@odinms.de[/email]>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation. You may not use, modify
+    or distribute this program under any other version of the
+    GNU Affero General Public License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <[url]http://www.gnu.org/licenses/[/url]>.
+*/
+
+/*
+* To change this template, choose Tools | Templates
+* and open the template in the editor.
+*/
+
+package net.sf.odinms.server;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import net.sf.odinms.client.IItem;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.net.MaplePacket;
+import net.sf.odinms.server.maps.AbstractMapleMapObject;
+import net.sf.odinms.server.maps.MapleMapObjectType;
+import net.sf.odinms.tools.MaplePacketCreator;
+
+/**
+*
+* @author Matze
+*/
+public class MaplePlayerShop extends AbstractMapleMapObject {
+    private MapleCharacter owner;
+    private MapleCharacter[] visitors = new MapleCharacter[3];
+    private List<MaplePlayerShopItem> items = new ArrayList<MaplePlayerShopItem>();
+    private MapleCharacter slot1 = null;
+        private MapleCharacter slot2 = null;
+        private MapleCharacter slot3 = null;
+        private String description;
+        private List playerSlots = new ArrayList();
+
+
+        public MaplePlayerShop(MapleCharacter owner, String description) {
+        this.owner = owner;
+        this.description = description;
+    }
+    
+    public boolean hasFreeSlot() {
+        return visitors[0] == null || visitors[1] == null || visitors[2] == null;
+    }
+    
+    public boolean isOwner(MapleCharacter c) {
+        return owner == c;
+    }
+    
+    public void addVisitor(MapleCharacter visitor) {
+        for (int i = 0; i < 3; i++) {
+            if (visitors[i] == null) {
+                visitors[i] = visitor;
+                                if (this.getSlot1() == null) {
+                                    this.setSlot1(visitor);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopNewVisitor(visitor, 1));
+                                } else if (this.getSlot2() == null) {
+                                    this.setSlot2(visitor);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopNewVisitor(visitor, 2));
+                                } else if (this.getSlot3() == null) {
+                                    this.setSlot3(visitor);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopNewVisitor(visitor, 3));
+                                    visitor.getMap().broadcastMessage(MaplePacketCreator.addCharBox(this.getOwner(), 1));
+                                }
+                                break;
+            }
+        }
+        
+    }
+    
+    public void removeVisitor(MapleCharacter visitor) {
+        for (int i = 0; i < 3; i++) {
+            if (visitors[i] == visitor) {
+                visitors[i] = null;
+                if (visitor.getSlot() == 1) {
+                                    this.setSlot1(null);
+                                    visitor.setSlot(0);
+                                    //this.broadcastToVisitors(MaplePacketCreator.getPlayerShopRemoveVisitor(1));
+                                    break;
+                                }    
+                                if (visitor.getSlot() == 2) {
+                                    this.setSlot2(null);
+                                    visitor.setSlot(0);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopRemoveVisitor(2));
+                                    break;
+                                }
+                                if (visitor.getSlot() == 3) {
+                                    this.setSlot3(null);
+                                    visitor.setSlot(0);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopRemoveVisitor(3));
+                                    visitor.getMap().broadcastMessage(MaplePacketCreator.addCharBox(this.getOwner(), 4));
+                                    break;
+                                }
+                                break;
+            }
+        }
+    }
+              
+    public boolean isVisitor(MapleCharacter visitor) {
+        return visitors[0] == visitor || visitors[1] == visitor || visitors[2] == visitor;
+    }
+    
+    public void addItem(MaplePlayerShopItem item) {
+        items.add(item);
+    }
+    
+    public void removeItem(int item) {
+        items.remove(item);
+    }
+    
+    /**
+    * no warnings for now o.op
+    * @param c
+    * @param item
+    * @param quantity
+    */
+    public void buy(MapleClient c, int item, short quantity) {
+        if (isVisitor(c.getPlayer())) {
+            MaplePlayerShopItem pItem = items.get(item);
+            owner = this.getOwner();
+                        synchronized (c.getPlayer()) {
+                                IItem newItem = pItem.getItem().copy();
+                                newItem.setQuantity((short) (newItem.getQuantity() * quantity));
+                                c.getPlayer().gainMeso(-pItem.getPrice() * quantity, true);
+                                owner.gainMeso(pItem.getPrice() * quantity, true);
+                                MapleInventoryManipulator.addFromDrop(c, newItem, "");
+                                pItem.setBundles((short) (pItem.getBundles() - quantity));
+            }
+        }
+    }
+    
+    public void broadcastToVisitors(MaplePacket packet) {
+        for (int i = 0; i < 3; i++) {
+            if (visitors[i] != null)
+                visitors[i].getClient().getSession().write(packet);
+        }
+    }
+        
+        public void removeVisitors() {
+        for (int i = 0; i < 3; i++) {
+            if (visitors[i] != null)
+                visitors[i].changeMap(visitors[i].getMap(), visitors[i].getPosition());
+        }
+    }
+    
+    public void broadcast(MaplePacket packet) {
+        if (owner.getClient() != null && owner.getClient().getSession() != null)
+            owner.getClient().getSession().write(packet);
+                        broadcastToVisitors(packet);
+    }
+    
+    public void chat(MapleClient c, String chat) {
+        broadcast(MaplePacketCreator.getPlayerShopChat(c.getPlayer(), chat, isOwner(c.getPlayer())));
+    }
+    
+    public void sendShop(MapleClient c) {
+        c.getSession().write(MaplePacketCreator.getPlayerShop(c, this, isOwner(c.getPlayer())));
+    }
+
+    public MapleCharacter getOwner() {
+        return owner;
+    }
+
+    public MapleCharacter[] getVisitors() {
+        return visitors;
+    }
+        
+        public MapleCharacter getSlot1() {
+                return slot1;
+        }
+        
+        public MapleCharacter getSlot2() {
+                return slot2;
+        }
+        
+        public MapleCharacter getSlot3() {
+                return slot3;
+        }
+        
+        public void setSlot1(MapleCharacter person) {
+                slot1 = person;
+                if (person != null) {
+                    person.setSlot(1);
+                }
+        }
+        
+        public void setSlot2(MapleCharacter person) {
+                slot2 = person;
+                if (person != null) {
+                    person.setSlot(2);
+                }
+        }
+        
+        public void setSlot3(MapleCharacter person) {
+                slot3 = person;
+                if (person != null) {
+                    person.setSlot(3);
+                }
+        }
+
+    public List<MaplePlayerShopItem> getItems() {
+        return Collections.unmodifiableList(items);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public void sendDestroyData(MapleClient client) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void sendSpawnData(MapleClient client) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MapleMapObjectType getType() {
+        return MapleMapObjectType.SHOP;
+    }
+}
+
+打开
+PlayerInteractionHandler.java 
+全覆盖
+/*
+    This file is part of the OdinMS Maple Story Server
+    Copyright (C) 2008 Patrick Huy <[email]patrick.huy@frz.cc[/email]> 
+                      Matthias Butz <[email]matze@odinms.de[/email]>
+                      Jan Christian Meyer <[email]vimes@odinms.de[/email]>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation. You may not use, modify
+    or distribute this program under any other version of the
+    GNU Affero General Public License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <[url]http://www.gnu.org/licenses/[/url]>.
+*/
+
+package net.sf.odinms.net.channel.handler;
+
+import net.sf.odinms.client.IItem;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.MapleInventoryType;
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.server.MapleInventoryManipulator;
+import net.sf.odinms.server.MapleItemInformationProvider;
+import net.sf.odinms.server.MapleMiniGame;
+import net.sf.odinms.server.MaplePlayerShop;
+import net.sf.odinms.server.MaplePlayerShopItem;
+import net.sf.odinms.server.MapleTrade;
+import net.sf.odinms.server.maps.MapleMapObject;
+import net.sf.odinms.tools.MaplePacketCreator;
+import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+/**
+*
+* @author Matze
+*/
+public class PlayerInteractionHandler extends AbstractMaplePacketHandler {
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PlayerInteractionHandler.class);    
+    
+    private enum Action {
+        CREATE(0),
+        INVITE(2),
+        DECLINE(3),
+        VISIT(4),
+        CHAT(6),
+        EXIT(0xA),
+        OPEN(0xB),
+        SET_ITEMS(0xD),
+        SET_MESO(0xE),
+        CONFIRM(0xF),
+        ADD_ITEM(0x13),
+        BUY(0x14),
+        REMOVE_ITEM(0x18); //slot(byte) bundlecount(short)
+        
+        final byte code;
+        
+        private Action(int code) {
+            this.code = (byte) code;
+        }
+        
+        public byte getCode() {
+            return code;
+        }
+    }
+
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+        byte mode = slea.readByte();
+        if (mode == Action.CREATE.getCode()) {
+            byte createType = slea.readByte();
+            if (createType == 3) { // trade
+                MapleTrade.startTrade(c.getPlayer());
+            } else if (createType == 4) { // shop
+                String desc = slea.readMapleAsciiString();
+                @SuppressWarnings("unused")
+                byte uk1 = slea.readByte(); // maybe public/private 00
+                @SuppressWarnings("unused")
+                short uk2 = slea.readShort(); // 01 00
+                @SuppressWarnings("unused")
+                int uk3 = slea.readInt(); // 20 6E 4E
+                MaplePlayerShop shop = new MaplePlayerShop(c.getPlayer(), desc);
+                c.getPlayer().setPlayerShop(shop);
+                c.getPlayer().getMap().addMapObject(shop);
+                shop.sendShop(c);
+            }
+        } else if (mode == Action.INVITE.getCode()) {
+            int otherPlayer = slea.readInt();
+            MapleCharacter otherChar = c.getPlayer().getMap().getCharacterById(otherPlayer);
+            MapleTrade.inviteTrade(c.getPlayer(), otherChar);
+        } else if (mode == Action.DECLINE.getCode()) {
+            MapleTrade.declineTrade(c.getPlayer());
+        } else if (mode == Action.VISIT.getCode()) {
+            // we will ignore the trade oids for now
+            if (c.getPlayer().getTrade() != null && c.getPlayer().getTrade().getPartner() != null) {
+                MapleTrade.visitTrade(c.getPlayer(), c.getPlayer().getTrade().getPartner().getChr());
+            } else {
+                int oid = slea.readInt();
+                MapleMapObject ob = c.getPlayer().getMap().getMapObject(oid);
+                if (ob instanceof MaplePlayerShop) {
+                    MaplePlayerShop shop = (MaplePlayerShop) ob;
+                    if (shop.hasFreeSlot() && !shop.isVisitor(c.getPlayer())) {
+                        shop.addVisitor(c.getPlayer());
+                                                c.getPlayer().setPlayerShop(shop);
+                        shop.sendShop(c);
+                                        }
+                }
+            }
+        } else if (mode == Action.CHAT.getCode()) { // chat lol
+            if (c.getPlayer().getTrade() != null) {
+                c.getPlayer().getTrade().chat(slea.readMapleAsciiString());
+            } else {
+                MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+                if (shop != null) {
+                    shop.chat(c, slea.readMapleAsciiString());
+                }
+            }
+        } else if (mode == Action.EXIT.getCode()) {
+            if (c.getPlayer().getTrade() != null) {
+                MapleTrade.cancelTrade(c.getPlayer());
+            } else {
+                MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+                if (shop != null) {
+                    c.getPlayer().setPlayerShop(null);
+                    if (shop.isOwner(c.getPlayer())) {                                        
+                                                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.removeCharBox(c.getPlayer()));
+                                                shop.removeVisitors();
+                                                // return the items not sold
+                        for (MaplePlayerShopItem item : shop.getItems()) {
+                            IItem iItem = item.getItem().copy();
+                            iItem.setQuantity((short) (item.getBundles() * iItem.getQuantity()));
+                            StringBuilder logInfo = new StringBuilder("Returning items not sold in ");
+                            logInfo.append(c.getPlayer().getName());
+                            logInfo.append("'s shop");
+                            MapleInventoryManipulator.addFromDrop(c, iItem, logInfo.toString());
+                        }
+                    } else {
+                        shop.removeVisitor(c.getPlayer());
+                    }
+                }
+            }
+        } else if (mode == Action.OPEN.getCode()) {
+            MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+            if (shop != null && shop.isOwner(c.getPlayer())) {
+                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.addCharBox(c.getPlayer(), 0));
+MapleInventoryManipulator.removeById(c, MapleItemInformationProvider.getInstance().getInventoryType(5140000), 5140000, 1, true, false);
+                                @SuppressWarnings("unused")
+                byte uk1 = slea.readByte(); // 01
+            }
+        } else if (mode == Action.SET_MESO.getCode()) {
+            c.getPlayer().getTrade().setMeso(slea.readInt());
+        } else if (mode == Action.SET_ITEMS.getCode()) {
+            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            MapleInventoryType ivType = MapleInventoryType.getByType(slea.readByte());
+            IItem item = c.getPlayer().getInventory(ivType).getItem((byte) slea.readShort());
+            short quantity = slea.readShort();
+            byte targetSlot = slea.readByte();
+            if (c.getPlayer().getTrade() != null) {
+                if ((quantity <= item.getQuantity() && quantity >= 0) || ii.isThrowingStar(item.getItemId())) {
+                    IItem tradeItem = item.copy();
+                    if (ii.isThrowingStar(item.getItemId())) {
+                        tradeItem.setQuantity(item.getQuantity());
+                        MapleInventoryManipulator.removeFromSlot(c, ivType, item.getPosition(), item.getQuantity(), true);
+                    } else {
+                        tradeItem.setQuantity(quantity);
+                        MapleInventoryManipulator.removeFromSlot(c, ivType, item.getPosition(), quantity, true);
+                    }
+                    tradeItem.setPosition(targetSlot);
+                    c.getPlayer().getTrade().addItem(tradeItem);
+                } else if (quantity < 0) {
+                    log.info("[h4x] {} Trading negative amounts of an item", c.getPlayer().getName());
+                }
+            }
+        } else if (mode == Action.CONFIRM.getCode()) {
+            MapleTrade.completeTrade(c.getPlayer());
+        } else if (mode == Action.ADD_ITEM.getCode()) {
+            MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+            if (shop != null && shop.isOwner(c.getPlayer())) {
+                MapleInventoryType type = MapleInventoryType.getByType(slea.readByte());
+                byte slot = (byte) slea.readShort();
+                short bundles = slea.readShort();
+                short perBundle = slea.readShort();
+                int price = slea.readInt();
+                IItem ivItem = c.getPlayer().getInventory(type).getItem(slot);
+                if (ivItem != null && ivItem.getQuantity() >= bundles * perBundle) {
+                    IItem sellItem = ivItem.copy();
+                    sellItem.setQuantity(perBundle);
+                    MaplePlayerShopItem item = new MaplePlayerShopItem(
+                        shop, sellItem, bundles, price);
+                    shop.addItem(item);
+                    // can be put in addItem without faek o.o
+                    MapleInventoryManipulator.removeFromSlot(c, type, slot, 
+                        (short) (bundles * perBundle), true);
+                    c.getSession().write(MaplePacketCreator.getPlayerShopItemUpdate(shop));
+                                }
+                
+            }            
+        } else if (mode == Action.REMOVE_ITEM.getCode()) {
+            MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+            if (shop != null && shop.isOwner(c.getPlayer())) {
+                int slot = slea.readShort();
+                MaplePlayerShopItem item = shop.getItems().get(slot);
+                IItem ivItem = item.getItem().copy();
+                shop.removeItem(slot);
+                ivItem.setQuantity((short) (item.getBundles() * ivItem.getQuantity()));
+                StringBuilder logInfo = new StringBuilder("Taken out from player shop by ");
+                logInfo.append(c.getPlayer().getName());
+                MapleInventoryManipulator.addFromDrop(c, ivItem, logInfo.toString());
+                c.getSession().write(MaplePacketCreator.getPlayerShopItemUpdate(shop));
+                        }            
+        } else if (mode == Action.BUY.getCode()) {
+                        MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+                        MapleCharacter owner = shop.getOwner();
+                        if (shop != null && shop.isVisitor(c.getPlayer())) {
+                                int item = slea.readByte();
+                                short quantity = slea.readShort();
+                                shop.buy(c, item, quantity);
+                                StringBuilder logInfo = new StringBuilder("Taken out from player shop by ");
+                                logInfo.append(c.getPlayer().getName());
+                                shop.broadcast(MaplePacketCreator.getPlayerShopItemUpdate(shop)); 
+                        } else {
+                        }            
+        }
+    }
+
+}
+打开
+MapleCharacter.java 
+找到
+private int jobRankMove;
+下面添加
+private int slot = 0;
+找到
+public boolean isAlive() {
+        return this.hp > 0;
+    }
+下面添加
+public void setSlot(int slotid) {
+            slot = slotid;
+        }
+        
+        public int getSlot() {
+            return slot;
+        }
+
+如果有错误
+打开MaplePacketCreator.java
+找到
+if (chr.getPlayerShop() != null && chr.getPlayerShop().isOwner(chr)) {
+
+相似部分替换成
+if (chr.getPlayerShop() != null && chr.getPlayerShop().isOwner(chr)) {
+                    if (chr.getPlayerShop().hasFreeSlot()) {
+                        addAnnounceBox(mplew, chr.getPlayerShop(), 4 );
+                    } else {
+                        addAnnounceBox(mplew, chr.getPlayerShop(), 1 );
+                    }
+                    } else {
+            mplew.write(0);
+        }
+
+----------------------分割线-------------------------
+以下为解决购买后卡号问题
+
+打开MaplePacketCreator.java
+找到
+private static void addAnnounceBox
+相似部分替换成
+private static void addAnnounceBox(MaplePacketLittleEndianWriter mplew, MaplePlayerShop shop, int availability) {
+        // 00: no game
+        // 01: omok game
+        // 02: card game
+        // 04: shop
+        mplew.write(4);
+        mplew.writeInt(shop.getObjectId()); // gameid/shopid
+
+        mplew.writeMapleAsciiString(shop.getDescription()); // desc
+        // 00: public
+        // 01: private
+
+        mplew.write(0);
+        // 00: red 4x3
+        // 01: green 5x4
+        // 02: blue 6x5
+        // omok:
+        // 00: normal
+        mplew.write(0);
+        // first slot: 1/2/3/4
+        // second slot: 1/2/3/4
+        mplew.write(1);
+        mplew.write(availability);
+        // 0: open
+        // 1: in progress
+        mplew.write(0);
+    }
+
+找到
+public static MaplePacket updateCharBox
+相似部分替换成
+public static MaplePacket addCharBox(MapleCharacter c, int type) {
+                MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_BOX.getValue());
+                mplew.writeInt(c.getId());
+                addAnnounceBox(mplew, c.getPlayerShop(), type);
+                return mplew.getPacket();
+    }
+        
+        public static MaplePacket removeCharBox(MapleCharacter c) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_BOX.getValue());
+        mplew.writeInt(c.getId());
+                mplew.write(0);
+        return mplew.getPacket();
+    }
+找到
+public static MaplePacket getPlayerShopNewVisitor
+
+还是相似部分
+
+public static MaplePacket getPlayerShopNewVisitor(MapleCharacter c, int slot) {
+                MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(HexTool.getByteArrayFromHexString("04 0"+slot));
+        addCharLook(mplew, c, false);
+        mplew.writeMapleAsciiString(c.getName());
+        log.info("player shop send packet: \n" + mplew.toString());
+                return mplew.getPacket();
+    }
+        
+        public static MaplePacket getPlayerShopRemoveVisitor(int slot) {
+                MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(HexTool.getByteArrayFromHexString("0A 0"+slot));
+                log.info("player shop send packet: \n" + mplew.toString());
+                return mplew.getPacket();
+    }
+再找到
+public static MaplePacket getPlayerShop
+继续相似替换
+public static MaplePacket getPlayerShop(MapleClient c, MaplePlayerShop shop, boolean owner) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue());
+        mplew.write(HexTool.getByteArrayFromHexString("05 04 04"));
+        mplew.write(owner ? 0 : 1);
+        mplew.write(0);
+        addCharLook(mplew, shop.getOwner(), false);
+        mplew.writeMapleAsciiString(shop.getOwner().getName());
+                /*
+        MapleCharacter[] visitors = shop.getVisitors();
+        for (int i = 0; i < visitors.length; i++) {
+            if (visitors != null) {
+                mplew.write(i + 1);
+                addCharLook(mplew, visitors, false);
+                mplew.writeMapleAsciiString(visitors.getName());
+            }
+        } */
+        mplew.write(1);
+                addCharLook(mplew, shop.getOwner(), false);
+                mplew.writeMapleAsciiString(shop.getOwner().getName());
+        mplew.write(0xFF);
+        mplew.writeMapleAsciiString(shop.getDescription());
+        List<MaplePlayerShopItem> items = shop.getItems();
+        mplew.write(0x10);
+        mplew.write(items.size());
+        for (MaplePlayerShopItem item : items) {
+            mplew.writeShort(item.getBundles());
+            mplew.writeShort(item.getItem().getQuantity());
+            mplew.writeInt(item.getPrice());
+            addItemInfo(mplew, item.getItem(), true, true);
+        }
+        // mplew.write(HexTool.getByteArrayFromHexString("01 60 BF 0F 00 00 00
+        // 80 05 BB 46 E6 17 02 05 00 00 00 00 00 00
+        // 00 00 00 1D 00 16 00 00 00 00 00 00 00 02 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 1B 7F 00 00 0D 00 00
+        // 40 01 00 01 00 FF 34 0C 00 01 E6 D0 10 00 00 00 80 05 BB 46 E6 17 02
+        // 04 01 00 00 00 00 00 00 00 00 0A 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 0F 00 00 00 00 00 00 00 00 00 00 00
+        // 63 CF 07 01 00 00 00 7C 01 00 01 00 5F
+        // AE 0A 00 01 79 16 15 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00
+        // 00 00 00 00 66 00 00 00 21 00 2F 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 A4 82 7A 01 00 00
+        // 00 7C 01 00 01 00 5F AE 0A 00 01 79 16
+        // 15 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00 00 00 00 00 66 00
+        // 00 00 23 00 2C 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 FE AD 88 01 00 00 00 7C 01 00 01 00
+        // DF 67 35 00 01 E5 D0 10 00 00 00 80 05
+        // BB 46 E6 17 02 01 03 00 00 00 00 07 00 00 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 0A 00 00 00 00 00 00
+        // 00 00 00 00 00 CE D4 F1 00 00 00 00 7C 01 00 01 00 7F 1A 06 00 01 4C
+        // BF 0F 00 00 00 80 05 BB 46 E6 17 02 05
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 1D 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 00 38
+        // CE AF 00 00 00 00 7C 01 00 01 00 BF 27 09 00 01 07 76 16 00 00 00 80
+        // 05 BB 46 E6 17 02 00 07 00 00 00 00 00
+        // 00 00 00 00 00 00 00 17 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 7C 02 00 00 1E 00 00
+        // 48 01 00 01 00 5F E3 16 00 01 11 05 14 00 00 00 80 05 BB 46 E6 17 02
+        // 07 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 21 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 1C 8A 00 00 39 00 00 10 01 00 01 00 7F
+        // 84 1E 00 01 05 DE 13 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 0C 00 00 00 00 00 00 00 00 E5 07 01 00 00
+        // 00 7C 2B 00 01 00 AF B3 00 00 02 FC 0C
+        // 3D 00 00 00 80 05 BB 46 E6 17 02 2B 00 00 00 00 00 00 00 01 00 0F 27
+        // 00 00 02 D1 ED 2D 00 00 00 80 05 BB 46
+        // E6 17 02 01 00 00 00 00 00 0A 00 01 00 9F 0F 00 00 02 84 84 1E 00 00
+        // 00 80 05 BB 46 E6 17 02 0A 00 00 00 00
+        // 00 01 00 01 00 FF 08 3D 00 01 02 05 14 00 00 00 80 05 BB 46 E6 17 02
+        // 07 00 00 00 00 00 00 00 00 00 00 00 00
+        // 00 25 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+        // 78 36 00 00 1D 00 00 14 01 00 01 00 9F
+        // 25 26 00 01 2B 2C 14 00 00 00 80 05 BB 46 E6 17 02 07 00 00 00 00 00
+        // 00 00 00 00 00 00 00 00 34 00 00 00 06
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E8 76 00 00 1F 00
+        // 00 24 01 00 01 00 BF 0E 16 02 01 D9 D0
+        // 10 00 00 00 80 05 BB 46 E6 17 02 00 04 00 00 00 00 00 00 07 00 00 00
+        // 00 00 02 00 00 00 06 00 08 00 00 00 00
+        // 00 00 00 00 00 00 00 00 00 00 00 23 02 00 00 1C 00 00 1C 5A 00 01 00
+        // 0F 27 00 00 02 B8 14 3D 00 00 00 80 05
+        // BB 46 E6 17 02 5A 00 00 00 00 00"));
+        /*
+        * 10 10 01 00 01 00 3F 42 0F 00 01 60 BF 0F 00 00 00 80 05 BB /* ||||||||||| OMG ITS THE PRICE ||||| PROBABLY
+        * THA QUANTITY ||||||||||| itemid
+        * 
+        */
+        // mplew.writeInt(0);
+        return mplew.getPacket();
+    }
+
+====================================================================
+打开
+MaplePlayerShop.java
+把下面的全覆盖进去
+/*
+    This file is part of the OdinMS Maple Story Server
+    Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
+                      Matthias Butz <matze@odinms.de>
+                      Jan Christian Meyer <vimes@odinms.de>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation. You may not use, modify
+    or distribute this program under any other version of the
+    GNU Affero General Public License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+/*
+* To change this template, choose Tools | Templates
+* and open the template in the editor.
+*/
+
+package net.sf.odinms.server;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import net.sf.odinms.client.IItem;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.net.MaplePacket;
+import net.sf.odinms.server.maps.AbstractMapleMapObject;
+import net.sf.odinms.server.maps.MapleMapObjectType;
+import net.sf.odinms.tools.MaplePacketCreator;
+
+/**
+*
+* @author Matze
+*/
+public class MaplePlayerShop extends AbstractMapleMapObject {
+    private MapleCharacter owner;
+    private MapleCharacter[] visitors = new MapleCharacter[3];
+    private List<MaplePlayerShopItem> items = new ArrayList<MaplePlayerShopItem>();
+    private MapleCharacter slot1 = null;
+        private MapleCharacter slot2 = null;
+        private MapleCharacter slot3 = null;
+        private String description;
+        private List playerSlots = new ArrayList();
+
+
+        public MaplePlayerShop(MapleCharacter owner, String description) {
+        this.owner = owner;
+        this.description = description;
+    }
+    
+    public boolean hasFreeSlot() {
+        return visitors[0] == null || visitors[1] == null || visitors[2] == null;
+    }
+    
+    public boolean isOwner(MapleCharacter c) {
+        return owner == c;
+    }
+    
+    public void addVisitor(MapleCharacter visitor) {
+        for (int i = 0; i < 3; i++) {
+            if (visitors == null) {
+                visitors = visitor;
+                                if (this.getSlot1() == null) {
+                                    this.setSlot1(visitor);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopNewVisitor(visitor, 1));
+                                } else if (this.getSlot2() == null) {
+                                    this.setSlot2(visitor);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopNewVisitor(visitor, 2));
+                                } else if (this.getSlot3() == null) {
+                                    this.setSlot3(visitor);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopNewVisitor(visitor, 3));
+                                    visitor.getMap().broadcastMessage(MaplePacketCreator.addCharBox(this.getOwner(), 1));
+                                }
+                                break;
+            }
+        }
+        
+    }
+    
+    public void removeVisitor(MapleCharacter visitor) {
+        for (int i = 0; i < 3; i++) {
+            if (visitors == visitor) {
+                visitors = null;
+                if (visitor.getSlot() == 1) {
+                                    this.setSlot1(null);
+                                    visitor.setSlot(0);
+                                    //this.broadcastToVisitors(MaplePacketCreator.getPlayerShopRemoveVisitor(1));
+                                    break;
+                                }    
+                                if (visitor.getSlot() == 2) {
+                                    this.setSlot2(null);
+                                    visitor.setSlot(0);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopRemoveVisitor(2));
+                                    break;
+                                }
+                                if (visitor.getSlot() == 3) {
+                                    this.setSlot3(null);
+                                    visitor.setSlot(0);
+                                    //this.broadcast(MaplePacketCreator.getPlayerShopRemoveVisitor(3));
+                                    visitor.getMap().broadcastMessage(MaplePacketCreator.addCharBox(this.getOwner(), 4));
+                                    break;
+                                }
+                                break;
+            }
+        }
+    }
+              
+    public boolean isVisitor(MapleCharacter visitor) {
+        return visitors[0] == visitor || visitors[1] == visitor || visitors[2] == visitor;
+    }
+    
+    public void addItem(MaplePlayerShopItem item) {
+        items.add(item);
+    }
+    
+    public void removeItem(int item) {
+        items.remove(item);
+    }
+    
+    /**
+    * no warnings for now o.op
+    * @param c
+    * @param item
+    * @param quantity
+    */
+    public void buy(MapleClient c, int item, short quantity) {
+        if (isVisitor(c.getPlayer())) {
+            MaplePlayerShopItem pItem = items.get(item);
+            owner = this.getOwner();
+                        synchronized (c.getPlayer()) {
+                                IItem newItem = pItem.getItem().copy();
+                                newItem.setQuantity((short) (newItem.getQuantity() * quantity));
+                                if (c.getPlayer().getMeso() >= pItem.getPrice() * quantity)
+                                {
+                                    if(owner.getMeso()+pItem.getPrice() * quantity<2147483647)
+                                    {
+                                        
+                                        c.getPlayer().gainMeso(-pItem.getPrice() * quantity, true);
+                                        owner.gainMeso(pItem.getPrice() * quantity, true);
+                                        MapleInventoryManipulator.addFromDrop(c, newItem, "");
+                                        pItem.setBundles((short) (pItem.getBundles() - quantity));
+                                    }
+                                    else{
+                            c.getSession().write(MaplePacketCreator.serverNotice(1, "购买后对方金钱总额将超过上限.交易终止"));
+                            c.disconnect();
+                                }
+            }else
+                c.getSession().write(MaplePacketCreator.serverNotice(1, "对不起，您的钱不够不能购买."));
+                c.disconnect();
+        }
+        }
+    }
+    
+    public void broadcastToVisitors(MaplePacket packet) {
+        for (int i = 0; i < 3; i++) {
+            if (visitors != null)
+                visitors.getClient().getSession().write(packet);
+        }
+    }
+        
+        public void removeVisitors() {
+        for (int i = 0; i < 3; i++) {
+            if (visitors != null)
+                visitors.changeMap(visitors.getMap(), visitors.getPosition());
+        }
+    }
+    
+    public void broadcast(MaplePacket packet) {
+        if (owner.getClient() != null && owner.getClient().getSession() != null)
+            owner.getClient().getSession().write(packet);
+                        broadcastToVisitors(packet);
+    }
+    
+    public void chat(MapleClient c, String chat) {
+        broadcast(MaplePacketCreator.getPlayerShopChat(c.getPlayer(), chat, isOwner(c.getPlayer())));
+    }
+    
+    public void sendShop(MapleClient c) {
+        c.getSession().write(MaplePacketCreator.getPlayerShop(c, this, isOwner(c.getPlayer())));
+    }
+
+    public MapleCharacter getOwner() {
+        return owner;
+    }
+
+    public MapleCharacter[] getVisitors() {
+        return visitors;
+    }
+        
+        public MapleCharacter getSlot1() {
+                return slot1;
+        }
+        
+        public MapleCharacter getSlot2() {
+                return slot2;
+        }
+        
+        public MapleCharacter getSlot3() {
+                return slot3;
+        }
+        
+        public void setSlot1(MapleCharacter person) {
+                slot1 = person;
+                if (person != null) {
+                    person.setSlot(1);
+                }
+        }
+        
+        public void setSlot2(MapleCharacter person) {
+                slot2 = person;
+                if (person != null) {
+                    person.setSlot(2);
+                }
+        }
+        
+        public void setSlot3(MapleCharacter person) {
+                slot3 = person;
+                if (person != null) {
+                    person.setSlot(3);
+                }
+        }
+
+    public List<MaplePlayerShopItem> getItems() {
+        return Collections.unmodifiableList(items);
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    @Override
+    public void sendDestroyData(MapleClient client) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void sendSpawnData(MapleClient client) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MapleMapObjectType getType() {
+        return MapleMapObjectType.SHOP;
+    }
+}
+
+====================================================================
+打开
+PlayerInteractionHandler.java 
+全覆盖
+/*
+    This file is part of the OdinMS Maple Story Server
+    Copyright (C) 2008 Patrick Huy <patrick.huy@frz.cc> 
+                      Matthias Butz <matze@odinms.de>
+                      Jan Christian Meyer <vimes@odinms.de>
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License version 3
+    as published by the Free Software Foundation. You may not use, modify
+    or distribute this program under any other version of the
+    GNU Affero General Public License.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+package net.sf.odinms.net.channel.handler;
+
+import net.sf.odinms.client.IItem;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.MapleInventoryType;
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.server.MapleInventoryManipulator;
+import net.sf.odinms.server.MapleItemInformationProvider;
+//import net.sf.odinms.server.MapleMiniGame;
+import net.sf.odinms.server.MaplePlayerShop;
+import net.sf.odinms.server.MaplePlayerShopItem;
+import net.sf.odinms.server.MapleTrade;
+import net.sf.odinms.server.maps.MapleMapObject;
+import net.sf.odinms.tools.MaplePacketCreator;
+import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+/**
+*
+* @author Matze
+*/
+public class PlayerInteractionHandler extends AbstractMaplePacketHandler {
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(PlayerInteractionHandler.class);    
+    
+    private enum Action {
+        CREATE(0),
+        INVITE(2),
+        DECLINE(3),
+        VISIT(4),
+        CHAT(6),
+        EXIT(0xA),
+        OPEN(0xB),
+        SET_ITEMS(0xD),
+        SET_MESO(0xE),
+        CONFIRM(0xF),
+        ADD_ITEM(0x13),
+        BUY(0x14),
+        REMOVE_ITEM(0x18); //slot(byte) bundlecount(short)
+        
+        final byte code;
+        
+        private Action(int code) {
+            this.code = (byte) code;
+        }
+        
+        public byte getCode() {
+            return code;
+        }
+    }
+
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+        byte mode = slea.readByte();
+        if (mode == Action.CREATE.getCode()) {
+            byte createType = slea.readByte();
+            if (createType == 3) { // trade
+                MapleTrade.startTrade(c.getPlayer());
+            } else if (createType == 4) { // shop
+                String desc = slea.readMapleAsciiString();
+                @SuppressWarnings("unused")
+                byte uk1 = slea.readByte(); // maybe public/private 00
+                @SuppressWarnings("unused")
+                short uk2 = slea.readShort(); // 01 00
+                @SuppressWarnings("unused")
+                int uk3 = slea.readInt(); // 20 6E 4E
+                MaplePlayerShop shop = new MaplePlayerShop(c.getPlayer(), desc);
+                c.getPlayer().setPlayerShop(shop);
+                c.getPlayer().getMap().addMapObject(shop);
+                shop.sendShop(c);
+            }
+        } else if (mode == Action.INVITE.getCode()) {
+            int otherPlayer = slea.readInt();
+            MapleCharacter otherChar = c.getPlayer().getMap().getCharacterById(otherPlayer);
+            MapleTrade.inviteTrade(c.getPlayer(), otherChar);
+        } else if (mode == Action.DECLINE.getCode()) {
+            MapleTrade.declineTrade(c.getPlayer());
+        } else if (mode == Action.VISIT.getCode()) {
+            // we will ignore the trade oids for now
+            if (c.getPlayer().getTrade() != null && c.getPlayer().getTrade().getPartner() != null) {
+                MapleTrade.visitTrade(c.getPlayer(), c.getPlayer().getTrade().getPartner().getChr());
+            } else {
+                int oid = slea.readInt();
+                MapleMapObject ob = c.getPlayer().getMap().getMapObject(oid);
+                if (ob instanceof MaplePlayerShop) {
+                    MaplePlayerShop shop = (MaplePlayerShop) ob;
+                    if (shop.hasFreeSlot() && !shop.isVisitor(c.getPlayer())) {
+                        shop.addVisitor(c.getPlayer());
+                                                c.getPlayer().setPlayerShop(shop);
+                        shop.sendShop(c);
+                                        }
+                }
+            }
+        } else if (mode == Action.CHAT.getCode()) { // chat lol
+            if (c.getPlayer().getTrade() != null) {
+                c.getPlayer().getTrade().chat(slea.readMapleAsciiString());
+            } else {
+                MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+                if (shop != null) {
+                    shop.chat(c, slea.readMapleAsciiString());
+                }
+            }
+        } else if (mode == Action.EXIT.getCode()) {
+            if (c.getPlayer().getTrade() != null) {
+                MapleTrade.cancelTrade(c.getPlayer());
+            } else {
+                MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+                if (shop != null) {
+                    c.getPlayer().setPlayerShop(null);
+                    if (shop.isOwner(c.getPlayer())) {                                        
+                                                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.removeCharBox(c.getPlayer()));
+                                                shop.removeVisitors();
+                                                // return the items not sold
+                        for (MaplePlayerShopItem item : shop.getItems()) {
+                            IItem iItem = item.getItem().copy();
+                            //2070000>iItem.getItemId()||iItem.getItemId()>2070016&&
+                            if(item.getBundles()!=0){
+                            iItem.setQuantity((short) (item.getBundles() * iItem.getQuantity()));
+                            StringBuilder logInfo = new StringBuilder(c.getPlayer().getName());
+                            logInfo.append("收回没有卖掉的");
+                            MapleInventoryManipulator.addFromDrop(c, iItem, logInfo.toString());}
+                        }
+                    } else {
+                        shop.removeVisitor(c.getPlayer());
+                    }
+                }
+            }
+        } else if (mode == Action.OPEN.getCode()) {
+            MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+            if (shop != null && shop.isOwner(c.getPlayer())) {
+                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.addCharBox(c.getPlayer(), 0));
+MapleInventoryManipulator.removeById(c, MapleItemInformationProvider.getInstance().getInventoryType(5140000), 5140000, 1, true, false);
+                                @SuppressWarnings("unused")
+                byte uk1 = slea.readByte(); // 01
+            }
+        } else if (mode == Action.SET_MESO.getCode()) {
+            c.getPlayer().getTrade().setMeso(slea.readInt());
+        } else if (mode == Action.SET_ITEMS.getCode()) {
+            MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+            MapleInventoryType ivType = MapleInventoryType.getByType(slea.readByte());
+            IItem item = c.getPlayer().getInventory(ivType).getItem((byte) slea.readShort());
+            short quantity = slea.readShort();
+            byte targetSlot = slea.readByte();
+            if (c.getPlayer().getTrade() != null) {
+                if ((quantity <= item.getQuantity() && quantity >= 0) || ii.isThrowingStar(item.getItemId())) {
+                    IItem tradeItem = item.copy();
+                    if (ii.isThrowingStar(item.getItemId())) {
+                        tradeItem.setQuantity(item.getQuantity());
+                        MapleInventoryManipulator.removeFromSlot(c, ivType, item.getPosition(), item.getQuantity(), true);
+                    } else {
+                        tradeItem.setQuantity(quantity);
+                        MapleInventoryManipulator.removeFromSlot(c, ivType, item.getPosition(), quantity, true);
+                    }
+                    tradeItem.setPosition(targetSlot);
+                    c.getPlayer().getTrade().addItem(tradeItem);
+                } else if (quantity < 0) {
+                    log.info("[h4x] {} Trading negative amounts of an item", c.getPlayer().getName());
+                }
+            }
+
+        } else if (mode == Action.CONFIRM.getCode()) {
+            MapleTrade.completeTrade(c.getPlayer());
+        } else if (mode == Action.ADD_ITEM.getCode()) {
+            MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+            if (shop != null && shop.isOwner(c.getPlayer())) {
+                MapleInventoryType type = MapleInventoryType.getByType(slea.readByte());
+                byte slot = (byte) slea.readShort();
+                short bundles = slea.readShort();
+                short perBundle = slea.readShort();
+                int price = slea.readInt();
+                IItem ivItem = c.getPlayer().getInventory(type).getItem(slot);
+                if (ivItem != null && ivItem.getQuantity() >= bundles * perBundle) {
+                    IItem sellItem = ivItem.copy();
+                    if(2070000<=ivItem.getItemId()&&ivItem.getItemId()<=2070016){
+                    perBundle=(short)ivItem.getQuantity();}
+                    else {sellItem.setQuantity(perBundle);}
+                    MaplePlayerShopItem item = new MaplePlayerShopItem(
+                        shop, sellItem, bundles, price);
+                    shop.addItem(item);
+                    // can be put in addItem without faek o.o
+                    MapleInventoryManipulator.removeFromSlot(c, type, slot, 
+                        (short) (bundles * perBundle), true);
+                    c.getSession().write(MaplePacketCreator.getPlayerShopItemUpdate(shop));
+                                }else
+                                    log.error("添加商品失败");
+            }            
+        } else if (mode == Action.REMOVE_ITEM.getCode()) {
+            MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+            if (shop != null && shop.isOwner(c.getPlayer())) {
+                int slot = slea.readShort();
+                MaplePlayerShopItem item = shop.getItems().get(slot);
+                IItem ivItem = item.getItem().copy();
+                shop.removeItem(slot);
+                ivItem.setQuantity((short) (item.getBundles() * ivItem.getQuantity()));
+                StringBuilder logInfo = new StringBuilder(c.getPlayer().getName());
+                logInfo.append("拿走了店里的商品");
+                MapleInventoryManipulator.addFromDrop(c, ivItem, logInfo.toString());
+                c.getSession().write(MaplePacketCreator.getPlayerShopItemUpdate(shop));
+                        }            
+        } else if (mode == Action.BUY.getCode()) {
+                        MaplePlayerShop shop = c.getPlayer().getPlayerShop();
+                        MapleCharacter owner = shop.getOwner();
+                        if (shop != null && shop.isVisitor(c.getPlayer())) {
+                                int item = slea.readByte();
+                                short quantity = slea.readShort();
+                                shop.buy(c, item, quantity);
+                                StringBuilder logInfo = new StringBuilder(c.getPlayer().getName());
+                                logInfo.append("拿走了店里的商品");
+                                shop.broadcast(MaplePacketCreator.getPlayerShopItemUpdate(shop)); 
+                        } else {
+                        }            
+        }
+    }
+
+}
+
+===========================================================
+打开
+MapleCharacter.java 
+找到
+private int jobRankMove;
+下面添加
+private int slot = 0;
+找到
+public boolean isAlive() {
+        return this.hp > 0;
+    }
+下面添加
+    public void setSlot(int slotid) {
+            slot = slotid;
+        }
+        
+        public int getSlot() {
+            return slot;
+        }
+
+如果有错误
+打开MaplePacketCreator.java
+找到
+if (chr.getPlayerShop() != null && chr.getPlayerShop().isOwner(chr)) {
+
+相似部分替换成
+if (chr.getPlayerShop() != null && chr.getPlayerShop().isOwner(chr)) {
+                    if (chr.getPlayerShop().hasFreeSlot()) {
+                        addAnnounceBox(mplew, chr.getPlayerShop(), 4 );
+                    } else {
+                        addAnnounceBox(mplew, chr.getPlayerShop(), 1 );
+                    }
+                    } else {
+            mplew.write(0);
+        }
+
+
+----------------------------------------另外一个BUG修复方法如下--------------------
+
+进入MaplePlayerShop.java
+
+找到public void buy(MapleClient c, int item, short quantity) {，下面的直接替换，可以解决掉复制和钱超过21亿后的BUG。
+
+public void buy(MapleClient c, int item, short quantity) {
+        if (isVisitor(c.getPlayer())) {
+            MaplePlayerShopItem pItem = items.get(item);
+            owner = this.getOwner();
+                        synchronized (c.getPlayer()) {
+                                IItem newItem = pItem.getItem().copy();
+                                newItem.setQuantity((short) (newItem.getQuantity() * quantity));
+                                if (c.getPlayer().getMeso() >= pItem.getPrice() && owner.getMeso()+pItem.getPrice() < 2100000000){  //判断是否有足够的金币购买，且卖家钱不超21E。
+                                c.getPlayer().gainMeso(-pItem.getPrice() * quantity, true);
+                                owner.gainMeso(pItem.getPrice() * quantity, true);
+                                MapleInventoryManipulator.addFromDrop(c, newItem, "");
+                                pItem.setBundles((short) (pItem.getBundles() - quantity));
+                                }else{ 
+                                    c.getSession().write(MaplePacketCreator.serverNotice(1, "你的金币不足,或者是对方金币总量已达到最高限额！."));
+                                  MaplePlayerShop shop = owner.getPlayerShop();
+                                    shop.removeVisitor(c.getPlayer());
+                                    c.getPlayer().changeMap(c.getPlayer().getMap(), c.getPlayer().getPosition());//将人物传开，避免卡号的问题
+                                  
+                                }
+                                
+            }
+        }
+    }
+
+
+还有就是在这里可以复制标类物品，我个人的解决办法是，直接屏蔽掉》
+进入PlayerInteractionHandler.java 
+找到：
+MaplePlayerShopItem item = new MaplePlayerShopItem(
+                        shop, sellItem, bundles, price);
+
+在下面添加：
+if (sellItem.getItemId() >=2070000 && sellItem.getItemId() <=2070017){
+                        c.getSession().write(MaplePacketCreator.serverNotice(1, "发现你放标类物品在商店里面，所\n\r以进行没收处理！."));
+                    }else{
+                        shop.addItem(item);
+                    }
+
+-------------------分割线-----------------------------------------
+雇佣商店就修复到这了、领取金钱NPC脚本自己写....
+
+
+
+

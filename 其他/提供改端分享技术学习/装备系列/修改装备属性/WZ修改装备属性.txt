@@ -1,0 +1,41 @@
+示范：以下是兰色桑拿服改后的属性，打开个\wz\Character.wz\Longcoat
+                  找到01050018.img.xml，然后点右键，点编辑！！之后就出现这些语句。
+        <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<imgdir name="01050018.img">
+    <imgdir name="info">
+        <canvas name="icon" width="30" height="29">
+            <vector name="origin" x="-1" y="29"/>
+        </canvas>
+        <canvas name="iconRaw" width="30" height="25">
+            <vector name="origin" x="-1" y="29"/>
+        </canvas>
+        <string name="islot" value="MaPn"/>
+        <string name="vslot" value="MaPn"/>
+        <int name="reqJob" value="0"/>
+        <int name="reqLevel" value="30"/>
+        <int name="reqSTR" value="0"/>
+        <int name="reqDEX" value="0"/>
+        <int name="reqINT" value="0"/>
+        <int name="reqLUK" value="0"/>
+                <int name="incSTR" value="333"/>      这是+333力（inc就是+的意思）
+                <int name="incDEX" value="333"/>      这是+333敏
+                <int name="incINT" value="333"/>        这是+333智
+                <int name="incLUK" value="333"/>      这是+333 运
+        <int name="incPDD" value="200"/>    这是物防
+                <int name="incMDD" value="200"/>  这是魔防
+                <int name="incACC" value="200"/>    这是命中
+        <int name="incSpeed" value="30"/>  这是速度
+        <int name="incJump" value="50"/>    这是跳跃 
+        <int name="tuc" value="10"/>              这是装备升级次数
+        <int name="price" value="15000"/>    这是售价（我没改过，估计有效）
+        <int name="cash" value="0"/>            这是判断是否现金装备（不用改）
+        <float name="recovery" value="1.5"/>    这是桑拿服的特性
+===========================白银分割线========================================
+  物攻是:PAD 魔攻是:MAD 回避是:EVA  想怎么加自己加上去，语句格式模仿以上格式便可``````````````````````````````````            
+============================黄金分割线=======================================
+  好了能改的地方我都注解出来了！相信大家会改了吧！再不会改就把上面内容复制，然后把中文的地方去掉```！
+  ps:大家要想让这个装备不能交易，那也行。在<int name="cash" value="0"/>下面加个任务品判断语句  <int name="quest" value="1"/>  其中的=1 就是代表它是任务品，丢出会消失，不能交易。如果=0，那就是普通物品。上面的<int name="cash" value="0"/>  其中的=0，也是一样的道理。就是代表它不是现金装备。如果=1，那就代表是现金装备。
+  ps:想把任何东西改成不能交易都行，宠物除外吧。我改了宠物的，无效！反正物品的属性都在<imgdir name="info">这里改，下面的就不要理他。
+  ps:现金装备也能改出属性哦，大家去试试吧。我是成功改的了。。。
+  ps:改了属性的物品，在商店里只能显示原来属性。但是买了之后就能看到修改后的属性了。。
+===========================好了，写完了，相信大家都会了吧========================

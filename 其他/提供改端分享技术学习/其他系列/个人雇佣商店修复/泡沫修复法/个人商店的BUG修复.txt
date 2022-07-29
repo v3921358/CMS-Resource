@@ -1,0 +1,43 @@
+进入MaplePlayerShop.java
+
+找到public void buy(MapleClient c, int item, short quantity) {，下面的直接替换，可以解决掉复制和钱超过21亿后的BUG。
+
+public void buy(MapleClient c, int item, short quantity) {
+        if (isVisitor(c.getPlayer())) {
+            MaplePlayerShopItem pItem = items.get(item);
+            owner = this.getOwner();
+                        synchronized (c.getPlayer()) {
+                                IItem newItem = pItem.getItem().copy();
+                                newItem.setQuantity((short) (newItem.getQuantity() * quantity));
+                                if (c.getPlayer().getMeso() >= pItem.getPrice() && owner.getMeso()+pItem.getPrice() < 2100000000){  //判断是否有足够的金币购买，且卖家钱不超21E。
+                                c.getPlayer().gainMeso(-pItem.getPrice() * quantity, true);
+                                owner.gainMeso(pItem.getPrice() * quantity, true);
+                                MapleInventoryManipulator.addFromDrop(c, newItem, "");
+                                pItem.setBundles((short) (pItem.getBundles() - quantity));
+                                }else{ 
+                                    c.getSession().write(MaplePacketCreator.serverNotice(1, "你的金币不足,或者是对方金币总量已达到最高限额！."));
+                                  MaplePlayerShop shop = owner.getPlayerShop();
+                                    shop.removeVisitor(c.getPlayer());
+                                    c.getPlayer().changeMap(c.getPlayer().getMap(), c.getPlayer().getPosition());//将人物传开，避免卡号的问题
+                                  
+                                }
+                                
+            }
+        }
+    }
+
+
+还有就是在这里可以复制标类物品，我个人的解决办法是，直接屏蔽掉》
+进入PlayerInteractionHandler.java 
+找到：
+MaplePlayerShopItem item = new MaplePlayerShopItem(
+                        shop, sellItem, bundles, price);
+
+在下面添加：
+if (sellItem.getItemId() >=2070000 && sellItem.getItemId() <=2070017){
+                        c.getSession().write(MaplePacketCreator.serverNotice(1, "发现你放标类物品在商店里面，所\n\r以进行没收处理！."));
+                    }else{
+                        shop.addItem(item);
+                    }
+
+

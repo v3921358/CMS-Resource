@@ -1,0 +1,388 @@
+/* 
+Donator NPC 
+Author: Moogra 
+*/ 
+var status = 0; 
+function start() { 
+    status = -1; 
+    action(1, 0, 0); 
+} 
+function action(mode, type, selection) { 
+    if (mode == -1) { 
+        cm.dispose(); 
+    } else { 
+        if (mode == 0) { 
+            cm.dispose(); 
+            return; 
+        } 
+        if (mode == 1) 
+            status++; 
+        else 
+            status--; 
+        if (status == 0) { 
+            cm.sendSimple ("你好,我是Alex冒险岛自动销售员!~购买积分请联系管理员QQ:452551149冲值~10RMB=100积分\n您目前有 " + cm.getDonatorPoints() + "积分.#L0##v4001129#买转生币#k (20积分)#L1##v1002140#买GM帽子#k(400积分)#L2##v2044303#买枪攻击卷#k (20积分)#L3##v2340000#买祝福卷#k (20积分)#L4##v2043303#买短剑攻击卷#k (20积分)#L5##v2040807#买手套攻击卷#k (20积分)#L6##v1402040#买枫叶3年旗#k (30积分)#L7##v1302024#买废报纸武器#k (30积分)#L8##v1322003#棒棒果#k (30积分)#L9##v1432009#木精灵枪#k (30积分)#L10##v1302080#彩虹鞭子#k (30积分)#L11##v1372017#领路灯#k (30积分)#L12##v1302107#蓝色火眼刀#k (50积分)#L13##v1302049#光线鞭子#k (35积分)#L14##v1402013#日本地图#k (40积分)#L15##v1092022#调色盘#k (35积分)#L16##v1402014#温度计#k (40积分)#L17##v1402044#南瓜灯笼#k (40积分)#L18##v1402037#龙背刃#k (35积分)#L19##v5000053#宠物大猩猩#k(100积分)#L20##v1322027#乌龙茶#k (35积分)#L21##v1012014#圣诞鹿鼻子#k (35积分)#L22##v1302034#万圣节灯笼#k (35积分)#L23##v1302063#燃烧火焰刀#k (35积分)#L24##v1422011#酒瓶#k (35积分)#L25##v1442046#超级滑板#k (35积分)#L26##v1122014#永恒钻石项链#k (35积分)#L27##v1122006#蓝色蝶型领结#k (35积分)#L28##v1122001#绿色蝶型领结#k (35积分)#L29##v1122002#红色蝶型领结#k (50积分)#L30##v1122003#黄色蝶型领结#k (35积分)#L31##v1122004#粉色蝶型领结#k (35积分)#L32##v1122005#黑色蝶型领结#k (35积分)"); 
+        } else if (status == 1) { 
+            switch(selection) { 
+                case 0: 
+                    if (cm.getDonatorPoints() > 30) { 
+                        cm.gainItem(4001129); 
+                        cm.gainDonatorPoints(-30); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 1: 
+                    if (cm.getDonatorPoints() > 400) { 
+                        cm.gainItem(1002140,1); 
+                        cm.gainDonatorPoints(-400); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 2: 
+                    if (cm.getDonatorPoints() > 20) { 
+                        cm.gainItem(2044303); 
+                        cm.gainDonatorPoints(-20); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 3: 
+                    if (cm.getDonatorPoints() > 20) { 
+                        cm.gainItem(2340000); 
+                        cm.gainDonatorPoints(-20); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 4: 
+                    if (cm.getDonatorPoints() > 20) { 
+                        cm.gainItem(2043303); 
+                        cm.gainDonatorPoints(-20); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 5: 
+                    if (cm.getDonatorPoints() > 20) { 
+                        cm.gainItem(2040807); 
+                        cm.gainDonatorPoints(-20); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 6: 
+                    if (cm.getDonatorPoints() > 30) { 
+                        cm.gainItem(1402040); 
+                        cm.gainDonatorPoints(-30); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 7: 
+                    if (cm.getDonatorPoints() > 30) { 
+                        cm.gainItem(1302024); 
+                        cm.gainDonatorPoints(-30); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 8: 
+                    if (cm.getDonatorPoints() > 30) { 
+                        cm.gainItem(1322003); 
+                        cm.gainDonatorPoints(-30); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 9: 
+                    if (cm.getDonatorPoints() > 30) { 
+                        cm.gainItem(1432009); 
+                        cm.gainDonatorPoints(-30); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 10: 
+                    if (cm.getDonatorPoints() > 30) { 
+                        cm.gainItem(1302080); 
+                        cm.gainDonatorPoints(-30); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 11: 
+                    if (cm.getDonatorPoints() > 30) { 
+                        cm.gainItem(1372017); 
+                        cm.gainDonatorPoints(-30); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 12: 
+                    if (cm.getDonatorPoints() > 50) { 
+                        cm.gainItem(1302107); 
+                        cm.gainDonatorPoints(-50); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 13: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1302049); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 14: 
+                    if (cm.getDonatorPoints() > 40) { 
+                        cm.gainItem(1402013); 
+                        cm.gainDonatorPoints(-40); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 15: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1092022); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 16: 
+                    if (cm.getDonatorPoints() > 40) { 
+                        cm.gainItem(1402014); 
+                        cm.gainDonatorPoints(-40); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 17: 
+                    if (cm.getDonatorPoints() > 40) { 
+                        cm.gainItem(1402044); 
+                        cm.gainDonatorPoints(-40); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 18: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1402037); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 19: 
+                    if (cm.getDonatorPoints() > 100) { 
+                        cm.gainItem(5000053); 
+                        cm.gainDonatorPoints(-100); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 20: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1322027); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 21: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1012014); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 22: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1302034); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 23: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1302063); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 24: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1422011); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 25: 
+                    if (cm.getDonatorPoints() > 50) { 
+                        cm.gainItem(1442046); 
+                        cm.gainDonatorPoints(-50); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 26: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1122014); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 27: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1122006); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 28: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1122001); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 29: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1122002); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 30: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1122003); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 31: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1122004); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 32: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1122005); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 33: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1322027); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 34: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1322027); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+                case 35: 
+                    if (cm.getDonatorPoints() > 35) { 
+                        cm.gainItem(1322027); 
+                        cm.gainDonatorPoints(-35); 
+                        cm.dispose(); 
+                    } else { 
+                        cm.sendSimple("你没有积分请联系GM购买！."); 
+                        cm.dispose(); 
+                    } 
+                    break; 
+            } 
+        } 
+    } 

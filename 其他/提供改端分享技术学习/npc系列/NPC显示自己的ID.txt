@@ -1,0 +1,18 @@
+無工作NPC自動提供NPC代碼
+src\net\sf\odinms\scripting\npc\NPCScriptManager.java
+
+找到            
+            if (iv == null || NPCScriptManager.getInstance() == null) {
+                cm.dispose();
+                return;
+            }
+
+替換為
+if (iv == null || NPCScriptManager.getInstance() == null) {
+                if (iv == null) { // wow this is horrible
+                    cm.sendOk("你好我是無工作NPC！如果需要我幫忙的話請連繫GM把我的代碼給他！\n我的ID是：#r" + npc + "#k.");
+                }
+                cm.dispose();
+                return;
+            }
+

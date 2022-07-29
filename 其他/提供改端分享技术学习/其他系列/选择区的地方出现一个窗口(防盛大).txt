@@ -1,0 +1,4 @@
+打开AfterLoginHandler.java
+查找if (c2 == 1 && c3 == 1) {
+下面加一句
+c.getSession().write(MaplePacketCreator.serverNotice(1, "欢迎来到**冒险岛\r\n请不要用WG"));

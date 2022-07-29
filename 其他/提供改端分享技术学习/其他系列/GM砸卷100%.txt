@@ -1,0 +1,25 @@
+net.sf.odinms.net.channel.handler \ScrollHandler.java
+找到
+if (scroll.getQuantity() <= 0) {
+throw new InventoryException("<= 0 quantity when scrolling");
+} 
+在下方加入：
+boolean checkIfGM = c.getPlayer().isGM(); 
+
+找到：
+
+
+IEquip scrolled = (IEquip) ii.scrollEquipWithId(toScroll, scroll.getItemId()); 
+改成：
+IEquip scrolled = (IEquip) ii.scrollEquipWithId(toScroll, scroll.getItemId(), checkIfGM); 
+------------------------------------
+net.sf.odinms.server \MapleItemInformationProvider.java
+找到：
+public IItem scrollEquipWithId(IItem equip, int scrollId) { 
+改成：
+public IItem scrollEquipWithId(IItem equip, int scrollId, boolean checkIfGM) { 
+
+找到：
+if (nEquip.getUpgradeSlots() > 0 && Math.ceil(Math.random() * 100.0) <= stats.get("success")) { 
+改成：
+if (nEquip.getUpgradeSlots() > 0 && ((Math.ceil(Math.random() * 100.0) <= stats.get("success")) || (checkIfGM == true))) {   

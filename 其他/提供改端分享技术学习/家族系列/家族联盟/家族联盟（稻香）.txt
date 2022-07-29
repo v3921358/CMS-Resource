@@ -1,0 +1,94 @@
+经过一段时间的研究，发现家族联盟的修复方法和结婚的差不多！！结婚的不发啦！！我发家族联盟的！！嘿嘿！！  
+
+                     By:  稻、香   （ZreHy_MS_II_Rev 7.01 beta )  
+
+                 打开src\net\sf\odinms\net\world\guild\MapleGuild.java  
+
+      找到：  private int signature;    
+
+                  在下面增加： private int hideout;  
+
+      找到：capacity = rs.getInt("capacity");  
+
+                          在下面增加：  hideout = rs.getInt("hideout");    
+
+  还是同一个JAVA找到：  public int getLeaderId() {  
+                                                       return id;  
+    }  
+
+
+                                  在下面增加如下函数：  
+
+public int getHideout() {  
+        try {  
+            Connection con = DatabaseConnection.getConnection();  
+            PreparedStatement ps = con.prepareStatement("SELECT hideout FROM guilds WHERE guildid = ?");  
+            ResultSet rs = ps.executeQuery();  
+            hideout = rs.getInt("hideout");  
+            ps.executeUpdate();  
+            ps.close();  
+        } catch (SQLException ex) {  
+        }  
+        return hideout;  
+    }  
+
+   public void setHideout(int a) {  
+        this.hideout = a;  
+    }  
+
+
+
+       然后打开： \src\net\sf\odinms\net\world\guild\MapleGuildSummary.java  
+
+                      找到：  public byte getLogoBGColor() {  
+                                         return logoBGColor;  
+                                         }  
+
+
+
+  在下面增加：  
+
+          public int getHideout() {  
+                     return hideout;  
+                          }  
+
+
+  最后打开\src\net\sf\odinms\server\maps\SavedLocationType.java  
+
+      全部替换：    
+package net.sf.odinms.server.maps;  
+
+       public enum SavedLocationType {  
+    FREE_MARKET, WORLDTOUR, FLORINA, HIDEOUT  
+}  
+
+    
+
+       PlayerCommand.java 的玩家命令：  
+
+
+   } else if (splitted[0].equals("@jiazu")) {  
+            if (player.getGuildId() == 0) {  
+                mc.dropMessage("抱歉，你没有加入过任何家族！.");  
+            } else {  
+                int mapid = cserv.getGuildSummary(player.getGuildId()).getHideout();  
+                if (mapid == -1) {  
+                    mc.dropMessage("你的家族没有盟会！.");  
+                } else if (player.getClient().getChannel() >= 1) {  
+                    if (player.getMapId() != mapid) {  
+                        player.saveLocation(SavedLocationType.HIDEOUT);  
+                        MapleMap target = cserv.getMapFactory().getMap(mapid);  
+                        player.changeMap(target, target.getPortal(0));  
+                        mc.dropMessage("欢迎加入家族联盟！.");  
+                    } else {  
+                        MapleMap target = cserv.getMapFactory().getMap(player.getSavedLocation(SavedLocationType.HIDEOUT));  
+                        player.changeMap(target, target.getPortal(0));  
+                        player.clearSavedLocation(SavedLocationType.HIDEOUT);  
+                    }  
+                } else {  
+                    mc.dropMessage("你们的家族成员联盟不在这线~");  
+                }  
+            }  
+      
+    
+

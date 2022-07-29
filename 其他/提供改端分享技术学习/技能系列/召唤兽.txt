@@ -1,0 +1,66 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+找到maplemap.java
+
+
+找到addplayer  
+
+然后中间有一段是关于召唤的    
+
+有一段是  sendposition…………
+         sendspawndata……
+          char.addvisibleobject……
+          addmapobject 
+                    spawnmonster(summon)
+                    updatavisibleobject …………
+
+
+
+        改成 sendposition…………
+        // sendspawndata……
+        //  char.addvisibleobject……
+         // addmapobject 
+                    spawnmonster(summon)
+                  //  updatavisibleobject …………
+
+
+
+
+然后 将  removeplayer下 
+
+if(summon :summon:   …………=puppet)
+cancelbuffeffect
+
+else   
+
+cancelbuffeffect（这句改回removemapobject(summon);就是原来被划掉的那句，就这句  上面的那句不用改)
+   
+
+
+
+
+即可实现换地图不需要重复召唤   换线的问题   
+
+在changechannelhandle.java下
+
+pack端里有 puppet换线取消技能效果的   代码好象是下面这样的
+
+if……………………getchar .getbuffvalue=puppet
+    c.getplayer.cancelbuffeffect   
+
+将这句复制 然后将puppet改成 summon
+
+换线取消技能效果   就不会换线复制宠物  
+
+代码没有写全  pack端里自己找以下
+
+进商城复制宠物  
+changechannelhandle 中的两句控制语句
+
+添加到entercashhandle,java中的合适位置  就可以了  
+
+
+手上没端   代码可能有错误  大家自己修改   

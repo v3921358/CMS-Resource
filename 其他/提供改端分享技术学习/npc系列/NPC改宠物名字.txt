@@ -1,0 +1,57 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+//By:  稻、香
+var ststus = 0;
+
+function start(){
+    ststus = -1;
+    action(1, 0, 0);
+}
+
+function action(mode, type, selection){
+    if(mode == -1){
+        cm.dispose();
+    }else{
+        if(mode == 1){
+            status++;
+        }else{
+            status--;
+        }
+        if(status == 0){
+            cm.sendGetText("你好.\r\n你想给你可爱的宠物换个什么名字呢？");
+            var text = cm.getText;
+        }else if(status == 1){
+            cm.petName(text);
+            cm.sendOk("呵呵，成功咯!");
+        }
+    }
+}
+    }
+
+打开MapleCharacter.java 文件
+
+在合适的位置添加如下代码函数：
+
+      public void petName(String name){ //声明变量值
+                MaplePet pet = getPet(0);
+                if (pet == null) {
+                    getClient().getSession().write(MaplePacketCreator.enableActions());
+                    return;
+                }
+                pet.setName(name);
+                getClient().getSession().write(MaplePacketCreator.updatePet(pet, true));
+                getClient().getSession().write(MaplePacketCreator.enableActions());
+                getClient().getPlayer().getMap().broadcastMessage(getClient().getPlayer(), MaplePacketCreator.changePetName(getClient().getPlayer(), name, 1), true);
+    }
+
+    然后再打开：NPCConversationManager.java 这个文件！
+
+   在合适的位置添加如下赋值函数：
+
+
+      public void petName(String name){
+        getPlayer().petName(name);
+    }

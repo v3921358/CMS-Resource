@@ -1,0 +1,12 @@
+src\net\sf\odinms\net\channel\handler\AbstractDealDamageHandler.java 
+
+找到public static class AttackInfo { 
+如果上面指定了地图的话 就先屏蔽掉
+指定地图就是类似于这样的 
+private int PVP_MAP = 910000018; 需要屏蔽掉
+找到 
+MaplePvp.doPvP(player, map, attack); 
+他上面的改为
+if ((attack.skill != 2301002 && attack.skill != 4201004 && attack.skill != 1111008) && player.getClient().getChannel() == 2 ) { 
+这样就是指定频道了 当然你还可以加发挥一下再加个指定频道里的指定地图
+注意:很多发布的端都是指定地图PK的 先要把指定PK的地图给屏蔽掉 

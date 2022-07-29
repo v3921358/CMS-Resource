@@ -1,0 +1,19 @@
+修復忍者伏擊的技能(大部分的端都沒修復) 
+  MonsterStatus.java : 
+加入
+  NINJA_AMBUSH(0x400000), 
+  MapleStatEffect.java : 
+找到
+  isMonsterBuff() 
+加入
+  case 4121004: // Ninja ambush 
+  case 4221004: // Ninja ambush 
+最後
+
+
+case 4121004: // Ninja ambush 
+    case 4221004: 
+  monsterStatus.put(MonsterStatus.NINJA_AMBUSH, Integer.valueOf(1)); 
+    break; 
+  TODO :在修復的損害
+

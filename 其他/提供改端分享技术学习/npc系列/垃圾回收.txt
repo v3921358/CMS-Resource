@@ -1,0 +1,84 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+JAVA： 
+找到net.sf.odinms.scripting.npc.NPCConversationManager 
+在最后个大括号前加 
+public void deleteItem(int inventorytype) { 
+        try { 
+            Connection con = DatabaseConnection.getConnection(); 
+            PreparedStatement ps = con.prepareStatement("Select * from inventoryitems where characterid=? and inventorytype=?"); 
+            ps.setInt(1, getPlayer().getId()); 
+            ps.setInt(2, inventorytype); 
+            ResultSet re = ps.executeQuery(); 
+            MapleInventoryType type = null; 
+            switch (inventorytype) { 
+                case 1: 
+                    type=MapleInventoryType.EQUIP; 
+                    break; 
+                case 2: 
+                    type=MapleInventoryType.USE; 
+                    break; 
+                case 3: 
+                    type=MapleInventoryType.SETUP; 
+                    break; 
+                case 4: 
+                    type=MapleInventoryType.ETC; 
+                    break; 
+                case 5: 
+                    type=MapleInventoryType.CASH; 
+                    break; 
+            } 
+            while (re.next()) { 
+            MapleInventoryManipulator.removeById(getC(),type, re.getInt("itemid"),1,true, true); 
+            } 
+            re.close(); 
+            ps.close(); 
+            
+        } catch (SQLException ex) { 
+            // Logger.getLogger(NPCConversationManager.class.getName()).log(Level.SEVERE, null, ex); 
+        } 
+    } 
+
+JS： 
+var status = 0; 
+var types=new Array("装备栏","消耗栏","任务栏","杂物栏","现金栏"); 
+var selectedMap = -1; 
+function start() { 
+    status = -1; 
+    action(1, 0, 0); 
+} 
+function action(mode, type, selection) { 
+    if (mode == -1) { 
+        cm.dispose(); 
+    } else { 
+        if (status >= 3 && mode == 0) { 
+            cm.dispose(); 
+            return; 
+        } 
+        if (mode == 1) 
+            status++; 
+        else { 
+            cm.dispose(); 
+            return; 
+        } if (status == 0) { 
+   var a="你好我是垃圾回收员,请问您要清空：\r\n#b" 
+   for(var i=0;i<types.length;i++){ 
+    a+= "\r\n#L" + i + "#" + types[ i ]+""; 
+   } 
+           cm.sendSimple(a); 
+        } else if (status == 1) { 
+           cm.deleteItem(selection+1); 
+           cm.sendOk("清理成功!"); 
+     cm.dispose(); 
+        } 
+        
+        
+    } 
+} 
+
+---------------------------------------------------------------------------
+本来要卖技能点的 不过想想算了
+但要是整合在某某端的时候 请注明作者！

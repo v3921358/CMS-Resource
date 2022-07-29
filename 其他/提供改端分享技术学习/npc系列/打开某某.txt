@@ -1,0 +1,41 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+打开  MapleCharacter.java  
+import net.sf.odinms.scripting.npc.NPCScriptManager;  
+找到
+if (level == 200 && !isGM()) {
+            exp.set(0);
+            MaplePacket packet = MaplePacketCreator.serverNotice(6, "[Congrats] " + getName() + " has reached Level 200! Congratulate " + getName() + " on such an amazing achievment!");
+            try {
+                getClient().getChannelServer().getWorldInterface().broadcastMessage(getName(), packet.getBytes());
+            } catch (RemoteException e) {
+                getClient().getChannelServer().reconnectWorld();
+            }
+        }
+增加
+                    if (level == 10) {
+        NPCScriptManager npc = NPCScriptManager.getInstance();
+                        npc.start(client, 9010009);
+        }
+              if (level == 30) {
+        NPCScriptManager npc = NPCScriptManager.getInstance();
+                        npc.start(client, 9010009);
+        }
+        
+        if (level == 70) {
+        NPCScriptManager npc = NPCScriptManager.getInstance();
+                        npc.start(client, 9010009);
+        }
+        
+        if (level == 120) {
+        NPCScriptManager npc = NPCScriptManager.getInstance();
+                        npc.start(client, 9010009);
+        }
+得到某个物品与NPC对话
+            if (haveItem == [itemid, amount]) {
+        NPCScriptManager npc = NPCScriptManager.getInstance();
+                        npc.start(client, [npcid]);
+        }

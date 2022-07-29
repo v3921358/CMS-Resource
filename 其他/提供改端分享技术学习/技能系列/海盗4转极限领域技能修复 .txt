@@ -1,0 +1,74 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+
+
+
+找到MapleStatEffect.java
+增加：
+
+复制代码
+case 5121009:
+  statups.add(new Pair<MapleBuffStat, Integer>(MapleBuffStat.SPEED_INFUSION,Integer.valueOf(x)));
+  break;
+ 
+
+
+复制代码
+public boolean isInfusion() {
+       return skill && sourceid == 5121009;
+    }
+ 
+
+
+找到MapleBuffStat.java
+
+复制代码
+SPEED_INFUSION(0x800000000000L),
+ 
+
+
+找到skill.java
+复制代码
+case 4221004: 
+ 
+下面
+增加：
+复制代码
+case 5121009:
+ 
+
+
+找到MaplePacketCreator.java
+增加：
+复制代码
+    public static MaplePacket giveInfusion(int bufflength, int speed) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.GIVE_BUFF.getValue());
+        mplew.writeLong(0);
+        mplew.writeLong(MapleBuffStat.MORPH.getValue());
+        mplew.writeShort(speed);
+        mplew.writeInt(5121009);
+        mplew.writeLong(0);
+        mplew.writeShort(bufflength);
+        mplew.writeShort(0);
+        return mplew.getPacket();
+    }
+
+    public static MaplePacket giveForeignInfusion(int cid, int speed, int duration) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.GIVE_FOREIGN_BUFF.getValue());
+        mplew.writeInt(cid);
+        mplew.writeLong(0);
+        mplew.writeLong(MapleBuffStat.MORPH.getValue());
+        mplew.writeShort(0);
+        mplew.writeInt(speed);
+        mplew.writeInt(5121009);
+        mplew.writeLong(0);
+        mplew.writeInt(duration);
+        mplew.writeShort(0);
+        return mplew.getPacket();
+    }
+ 

@@ -1,0 +1,61 @@
+打开 EventManager.java 
+适合位置增加以下语句
+import net.sf.odinms.tools.MaplePacketCreator; 
+import java.sql.ResultSet;
+import net.sf.odinms.client.MapleCharacter;
+在最后一个}前面加入以下语句
+public void autogain(int jsexp) { 
+Collection<MapleCharacter> chrs = cserv.getPlayerStorage().getAllCharacters(); 
+for (MapleCharacter chr : chrs) { 
+if(chr.getMapId()==910000000)//地图ID 
+{ 
+int givexp=jsexp*chr.getLevel()*cserv.getExpRate()+chr .getLevel(); 
+int giveme=chr.getLevel()*cserv.getMesoRate()+chr.getLevel();//如果只要泡经验就把这个删了 
+chr.gainExp(givexp, true,true); 
+chr.gainMeso(giveme, true);//如果只要泡经验就把这个删了 
+chr.getClient().getSession().write(MaplePacketCreator.serverNotice(5, "自动泡点获得"+givexp+"经验和"+giveme+"Meso"));//如果只得经验就把后面的<和"+giveme+"Meso>删掉 
+} 
+} 
+} 
+======================================以上是泡点添加方法================================================
+
+======================================以下是泡点按钮添加================================================
+打开ChannelServer.java 
+找到
+import java.io.IOException;
+下面添加
+import java.io.InputStreamReader;
+找到
+private boolean finishedShutdown = false;
+下面添加
+private static boolean autogain;
+找到
+public void reconnectWorld() {
+上面添加
+public boolean isautogain()
+    {
+        try
+        {
+            InputStreamReader is = new FileReader("world.properties");
+            props.load(is);
+            is.close();
+        }
+        catch (Exception ex)
+        {
+            ex.getStackTrace();
+        }
+        String autostate = props.getProperty("net.sf.odinms.net.autogain");
+        if (autostate.equals("true"))
+            return autogain = true;
+        else
+            return autogain = false;
+    }
+
+==========================题外话1==========================
+然后打开world.properties
+在net.sf.odinms.channel.events=……后面添加个Autogain
+把附件的JS放去\scripts\event
+==========================题外话2==========================
+设置了泡点开关的还要添加打开world.properties
+# net autoexp市场泡点得经验：true为开启，其他为关闭
+net.sf.odinms.net.autogain=true

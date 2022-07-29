@@ -1,0 +1,41 @@
++为增加
+-为查找并删除
+
+
+
+
+
+Index: MapleCharacter.java
+===================================================================
+--- MapleCharacter.java	(revision 897)
++++ MapleCharacter.java	(working copy)
+@@ -1359,7 +1359,8 @@
+ 		client.getSession().write(MaplePacketCreator.updatePlayerStats(MaplePacketCreator.EMPTY_STATUPDATE, true));
+ 	}
+ 	
+-	public void gainExp(int gain, boolean show, boolean inChat, boolean white) {
++	public void gainExp(int gain, boolean show, boolean inChat, boolean white) { 
+            int currentLevel = level;
+ 		if (getLevel() < 200) { // lv200 is max and has 0 exp required to level
+ 			int newexp = this.exp.addAndGet(gain);
+ 			updateSingleStat(MapleStat.EXP, newexp);
+@@ -1367,8 +1368,8 @@
+ 		if (show) { // still show the expgain even if it's not there
+ 			client.getSession().write(MaplePacketCreator.getShowExpGain(gain, inChat, white));
+ 		}
+-		while (level < 200 && exp.get() >= ExpTable.getExpNeededForLevel(level + 1)) {
+-			levelUp();
++		if (level < 200 && exp.get() >= ExpTable.getExpNeededForLevel(level + 1)) {
++                        levelUp();
+ 		}
+ 	}
+ 	
+@@ -1601,6 +1602,8 @@
+ 		if (level == 200) {
+ 			exp.set(0);
+ 		}
+                if(exp.get() > 0)
+                    exp.set(0);
+ 
+ 		maxhp = Math.min(30000, maxhp);
+ 		maxmp = Math.min(30000, maxmp);

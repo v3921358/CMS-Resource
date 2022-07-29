@@ -1,0 +1,243 @@
+importPackage(net.sf.odinms.world); 
+var exitMap; 
+var instanceId; 
+var minPlayers = 1; 
+function init() { 
+ instanceId = 1; 
+} 
+function monsterValue(eim, mobId) { 
+ return 1; 
+} 
+function setup() { 
+ exitMap = em.getChannelServer().getMapFactory().getMap(qtmapId); // <exit> 
+ var instanceName = "wgquest" + instanceId;//任务名 
+ var eim = em.newInstance(instanceName); 
+  
+ var mf = eim.getMapFactory(); 
+  
+ instanceId++; 
+  
+ var map = mf.getMap(mapId); 
+ map.shuffleReactors(); 
+ var firstPortal = eim.getMapInstance(mapId).getPortal("next00"); 
+ em.schedule("timeOut", 10 * 60000);//10分钟 
+  
+ return eim; 
+} 
+function playerEntry(eim, player) { 
+ var map = eim.getMapInstance(mapId); 
+ player.changeMap(map, map.getPortal(0)); 
+  
+ //TODO: hold time across map changes 
+ player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(600));//600为时间限制10分钟。 
+ player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.serverNotice(5, "[注意]你已进入任务地图，小心,你的任务就是打败蜈蚣,获得金袋子.")); 
+ startInstance(eim); 
+} 
+function playerDead(eim, player) { 
+} 
+function playerRevive(eim, player) { 
+ if (eim.isLeader(player)) { //check for party leader 
+  //boot whole party and end 
+  var party = eim.getPlayers(); 
+  for (var i = 0; i < party.size(); i++) { 
+   playerExit(eim, party.get(i)); 
+  } 
+  eim.dispose(); 
+ } 
+ else { //boot dead player 
+  // If only 2 players are left, uncompletable: 
+  var party = eim.getPlayers(); 
+  if (party.size() <= minPlayers) { 
+   for (var i = 0; i < party.size(); i++) { 
+    playerExit(eim,party.get(i)); 
+   } 
+   eim.dispose(); 
+  } 
+  else 
+   playerExit(eim, player); 
+ } 
+} 
+function playerDisconnected(eim, player) { 
+ if (eim.isLeader(player)) { //check for party leader 
+  //boot whole party and end 
+  var party = eim.getPlayers(); 
+  for (var i = 0; i < party.size(); i++) { 
+   if (party.get(i).equals(player)) { 
+    removePlayer(eim, player); 
+   }    
+   else { 
+    playerExit(eim, party.get(i)); 
+   } 
+  } 
+  eim.dispose(); 
+ } 
+ else { //boot d/ced player 
+  // If only 2 players are left, uncompletable: 
+  var party = eim.getPlayers(); 
+  if (party.size() < minPlayers) { 
+   for (var i = 0; i < party.size(); i++) { 
+    playerExit(eim,party.get(i)); 
+   } 
+   eim.dispose(); 
+  } 
+  else 
+   playerExit(eim, player); 
+ } 
+} 
+function leftParty(eim, player) {    
+ // If only 2 players are left, uncompletable: 
+ var party = eim.getPlayers(); 
+ if (party.size() <= minPlayers) { 
+  for (var i = 0; i < party.size(); i++) { 
+   playerExit(eim,party.get(i)); 
+  } 
+  eim.dispose(); 
+ } 
+ else 
+  playerExit(eim, player); 
+} 
+function disbandParty(eim) { 
+ //boot whole party and end 
+ var party = eim.getPlayers(); 
+ for (var i = 0; i < party.size(); i++) { 
+  playerExit(eim, party.get(i)); 
+ } 
+ eim.dispose(); 
+} 
+function playerExit(eim, player) { 
+ eim.unregisterPlayer(player); 
+ player.changeMap(exitMap, exitMap.getPortal(0)); 
+} 
+//for offline players 
+function removePlayer(eim, player) { 
+ eim.unregisterPlayer(player); 
+ player.getMap().removePlayer(player); 
+ player.setMap(exitMap); 
+} 
+function clearPQ(eim) { 
+ //KPQ does nothing special with winners 
+ var party = eim.getPlayers(); 
+ for (var i = 0; i < party.size(); i++) { 
+  playerExit(eim, party.get(i)); 
+ } 
+ eim.dispose(); 
+} 
+function cancelSchedule() { 
+} 
+function timeOut() { 
+ var iter = em.getInstances().iterator(); 
+ while (iter.hasNext()) { 
+  var eim = iter.next(); 
+  if (eim.getPlayerCount() > 0) { 
+   var pIter = eim.getPlayers().iterator(); 
+   while (pIter.hasNext()) { 
+    playerExit(eim, pIter.next()); 
+   } 
+  } 
+  eim.dispose(); 
+ } 
+} 
+function startInstance(eim) { 
+ if (eim.getPlayerCount() > 0) { 
+  var map = eim.getMapFactory().getMap(mapId, false, false); 
+   for (var x = 0; x < 1; x++) { 
+    var mob = net.sf.odinms.server.life.MapleLifeFactory.getMonster(9600010); 
+    var overrideStats = new net.sf.odinms.server.life.MapleMonsterStats(); 
+    overrideStats.setHp(mob.getHp() * 1500); 
+    overrideStats.setExp(mob.getExp()); 
+    overrideStats.setMp(mob.getMaxMp()); 
+    mob.setOverrideStats(overrideStats); 
+    mob.setHp(mob.getHp() * 1500); 
+    eim.registerMonster(mob); 
+    map.spawnMonsterOnGroudBelow(mob, new java.awt.Point(-569, 33)); 
+   } 
+ } 
+} 
+function allMonstersDead(eim) { 
+        var map = eim.getMapFactory().getMap(mapId, false, false); 
+        var winner = eim.getPlayers().get(0); 
+        var price; 
+        var ii = net.sf.odinms.server.MapleItemInformationProvider.getInstance(); 
+        price = ii.getEquipById(5200002);//为物品ID 
+        map.spawnItemDrop(winner, winner, price, winner.getPosition(), true, false); 
+}
+
+然后，将此文件保存为wgquest.js,进入OD目录下面，打开world.properties文件，找到net.sf.odinms.channel.events=期 
+在后面添加wgquest，目前你的脚本OK了！ 
+
+
+脚本说明： 
+var mapId = 980000500;//任务地图   即蜈蚣刷的地图，此地图最好是没有出去的路，比如我现在设置的这个！ 
+var qtmapId = 980000503;//退出地图 ，即回城或者是下线的地图！当然你可指定一个NPC出去，用NPC来判断！ 
+player.getClient().getSession().write(net.sf.odinms.tools.MaplePacketCreator.getClock(600));     // 这里的600代表多少分钟，此为10分钟！ 
+var mob = net.sf.odinms.server.life.MapleLifeFactory.getMonster(9600010);   //9600010为你要召唤的怪物 
+var overrideStats = new net.sf.odinms.server.life.MapleMonsterStats(); 
+    overrideStats.setHp(mob.getHp() * 2000);   //设置HP 
+    overrideStats.setExp(mob.getExp()); //设置得到的经验 
+    overrideStats.setMp(mob.getMaxMp()); //设置MP 
+    mob.setOverrideStats(overrideStats); 
+    mob.setHp(mob.getHp() * 2000); 
+    eim.registerMonster(mob); 
+//以上的是设置召唤出来的怪的属性，这样可以区别和外面的怪不同！ 
+
+
+如果你想为此怪添加暴率，那么在这里： 
+function allMonstersDead(eim) { 
+}          //我这里没有写，如何写了，参照家族领地任务，稍候公布我写的
+
+下面是NPC的写法.
+
+
+var status = 0; 
+function start() { 
+    status = -1; 
+    action(1, 0, 0); 
+} 
+function action(mode, type, selection) { 
+    if (mode == -1) { 
+        cm.dispose(); 
+    } else { 
+        if (mode == 1) 
+            status++; 
+        else 
+            status--; 
+        if (status == 0) { 
+            cm.sendNext("你想去挑战 #b大王蜈蚣#k 吗？"); 
+        } else if (status == 1) { 
+            if(cm.getLevel() >= 150 ){  //判断人物等级 
+                if (cm.getParty() == null) { // 没有开队伍 
+                    cm.sendOk("#e你好像还没有一个队伍,我是不能送你进去的."); 
+                    cm.dispose(); 
+                    } 
+            if (!cm.isLeader()) { // 不是队长 
+                cm.sendSimple("如果你想挑战一下蜈蚣, 那么你只能自己开队伍,一个人去单挑,所以不能和人家组队！"); 
+                cm.dispose(); 
+                    }else { 
+            var party = cm.getParty().getMembers(); 
+            var next = true; 
+                if (party.size() > 1){ //判断队伍里面是否大于1人，如果大于，则不能开启任务 
+                    next = false; 
+                    } 
+                if (next) { 
+            var em = cm.getEventManager("wgquest");  //wgquest为任务的名字 
+                if (em == null) { 
+                    cm.sendOk("error！"); 
+                } else {  //开始任务 
+                em.startInstance(cm.getParty(),cm.getChar().getMap()); 
+                party = cm.getChar().getEventInstance().getPlayers(); 
+                cm.removeFromParty(4001008, party); 
+                cm.removeFromParty(4001007, party);  
+                } 
+            cm.serverNotice(5, "[NPC挑战使者]玩家:" + cm.c.getPlayer().getName() + " 带着绝招,进入了蜈蚣地图开始挑战大王蜈蚣!~~")); 
+            cm.dispose(); 
+                    } 
+                } 
+            }else{ 
+                cm.sendOk("#e#r对不起,你的等级太低,去了也是送死."); 
+                cm.dispose(); 
+            } 
+        } 
+    } 
+}     
+
+

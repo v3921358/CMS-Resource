@@ -1,0 +1,45 @@
+=========================================================================== 
+查找下面一段字符 去修改吧 或者可以复制到自己做的端 
+提取自Aexr端   UseCashItemHandler.java
+
+  } else if (itemType == 539) { 
+                List<String> lines = new LinkedList<String>(); 
+                    for (int i = 0; i < 4; i++) { 
+                    lines.add(slea.readMapleAsciiString()); 
+                    } 
+                    lasttime = nowtime; 
+                    nowtime = System.currentTimeMillis(); 
+                    long gmtime = 200000; //VIP1喇叭时间 
+                    if(c.getPlayer().getGMLevel()>2){ //GM喇叭 
+                    gmtime=1000; 
+                    }else if(c.getPlayer().getVip()>1){   //VIP2喇叭 
+                    gmtime=150000; 
+                      }else if(c.getPlayer().getVip()>2){  //VIP3喇叭 
+                    gmtime=100000; 
+                      }else if(c.getPlayer().getVip()>3){  //VIP4喇叭 
+                    gmtime=50000; 
+                      }else if(c.getPlayer().getVip()>4){  //VIP5喇叭 
+                    gmtime=1000; 
+                    } 
+                    if (nowtime- lasttime < gmtime){ 
+                        c.getPlayer().getClient().getSession().write(MaplePacketCreator.serverNotice(1, "为防止恶意刷屏，请稍候再试！ [小道消息:] VIP会员能显示情景效果")); 
+                        MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 0, true, false); 
+                    }else{ 
+                    if(c.getPlayer().getVip()>0){  //VIP1喇叭 
+                    c.getChannelServer().getWorldInterface().broadcastMessage(null, MaplePacketCreator.getAvatarMega(c.getPlayer(), c.getChannel(), itemId, lines, (slea.readByte() != 0)).getBytes()); 
+                    }else{ 
+                        String  mes=""; 
+                        for (int i=0;i<lines.size();i++) { 
+                             mes += lines.get(i); 
+                        } 
+                    c.getChannelServer().getWorldInterface().broadcastMessage(null, MaplePacketCreator.serverNotice(3, c.getChannel(), c.getPlayer().getName() + " : " + mes).getBytes()); 
+                    } 
+                    MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false); 
+                    } 
+            } 
+        } catch (RemoteException e) { 
+            c.getChannelServer().reconnectWorld(); 
+            log.error("UseCashItemHadler Error", e); 
+        } 
+    } 
+

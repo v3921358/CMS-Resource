@@ -1,0 +1,115 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+找到：net\sf\odinms\client\MapleCharacter.java 
+找到： 
+ 
++ "meso = ?, hpApUsed = ?, mpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, messengerid = ?, messengerposition = ?, reborns = ?, pvpkills = ?, pvpdeaths = ? WHERE id = ?");
+
+替换成： 
+ 
++ "meso = ?, hpApUsed = ?, mpApUsed = ?, spawnpoint = ?, party = ?, buddyCapacity = ?, messengerid = ?, messengerposition = ?, reborns = ?, pvpkills = ?, pvpdeaths = ?, name = ? WHERE id = ?");
+
+再找到： 
+ 
+  if (update) { 
+    ps.setInt(31, id); 
+  } else { 
+    ps.setInt(31, accountid); 
+                                ps.setString(32, name); 
+    ps.setInt(33, world); // TODO store world somewhere ;) 
+  }
+替换成： 
+  if (update) { 
+                                ps.setString(31, name); 
+    ps.setInt(32, id); 
+  } else { 
+    ps.setInt(31, accountid); 
+                                ps.setString(32, name); 
+    ps.setInt(33, world); // TODO store world somewhere ;) 
+  }
+
+找到：net\sf\odinms\scripting\npc\NPCConversationManager.java 
+随便在相似地方添加： 
+public void reloadChar() { // Basically !fakerelog in NPC function form. 
+            getPlayer().getClient().getSession().write(MaplePacketCreator.getCharInfo(getPlayer())); 
+            getPlayer().getMap().removePlayer(getPlayer()); 
+            getPlayer().getMap().addPlayer(getPlayer()); 
+        }
+
+再添加： 
+public boolean setName ( String name ) { 
+  if ( MapleCharacterUtil.isNameLegal( name ) ) { 
+  getPlayer().setName( name ); 
+  getPlayer().saveToDB( true ); 
+  return true; 
+  } else { 
+  return false; 
+  } 
+}
+
+然后再加入导包： 
+import net.sf.odinms.client.MapleCharacterUtil;
+
+------------------------------------------------------------------------------------------------------- 
+
+这里是NPC脚本： 
+var status = 0; 
+var selected; 
+function start() { 
+status = -1; 
+action(1, 0, 0); 
+} 
+function action(mode, type, selection) { 
+if (mode == -1) { 
+  cm.dispose(); 
+} else { 
+  if (mode == 0) { 
+  cm.sendOk("名字修改服务"); 
+  cm.dispose(); 
+  return; 
+  } 
+  if (mode == 1) 
+  status++; 
+  else 
+  status--; 
+  if (status == 0) { 
+  cm.sendNext("你好 #b#h ##k.我可以帮你修改名字! \r\n 当然需要一些费用. \r\n \r\n #b需要的道具#k \r\n 5个 #v4000038#."); 
+  } else if (status == 1) { 
+  cm.sendGetText("这一步很重要. 你需要在下面的白色框内输入你想要的名字.  请注意！你的名字必须在#b3 - 12个字符之间#k. \r\n \r\n 不要改成和GM相似的名字 ."); 
+  } else if (status == 2) { 
+  selected = cm.getText(); 
+if (selected.length() < 3 || selected.length() > 12) { 
+cm.sendOk("你的名字必须在 3 ~ 12 个字符之间."); 
+cm.dispose(); 
+} else if (selected.startsWith("[GM]") == true) { 
+cm.sendOk("请不要假冒GM!"); 
+cm.dispose(); 
+} else if (selected.endsWith("[GM]") == true) { 
+cm.sendOk("请不要假冒GM!"); 
+cm.dispose(); 
+} else if (selected.startsWith("GM_") == true) { 
+cm.sendOk("请不要假冒GM!"); 
+cm.dispose(); 
+} else if (selected.endsWith("GM_") == true) { 
+cm.sendOk("请不要假冒GM!"); 
+cm.dispose(); 
+} 
+  cm.sendYesNo("你想要#b" + selected + "#k 这个名字吗? "); 
+  } else if (status == 3) { 
+  if (cm.itemQuantity(4000038) >= 5) { 
+    cm.getChar().setName(selected); 
+    cm.gainItem(4000038, -5); 
+    cm.sendOk("好了! 你现在的名字是#b" + selected + "!#k 再见！."); 
+  } else { 
+    cm.sendOk("什么? 你好像没有5个 #v4000038#. 我们不是免费服务!"); 
+    cm.dispose(); 
+  } 
+  } else if (status == 4) { 
+  cm.dispose(); 
+  cm.reloadChar(); 
+  } 
+} 
+}

@@ -1,0 +1,141 @@
+/* 92MS
+by Some
+*/
+function start() {
+status = -1;
+action(1, 0, 0);
+}
+function action(mode, type, selection) {
+            if (mode == -1) {
+                cm.dispose();
+            }
+            else {
+                if (status >= 0 && mode == 0) {
+                
+cm.sendOk("好的,如果你想好了要做什么,我会很乐意的为你服务的..");
+cm.dispose();
+return;                    
+                }
+                if (mode == 1) {
+status++;
+}
+else {
+status--;
+}
+        if (status == 0) { 
+cm.sendSimple("您好我是消除恋人戒指的NPC,请问您要删除什么戒指什么呢（戒指请取下清理-放背包中）?\r\n #b#L0#恋人戒指#l \r\n #L1#四叶挚友戒指#l \r\n #L2#雏菊挚友戒指#l \r\n #L3#闪星挚友戒指#l \r\n #L4#丘比特戒指#l\r\n #L5#纯爱恋人戒指#l");
+} else if (status == 1) {
+if (selection == 0) {
+  if (cm.getChar().getNX() < 0) {
+              cm.sendOk("抱歉你没有2W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainItem(1112001,-1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+} else if (selection == 10) {
+  if (cm.getChar().getNX() < 50000) {
+              cm.sendOk("抱歉你没有5W点卷无法降低转生次数\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else if (cm.getChar().getVip()==1){
+              cm.sendOk("你还可以转生1次，所以不需要洗次数哦！");
+              cm.dispose();
+              }else{
+              cm.gainNX(-50000);
+              cm.status(3);
+              cm.sendOk("啊哦，我又给了你一次转生的机会哦！");
+              cm.dispose();
+              }    
+            } else if (selection == 1) {
+  if (cm.getChar().getNX() < 0) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainItem(1112800,-1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 2) {
+  if (cm.getChar().getNX() < 0) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainItem(1112801,-1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 3) {
+  if (cm.getChar().getNX() < 0) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainItem(1112802,-1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 4) {
+  if (cm.getChar().getNX() < 0) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainItem(1112003,-1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 5) {
+  if (cm.getChar().getNX() < 0) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainItem(1112002,-1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 6) {
+  if (cm.getChar().getNX() < 0) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainNX(-20000);
+              cm.gainItem(2040710,1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 7) {
+  if (cm.getChar().getNX() < 20000) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainNX(-20000);
+              cm.gainItem(2040807,1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 8) {
+  if (cm.getChar().getNX() < 20000) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainNX(-20000);
+              cm.gainItem(2041025,1);
+              cm.sendOk("恭喜你截止成功删除!");
+              cm.dispose();
+              }
+            } else if (selection == 9) {
+  if (cm.getChar().getNX() < 20000) {
+              cm.sendOk("抱歉你没有1W点卷无法购买GM卷轴\r\n需要冲值点卷请联系GM"); 
+              cm.dispose();
+              }else{
+              cm.gainNX(-20000);
+              cm.gainItem(2044003,1);
+              cm.sendOk("谢谢惠顾!");
+              cm.dispose();
+              }
+            } else if (selection == 11) {
+              cm.sendOk("#b增加装备升级次数还未开放");
+              cm.dispose();
+}
+}
+}
+} 

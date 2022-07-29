@@ -1,0 +1,35 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+首先在net.sf.odinms.client下找到MapleClient.java
+然后查找if (state == MapleClient.LOGIN_SERVER_TRANSITION) {
+代码大概是如下
+====================================
+          if (state == MapleClient.LOGIN_SERVER_TRANSITION) {
+                Timestamp ts = rs.getTimestamp("lastlogin");
+                long t = ts.getTime();
+                long now = System.currentTimeMillis();
+                if (t + 30000 < now) { // connecting to chanserver timeout
+                    state = MapleClient.LOGIN_NOTLOGGEDIN;
+                    updateLoginState(MapleClient.LOGIN_NOTLOGGEDIN);
+                }
+            }
+======================================
+然后把他替换成这样
+=======================================
+if (state == MapleClient.LOGIN_SERVER_TRANSITION) {
+                Timestamp ts = rs.getTimestamp("lastlogin");
+                long t = ts.getTime();
+                long now = System.currentTimeMillis();
+                if (t + 30000 < now) { // connecting to chanserver timeout
+                    state = MapleClient.LOGIN_NOTLOGGEDIN;
+                    updateLoginState(MapleClient.LOGIN_NOTLOGGEDIN);
+                }
+                                updateLoginState(MapleClient.LOGIN_NOTLOGGEDIN);
+                                loggedIn = false;
+                                serverTransition = false;
+            }
+========================================
+当登陆时提示 already logged 的时候，再次按登陆就能登陆的啦，喜欢就顶啊~~~~

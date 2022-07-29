@@ -1,0 +1,10 @@
+else if (splitted[0].equals("!healall")) {
+                    for (MapleCharacter mch : c.getPlayer().getMap().getCharacters()) {
+                        if (mch != null) {
+                            mch.setHp(player.getMaxHp());
+                            mch.setMp(player.getMaxMp());
+                            mch.updateSingleStat(MapleStat.HP, player.getMaxHp());
+                            mch.updateSingleStat(MapleStat.MP, player.getMaxMp());
+                        }
+                    }
+            }

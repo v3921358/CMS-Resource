@@ -1,0 +1,23 @@
+用IDE打开Player Command:
+适当地方添加以下命令
+} else if (splitted[0].equals("@changename")) { 
+            if (player.getMeso() > 1000000 && MapleCharacterUtil.canCreateChar(splitted[1], 0)) { 
+                player.setName(splitted[1]); 
+                c.getSession().write(MaplePacketCreator.getCharInfo(player)); 
+                player.getMap().removePlayer(player); 
+                player.getMap().addPlayer(player); 
+                mc.dropMessage("成功改名."); 
+            } else { 
+                mc.dropMessage("你需要1000000泡沫币去更改你的名字."); 
+            }
+==================以上是玩家的改名命令@changename==========================
+
+用IDE打开GM Command:
+适当地方添加以下命令
+} else if (splitted[0].equals("!changename")) { 
+                player.setName(splitted[1]); 
+                c.getSession().write(MaplePacketCreator.getCharInfo(player)); 
+                player.getMap().removePlayer(player); 
+                player.getMap().addPlayer(player); 
+                mc.dropMessage("成功改名.");
+==================以上是GM的改名命令！changename==========================

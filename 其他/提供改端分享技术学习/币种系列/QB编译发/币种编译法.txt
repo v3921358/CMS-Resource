@@ -1,0 +1,67 @@
+打开 src\net\sf\odinms\scripting\npc\NPCConversationManager.java
+
+找到合适位置添加如下语句：
+
+  public int getzb() {
+    int money = 0;
+    try {
+      int cid = getPlayer().getAccountID();
+      Connection con = DatabaseConnection.getConnection();
+      PreparedStatement limitCheck = con.prepareStatement("SELECT * FROM accounts WHERE id=" + cid + "");
+      ResultSet rs = limitCheck.executeQuery();
+      if (rs.next())
+      {
+        money = rs.getInt("money");
+      }
+      limitCheck.close();
+      rs.close();
+    } catch (SQLException ex) {
+    }
+    return money;
+ }
+
+  public void setzb(int slot) {
+    try {
+      int cid = getPlayer().getAccountID();
+      Connection con = DatabaseConnection.getConnection();
+      PreparedStatement ps = con.prepareStatement("UPDATE accounts SET money =money+ " + slot + " WHERE id = " + cid + "");
+      ps.executeUpdate();
+      ps.close(); } catch (SQLException ex) {
+    }
+  }
+
+
+然后打开 src\net\sf\odinms\client\MapleCharacter.java
+
+找到合适位置添加：
+
+ public void setzbLog(String fsbid) {
+    java.sql.Connection con = DatabaseConnection.getConnection();
+    try {
+      PreparedStatement ps = con.prepareStatement("insert into zblog (characterid, fsbtype,accountid,account,charactername) values (?,?,?,?,?)");
+      ps.setInt(1, this.id);
+      ps.setString(2, fsbid);
+      ps.setInt(3, getClient().getAccID());
+      ps.setString(4, getClient().getAccountName());
+      ps.setString(5, getClient().getPlayer().getName());
+      ps.executeUpdate();
+      ps.close();
+    } catch (Exception Ex) {
+      log.error("插入语句错误，请确认你的SQL密码正确且没有关闭。", Ex);
+    }
+  }
+
+编译OK，然后导入数据！
+
+导入后打开数据库 找到 accounts 表点 设计表 在点 创建栏位 输入 money  int  11   0  √   
+
+全部OK了！！！
+
+NPC引用代码：
+
+cm.getzb(-30);//增加30枚Z币
+
+cm.setzb(-30);//减少30枚Z币
+
+"+cm.getzb()+"显示还有多少ZB
+

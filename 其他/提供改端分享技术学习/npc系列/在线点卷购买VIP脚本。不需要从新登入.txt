@@ -1,0 +1,177 @@
+在端里的MapleCharacter.java里添加如下代码，然后编译最后还要把代码也改一下 
+    public void setVip(int vip){ 
+        this.vip = vip; 
+    } 
+    public void upVip1(){ 
+        client.getSession(); 
+        try 
+        { 
+            Connection con = DatabaseConnection.getConnection(); 
+            PreparedStatement ps = con.prepareStatement("UPDATE characters SET vip = ? WHERE id = ?"); 
+            ps.setInt(1, 1); 
+            ps.setInt(2, id); 
+                        ps.executeUpdate(); 
+                        ps.close(); 
+        } 
+        catch (SQLException ex) 
+        { 
+            log.error("Error while changing status", ex); 
+        } 
+    } 
+
+    public void upVip2(){ 
+        client.getSession(); 
+        try 
+        { 
+            Connection con = DatabaseConnection.getConnection(); 
+            PreparedStatement ps = con.prepareStatement("UPDATE characters SET vip = ? WHERE id = ?"); 
+            ps.setInt(1, 2); 
+            ps.setInt(2, id); 
+            ps.executeUpdate(); 
+            ps.close(); 
+        } 
+        catch (SQLException ex) 
+        { 
+            log.error("Error while changing status", ex); 
+        } 
+    } 
+
+    public void upVip3(){ 
+        client.getSession(); 
+        try 
+        { 
+            Connection con = DatabaseConnection.getConnection(); 
+            PreparedStatement ps = con.prepareStatement("UPDATE characters SET vip = ? WHERE id = ?"); 
+            ps.setInt(1, 3); 
+            ps.setInt(2, id); 
+            ps.executeUpdate(); 
+            ps.close(); 
+        } 
+        catch (SQLException ex) 
+        { 
+            log.error("Error while changing status", ex); 
+        } 
+    } 
+
+    public void unVip(){ 
+        client.getSession(); 
+        try 
+        { 
+            Connection con = DatabaseConnection.getConnection(); 
+            PreparedStatement ps = con.prepareStatement("UPDATE characters SET vip = ? WHERE id = ?"); 
+            ps.setInt(1,vip+1); 
+            ps.setInt(2, id); 
+            ps.executeUpdate(); 
+            ps.close(); 
+        } 
+        catch (SQLException ex) 
+        { 
+            log.error("Error while changing status", ex); 
+        } 
+    } 
+
+新的N PC代码。。。。 
+
+function start() { 
+    
+    status = -1; 
+     
+    action(1, 0, 0); 
+} 
+
+function action(mode, type, selection) { 
+            if (mode == -1) { 
+                cm.dispose(); 
+            } 
+            else { 
+                if (status >= 0 && mode == 0) { 
+                 
+            cm.sendOk("感谢你的光临！"); 
+            cm.dispose(); 
+            return;                     
+                } 
+                if (mode == 1) { 
+            status++; 
+        } 
+        else { 
+            status--; 
+        } 
+                if (status == 0) { 
+            cm.sendSimple("您好，欢迎使用冒险岛自动兑换系统,购买点卷请上官网,任何问题请联系GM\r\n\r\n #L2#初级VIP 20W点卷#l 
+
+\r\n #L3#高级VIP 30W点卷.还赠送您30000点#l \r\n #L4#超级VIP 45W点卷.还赠送您50000点#l \r\n #L9#升级VIP每次18W点卷#l \r\n #L5#1000 点 - 10E 冒险币#l \r\n #L6#2000 点 - 20E 冒险 
+
+币#n#l#k"); 
+                } else if (selection == 6) 
+                        if(cm.getMeso() >= 2000000000){ 
+                        cm.sendOk("谢谢, 你获得了2000点卷."); 
+                        cm.gainNX(2000); 
+                            cm.gainMeso(-2000000000); 
+                        cm.dispose(); 
+                        }else{ 
+                        cm.sendOk("你没有20E冒险币."); 
+                        cm.dispose(); 
+                }else if  (selection == 2) { 
+                       if(cm.getChar().getNX() >= 200000) { 
+                       cm.gainNX(-200000); 
+                       cm.getChar().upVip1(); 
+                       cm.getChar().setVip(1); 
+                       cm.gainNX(50000); 
+                       cm.sendOk("初级VIP购买成功！祝您游戏愉快！"); 
+                       cm.dispose(); 
+                    } else { 
+                       cm.sendOk("你没有足够的点卷，请充值！"); 
+                       cm.dispose();   
+                    } 
+                }else if  (selection == 3) { 
+                    if(cm.getChar().getNX() >= 300000) { 
+                       cm.gainNX(-300000); 
+                       cm.getChar().upVip2(); 
+                       cm.getChar().setVip(2); 
+                        cm.gainNX(30000); 
+                       cm.sendOk("高级VIP购买成功！系统赠送3W点，祝您游戏愉快！"); 
+                       cm.dispose(); 
+                    } else { 
+                       cm.sendOk("你没有足够的点卷，请充值！"); 
+                       cm.dispose(); 
+                    } 
+                }else if  (selection == 4) { 
+                    if(cm.getChar().getNX() >= 450000) { 
+                       cm.gainNX(-450000); 
+                       cm.getChar().upVip3(); 
+                       cm.getChar().setVip(3); 
+                       cm.gainNX(50000); 
+                       cm.sendOk("超级VIP购买成功！系统赠送5W点，祝您游戏愉快！"); 
+                       cm.dispose(); 
+                    } else { 
+                       cm.sendOk("你没有足够的点卷，请充值！"); 
+                       cm.dispose();   
+                    } 
+                }else if  (selection == 9) { 
+                   if(cm.getChar().getVip() >=3 ) { 
+                       cm.sendOk("你已经是超级VIP了，无需再升级"); 
+                       cm.dispose(); 
+                      }else if (cm.getChar().getNX() < 200000) { 
+                       cm.sendOk("你没有足够的点卷，请充值！"); 
+                       cm.dispose(); 
+                   } else { 
+                       cm.gainNX(-180000); 
+                       cm.getChar().unVip(); 
+                       cm.getChar().gainvip(1); 
+                       cm.sendOk("VIP升级成功"); 
+                       cm.dispose(); 
+                   } 
+                              }else if (selection == 5) 
+                            if(cm.getMeso() >= 1000000000){ 
+                                cm.sendOk("谢谢, 你获得了1,000点卷."); 
+                             cm.gainNX(1000); 
+                             cm.gainMeso(-1000000000); 
+                             cm.dispose(); 
+                             }else{ 
+                             cm.sendOk("你没有10E冒险币."); 
+                             cm.dispose(); 
+                        } 
+    } 
+} 
+
+经过测试， 完全没问题   

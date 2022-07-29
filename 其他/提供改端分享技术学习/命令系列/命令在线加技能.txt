@@ -1,0 +1,13 @@
+打开GM.java
+适当地方添加   
+         } else if (splitted[0].equals("!gmskills")) {
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5001000), 1, 1); //Haste (Normal)
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5001001), 1, 1); //Super Dragon Roar
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5001002), 1, 1); //Teleport
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5101003), 1, 1); //Bless
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5101001), 1, 1); //Haste (Super)
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5101000), 1, 1); //Heal + Dispel
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5101004), 1, 1); //Hide
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5101002), 1, 1); //Holy Symbol
+                c.getPlayer().changeSkillLevel(SkillFactory.getSkill(5101005), 1, 1); //Resurrection
+                mc.dropMessage("成功启动技能状态!");

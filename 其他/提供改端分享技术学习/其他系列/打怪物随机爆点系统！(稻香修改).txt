@@ -1,0 +1,48 @@
+这个我研究一一下，发现挺简单的递增函数！！
+
+
+打开MapleMap.java  ，
+
+   查找： import java.util.Map;
+复制代码下面增加： import java.util.Random;
+复制代码再继续查找： tempmeso = (int) (tempmeso * dropOwner.getBuffedValue(MapleBuffStat.MESOUP).doubleValue() / 100.0); 
+
+}
+复制代码下面增加如下函数： Collection<MapleCharacter> chrs = cserv.getPlayerStorage().getAllCharacters(); //爆点系统  稻香
+
+                    for (MapleCharacter chr : chrs) {
+
+                    int addnx;
+
+                   // Random t = new Random();
+
+                    addnx = (int) Math.floor(Math.random() * (chr.getVip() + 1));
+
+                    if (addnx > 0) {
+
+                    dropOwner.modifyCSPoints(1, addnx);
+
+                    dropOwner.getClient().getSession().write(MaplePacketCreator.serverNotice(5, "你从怪物身上获得 【 " + addnx +" 】点点卷."));
+
+                    }
+复制代码找到下面的：    public void run() {
+
+                                spawnMesoDrop(meso * mesoRate, meso, dropPos, dropMonster, dropChar, isBoss || publicLoott);
+
+                            }
+
+                        }, monster.getAnimationTime("die1"));
+
+                    }
+复制代码改成：        public void run() {
+
+                                spawnMesoDrop(meso * mesoRate, meso, dropPos, dropMonster, dropChar, isBoss || publicLoott);
+
+                            }
+
+                        }, monster.getAnimationTime("die1"));
+
+                    }
+
+                 }
+复制代码编译即可！！！原理是引用Random随机函数，随机打怪爆点1~50不等！！几率按等级递增！  稻、香发布！！感谢支持！

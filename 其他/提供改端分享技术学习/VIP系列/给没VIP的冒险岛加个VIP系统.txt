@@ -1,0 +1,36 @@
+打开MapleCharacter.java 
+找到 
+private int level;
+
+在下面加 
+private int vip; 
+
+找到 
+ret.level = rs.getInt("level");
+
+在下面加 
+ret.vip = rs.getInt("vip");
+
+找到
+public int getLevel() {
+        return level;
+    }
+在下面加
+public int getVip() {
+        return vip;
+    }
+
+================================泡沫分割线===========================
+NPCConversationManager.java 
+
+找到 
+public int getNpc() { 
+return npc; 
+}
+在下面加 
+@Deprecated 
+public MapleCharacter getVip() { 
+return getPlayer(); 
+}
+================================泡沫分割线===========================
+最后在数据库添加VIP的数据就行了

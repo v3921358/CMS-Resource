@@ -1,0 +1,65 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+在 net.sf.odinms.scripting.AbstractPlayerInteraction.java 
+找到： 
+private class AbstractPlayerInteraction { 
+ public MapleClient c;change to 
+改为： 
+public class AbstractPlayerInteraction { 
+ public MapleClient c; 
+在NPCConverstationManager, add import 
+添加 
+import net.sf.odinms.net.channel.ChannelServer; 
+在加一个： 
+        public void callGM(String Text) { 
+                        for (ChannelServer cservs : ChannelServer.getAllInstances()) { 
+                            for (MapleCharacter players : cservs.getPlayerStorage().getAllCharacters()) { 
+                                if (players.isGM()) { 
+                                    players.getClient().getSession().write(MaplePacketCreator.serverNotice(6, c.getPlayer().getName() + " sent you a message : " + Text)); 
+                                } 
+                            } 
+                        } 
+                } 
+脚本： 
+ var status = 0; 
+var price = 10000000; 
+function start() { 
+ status = -1; 
+ action(1, 0, 0); 
+} 
+function action(mode, type, selection) { 
+ if (mode == -1) { 
+cm.sendOK("你是谁想干啥？"); 
+  cm.dispose(); 
+ } else { 
+  if (mode == 0) { 
+   cm.sendOk("看在你是个好孩子不跟你计较了！"); 
+   cm.dispose(); 
+   return; 
+  } 
+  if (mode == 1) 
+   status++; 
+  else 
+   status--; 
+  if (status == 0) { 
+   cm.sendNext("Hey #b#h ##k, 你想联系GM？是不是要发邮件给他"); 
+  } else if (status == 1) { 
+   cm.sendGetText("好吧把你要说的话输入在下面."); 
+  } else if (status == 2) { 
+   message = cm.getText(); 
+   cm.sendYesNo("你确定要发出去了！ \r\n<#b" + message + "#k>\r\n to GMs? \r\n如果你乱使用我门就把你送到监狱"); 
+  } else if (status == 3) { 
+   if (cm.getMeso() >= price) { 
+    cm.callGM(message); 
+    cm.gainMeso(-price); 
+    cm.sendOk("Sent."); 
+   } else { 
+    cm.sendOk("你没有 " + price + " 金钱."); 
+    cm.dispose(); 
+   } 
+  } 
+ } 
+}

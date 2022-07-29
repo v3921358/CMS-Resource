@@ -1,0 +1,4 @@
+币种可以有很多种  比如你添加了如原文的币种还想再添加，只要更改  
+public int getzb() {的zb （随便）
+public void setzb(int slot) {的zb（随便）
+以及在NPCConversationManager.java所添加的语句中的money （改成你在数据库里的币种表的名字）

@@ -1,0 +1,10 @@
+打开MapleGenericPortal.java
+              搜索 changed = true;    
+在上面加入以下语句
+  if (getTargetMapId() >= 910000003 && getTargetMapId() <= 910000022) {
+            c.getSession().write(MaplePacketCreator.enableActions());
+            player.getClient().getSession().write(MaplePacketCreator.serverNotice(5, "[任务公告：请通过npc进入任务房间！"));
+            } else {
+            c.getPlayer().changeMap(to, pto);
+            }  
+编译，OK

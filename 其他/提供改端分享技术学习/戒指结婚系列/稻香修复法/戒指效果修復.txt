@@ -1,0 +1,1237 @@
+这个方法是RZ论坛的ToyFork发布的，他发布的时候没有说明在哪里增加函数！并且有错误，现在呢，我已经自己修改，全部添加成功！并且翻译好发布论坛！
+
+
+   首先：  打开 MaplePacketCreator.java
+  
+查找:public static MaplePacket getCharInfo(MapleCharacter chr) {
+复制代码复制以下函数替换这段对应字符：public static MaplePacket getCharInfo(MapleCharacter chr) {
+
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+
+
+        mplew.writeShort(SendPacketOpcode.WARP_TO_MAP.getValue()); // 0x49
+
+
+
+        mplew.writeInt(chr.getClient().getChannel() - 1);
+
+        mplew.write(1);
+
+        mplew.write(1);
+
+        mplew.writeShort(0);
+
+        mplew.writeInt(new Random().nextInt()); // seed the maplestory rng with a random number <3
+
+
+
+        mplew.write(HexTool.getByteArrayFromHexString("F8 17 D7 13 CD C5 AD 78"));
+
+        addCharWarp(mplew, chr);
+
+        addQuestInfo(mplew, chr);
+
+
+
+        MapleInventory iv = chr.getInventory(MapleInventoryType.EQUIPPED);
+
+        Collection<IItem> equippedC = iv.list();
+
+        List<Item> equipped = new ArrayList<Item>(equippedC.size());
+
+        for (IItem item : equippedC)
+
+            equipped.add((Item) item);
+
+        Collections.sort(equipped);
+
+        List<MapleRing> rings = new ArrayList<MapleRing>();
+
+        for (Item item : equipped)
+
+            if (((IEquip) item).getRingId() > -1)
+
+                rings.add(MapleRing.loadFromDb(((IEquip) item).getRingId()));
+
+        iv = chr.getInventory(MapleInventoryType.EQUIP);
+
+        for (IItem item : iv.list())
+
+            if (((IEquip) item).getRingId() > -1)
+
+                rings.add(MapleRing.loadFromDb(((IEquip) item).getRingId()));
+
+        Collections.sort(rings);
+
+        boolean FR_last = false;
+
+        for (MapleRing ring : rings) {
+
+            if ((ring.getItemId() >= 1112800 && ring.getItemId() <= 1112803 || ring.getItemId() <= 1112806 || ring.getItemId() <= 1112807 || ring.getItemId() <= 1112809) && rings.indexOf(ring) == 0)
+
+                mplew.writeShort(0);
+
+            mplew.writeShort(0);
+
+            mplew.writeShort(1);
+
+            mplew.writeInt(ring.getPartnerChrId());
+
+            mplew.writeAsciiString(StringUtil.getRightPaddedStr(ring.getPartnerName(), '\0', 13));
+
+            mplew.writeInt(ring.getRingId());
+
+            mplew.writeInt(0);
+
+            mplew.writeInt(ring.getPartnerRingId());
+
+            if (ring.getItemId() >= 1112800 && ring.getItemId() <= 1112803 || ring.getItemId() <= 1112806 || ring.getItemId() <= 1112807 || ring.getItemId() <= 1112809) {
+
+                FR_last = true;
+
+                mplew.writeInt(0);
+
+                mplew.writeInt(ring.getItemId());
+
+                mplew.writeShort(0);
+
+            } else {
+
+                if (rings.size() > 1)
+
+                    mplew.writeShort(0);
+
+                FR_last = false;
+
+            }
+
+        }
+
+        if (!FR_last)
+
+            mplew.writeLong(0);
+
+        List<Integer> maps = chr.getVIPRockMaps(0);
+
+        for (int map : maps)
+
+            mplew.writeInt(map);
+
+        for (int i = maps.size(); i < 5; i++)
+
+            mplew.write(CHAR_INFO_MAGIC);
+
+        maps = chr.getVIPRockMaps(1);
+
+        for (int map : maps)
+
+            mplew.writeInt(map);
+
+        for (int i = maps.size(); i < 10; i++)
+
+            mplew.write(CHAR_INFO_MAGIC);
+
+        maps.clear();
+
+        mplew.writeInt(0);
+
+        mplew.writeLong(getTime(System.currentTimeMillis()));
+
+        return mplew.getPacket();
+
+    }
+复制代码继续搜索查找：private static void addItemInfo(MaplePacketLittleEndianWriter mplew, IItem item, boolean zeroPosition, boolean leaveOut) {
+复制代码复制以下函数替换这段对应字符：private static void addItemInfo(MaplePacketLittleEndianWriter mplew, IItem item, boolean zeroPosition, boolean leaveOut) {
+
+        MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+
+        boolean ring = false;
+
+        IEquip equip = null;
+
+        if (item.getType() == IItem.EQUIP) {
+
+            equip = (IEquip) item;
+
+            if (equip.getRingId() > -1)
+
+                ring = true;
+
+        }
+
+        byte pos = item.getPosition();
+
+        boolean masking = false;
+
+        boolean equipped = false;
+
+        if (zeroPosition) {
+
+            if (!leaveOut)
+
+                mplew.write(0);
+
+        } else if (pos <= (byte) -1) {
+
+            pos *= -1;
+
+            if (pos > 100 || ring) {
+
+                masking = true;
+
+                mplew.write(0);
+
+                mplew.write(pos - 100);
+
+            } else
+
+                mplew.write(pos);
+
+            equipped = true;
+
+        } else
+
+            mplew.write(item.getPosition());
+
+        if (item.getPetId() > -1)
+
+            mplew.write(3);
+
+        else
+
+            mplew.write(item.getType());
+
+        mplew.writeInt(item.getItemId());
+
+        if (ring) {
+
+            mplew.write(1);
+
+            mplew.writeInt(equip.getRingId());
+
+            mplew.writeInt(0);
+
+        }
+
+        if (item.getPetId() > -1) {
+
+            MaplePet pet = MaplePet.loadFromDb(item.getItemId(), item.getPosition(), item.getPetId());
+
+            String petname = pet.getName();
+
+            mplew.write(1);
+
+            mplew.writeInt(item.getPetId());
+
+            mplew.writeInt(0);
+
+            mplew.write(0);
+
+            mplew.write(ITEM_MAGIC);
+
+            mplew.write(HexTool.getByteArrayFromHexString("BB 46 E6 17 02"));
+
+            if (petname.length() > 13)
+
+                petname = petname.substring(0, 13);
+
+            mplew.writeAsciiString(petname);
+
+            for (int i = petname.length(); i < 13; i++)
+
+                mplew.write(0);
+
+            mplew.write(pet.getLevel());
+
+            mplew.writeShort(pet.getCloseness());
+
+            mplew.write(pet.getFullness());
+
+
+
+            mplew.writeLong(getKoreanTimestamp((long) (System.currentTimeMillis() * 1.2)));
+
+            mplew.writeInt(0);
+
+
+
+            return;
+
+        }
+
+        if (masking && !ring) {
+
+
+
+            mplew.write(HexTool.getByteArrayFromHexString("01 41 B4 38 00 00 00 00 00 80 20 6F"));
+
+            addExpirationTime(mplew, 0, false);
+
+        } else if (ring)
+
+            mplew.writeLong(getKoreanTimestamp((long) (System.currentTimeMillis() * 1.2)));
+
+        else {
+
+            mplew.writeShort(0);
+
+            mplew.write(ITEM_MAGIC);
+
+            addExpirationTime(mplew, 0, false);
+
+        }
+
+        if (item.getType() == IItem.EQUIP) {
+
+            mplew.write(equip.getUpgradeSlots());
+
+            mplew.write(equip.getLevel());
+
+            mplew.writeShort(equip.getStr()); // str
+
+
+
+            mplew.writeShort(equip.getDex()); // dex
+
+
+
+            mplew.writeShort(equip.getInt()); // int
+
+
+
+            mplew.writeShort(equip.getLuk()); // luk
+
+
+
+            mplew.writeShort(equip.getHp()); // hp
+
+
+
+            mplew.writeShort(equip.getMp()); // mp
+
+
+
+            mplew.writeShort(equip.getWatk()); // watk
+
+
+
+            mplew.writeShort(equip.getMatk()); // matk
+
+
+
+            mplew.writeShort(equip.getWdef()); // wdef
+
+
+
+            mplew.writeShort(equip.getMdef()); // mdef
+
+
+
+            mplew.writeShort(equip.getAcc()); // accuracy
+
+
+
+            mplew.writeShort(equip.getAvoid()); // avoid
+
+
+
+            mplew.writeShort(equip.getHands()); // hands
+
+
+
+            mplew.writeShort(equip.getSpeed()); // speed
+
+
+
+            mplew.writeShort(equip.getJump()); // jump
+
+
+
+            mplew.writeMapleAsciiString(equip.getOwner());
+
+
+
+            // 0 normal; 1 locked
+
+            mplew.write(equip.getLocked());
+
+
+
+            if (ring && !equipped)
+
+                mplew.write(0);
+
+
+
+            if (!masking && !ring) {
+
+                mplew.write(0);
+
+                mplew.writeLong(0); // values of these don't seem to matter at all
+
+            }
+
+        } else {
+
+            mplew.writeShort(item.getQuantity());
+
+            mplew.writeMapleAsciiString(item.getOwner());
+
+            mplew.writeShort(0); // this seems to end the item entry
+
+            // but only if its not a THROWING STAR :))9 O.O!
+
+
+
+            if (ii.isThrowingStar(item.getItemId()) || ii.isBullet(item.getItemId()))
+
+                mplew.write(HexTool.getByteArrayFromHexString("02 00 00 00 54 00 00 34"));
+
+        }
+
+    }
+复制代码继续搜索查找：  public static MaplePacket spawnPlayerMapobject(MapleCharacter chr) {
+复制代码复制以下函数替换这段对应字符，这个它是没有说明的，我自己修改增加：public static MaplePacket spawnPlayerMapobject(MapleCharacter chr) {
+
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+
+
+        mplew.writeShort(SendPacketOpcode.SPAWN_PLAYER.getValue());
+
+        mplew.writeInt(chr.getId());
+
+        mplew.writeMapleAsciiString(chr.getName());
+
+        if (chr.getGuildId() <= 0) {
+
+            mplew.writeMapleAsciiString("");
+
+            mplew.write(new byte[6]);
+
+        } else {
+
+            MapleGuildSummary gs = chr.getClient().getChannelServer().getGuildSummary(chr.getGuildId());
+
+
+
+            if (gs != null) {
+
+                mplew.writeMapleAsciiString(gs.getName());
+
+                mplew.writeShort(gs.getLogoBG());
+
+                mplew.write(gs.getLogoBGColor());
+
+                mplew.writeShort(gs.getLogo());
+
+                mplew.write(gs.getLogoColor());
+
+            } else {
+
+                mplew.writeMapleAsciiString("");
+
+                mplew.write(new byte[6]);
+
+            }
+
+        }
+
+        mplew.writeInt(0);
+
+        mplew.writeInt(1);
+
+        if (chr.getBuffedValue(MapleBuffStat.MORPH) != null) {
+
+            mplew.write(2);
+
+        } else {
+
+            mplew.write(0);
+
+        }
+
+        mplew.writeShort(0);
+
+        mplew.write(0xF8);
+
+        long buffmask = 0;
+
+        Integer buffvalue = null;
+
+        if (chr.getBuffedValue(MapleBuffStat.DARKSIGHT) != null && !chr.isHidden()) {
+
+            buffmask |= MapleBuffStat.DARKSIGHT.getValue();
+
+        }
+
+        if (chr.getBuffedValue(MapleBuffStat.COMBO) != null) {
+
+            buffmask |= MapleBuffStat.COMBO.getValue();
+
+            buffvalue = Integer.valueOf(chr.getBuffedValue(MapleBuffStat.COMBO).intValue());
+
+        }
+
+        if (chr.getBuffedValue(MapleBuffStat.SHADOWPARTNER) != null) {
+
+            buffmask |= MapleBuffStat.SHADOWPARTNER.getValue();
+
+        }
+
+        if (chr.getBuffedValue(MapleBuffStat.SOULARROW) != null) {
+
+            buffmask |= MapleBuffStat.SOULARROW.getValue();
+
+        }
+
+        if (chr.getBuffedValue(MapleBuffStat.MORPH) != null) {
+
+            buffvalue = Integer.valueOf(chr.getBuffedValue(MapleBuffStat.MORPH).intValue());
+
+        }
+
+        mplew.writeInt((int) ((buffmask >> 32) & 0xffffffffL));
+
+        if (buffvalue != null) {
+
+            if (chr.getBuffedValue(MapleBuffStat.MORPH) != null) {
+
+                mplew.writeShort(buffvalue);
+
+            } else {
+
+                mplew.write(buffvalue.byteValue());
+
+            }
+
+        }
+
+        mplew.writeInt((int) (buffmask & 0xffffffffL));
+
+        int CHAR_MAGIC_SPAWN = new Random().nextInt();
+
+        mplew.writeInt(0);
+
+        mplew.writeShort(0);
+
+        mplew.writeInt(CHAR_MAGIC_SPAWN);
+
+        mplew.writeLong(0);
+
+        mplew.writeShort(0);
+
+        mplew.writeInt(CHAR_MAGIC_SPAWN);
+
+        mplew.writeLong(0);
+
+        mplew.writeShort(0);
+
+        mplew.writeInt(CHAR_MAGIC_SPAWN);
+
+        mplew.writeShort(0);
+
+        MapleMount mount = chr.getMount();
+
+        boolean showMount = false;
+
+        if (chr.getBuffedValue(MapleBuffStat.MONSTER_RIDING) != null) {
+
+            if (mount != null) {
+
+                if (mount.isActive()) {
+
+                    if (chr.getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -19) != null) {
+
+                        mplew.writeInt(mount.getItemId());
+
+                        mplew.writeInt(mount.getSkillId());
+
+                        mplew.writeInt(0x2D4DFC2A);
+
+                        showMount = true;
+
+                    }
+
+                } else {
+
+                    mplew.writeInt(1932000);
+
+                    mplew.writeInt(5221006);
+
+                    mplew.writeInt(0x2D4DFC2A);
+
+                    showMount = true;
+
+                }
+
+            }
+
+        }
+
+        if (!showMount) {
+
+            mplew.writeInt(0);
+
+            mplew.writeInt(0);
+
+            mplew.writeInt(CHAR_MAGIC_SPAWN);
+
+        }
+
+        mplew.writeLong(0);
+
+        mplew.writeInt(CHAR_MAGIC_SPAWN);
+
+        mplew.writeLong(0);
+
+        mplew.writeInt(0);
+
+        mplew.writeShort(0);
+
+        mplew.writeInt(CHAR_MAGIC_SPAWN);
+
+        mplew.writeInt(0);
+
+        mplew.write(0x40);
+
+        mplew.write(1);
+
+        addCharLook(mplew, chr, false);
+
+        mplew.writeInt(0);
+
+        mplew.writeInt(chr.getItemEffect());
+
+        mplew.writeInt(chr.getChair());
+
+        mplew.writeShort(chr.getPosition().x);
+
+        mplew.writeShort(chr.getPosition().y);
+
+        mplew.write(chr.getStance());
+
+        mplew.writeInt(0);
+
+        mplew.writeInt(1);
+
+        mplew.writeLong(0);
+
+        IPlayerInteractionManager ipim = chr.getInteraction();
+
+        if (ipim != null && ipim.isOwner(chr)) {
+
+            if (ipim.getShopType() == 2 || ipim.getShopType() == 3 || ipim.getShopType() == 4) {
+
+                addAnnounceBox(mplew, ipim);
+
+            }
+
+        }
+
+        mplew.write(0); 
+
+        if (chr.getChalkboard() != null) {
+
+            mplew.write(1);
+
+            mplew.writeMapleAsciiString(chr.getChalkboard());
+
+        } else {
+
+            mplew.write(0);
+
+        }
+
+       MapleInventory iv = chr.getInventory(MapleInventoryType.EQUIPPED);
+
+        Collection<IItem> equippedC = iv.list();
+
+        List<Item> equipped = new ArrayList<Item>(equippedC.size());
+
+        for (IItem item : equippedC) {
+
+            equipped.add((Item) item);
+
+        }
+
+        Collections.sort(equipped);
+
+       List<MapleRing> rings = new ArrayList<MapleRing>();
+
+        for (Item item : equipped)
+
+            if (((IEquip) item).getRingId() > -1)
+
+                rings.add(MapleRing.loadFromDb(((IEquip) item).getRingId()));
+
+        Collections.sort(rings);
+
+        if (rings.size() > 0) {
+
+            mplew.write(0);
+
+            for (MapleRing ring : rings)
+
+                if (ring != null) {
+
+                    mplew.write(1);
+
+                    mplew.writeInt(ring.getRingId());
+
+                    mplew.writeInt(0);
+
+                    mplew.writeInt(ring.getPartnerRingId());
+
+                    mplew.writeInt(0);
+
+                    mplew.writeInt(ring.getItemId());
+
+                }
+
+            mplew.writeShort(0);
+
+        } else
+
+            mplew.writeInt(0);
+
+
+
+        return mplew.getPacket();
+
+
+
+    }
+复制代码继续查找搜索：public static MaplePacket updateCharLook(MapleCharacter chr) {
+复制代码复制以下函数替换这段对应字符：public static MaplePacket updateCharLook(MapleCharacter chr) {
+
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.UPDATE_CHAR_LOOK.getValue());
+
+        mplew.writeInt(chr.getId());
+
+        mplew.write(1);
+
+        addCharLook(mplew, chr, false);
+
+        MapleInventory iv = chr.getInventory(MapleInventoryType.EQUIPPED);
+
+        Collection<IItem> equippedC = iv.list();
+
+        List<Item> equipped = new ArrayList<Item>(equippedC.size());
+
+        for (IItem item : equippedC) {
+
+            equipped.add((Item) item);
+
+        }
+
+        Collections.sort(equipped);
+
+        List<MapleRing> rings = new ArrayList<MapleRing>();
+
+        for (Item item : equipped)
+
+            if (((IEquip) item).getRingId() > -1)
+
+                rings.add(MapleRing.loadFromDb(((IEquip) item).getRingId()));
+
+        Collections.sort(rings);
+
+      
+
+        if (rings.size() > 0)
+
+            for (MapleRing ring : rings) {
+
+                mplew.write(1);
+
+                mplew.writeInt(ring.getRingId());
+
+                mplew.writeInt(0);
+
+                mplew.writeInt(ring.getPartnerRingId());
+
+                mplew.writeInt(0);
+
+                mplew.writeInt(ring.getItemId());
+
+            }
+
+        else
+
+            mplew.write(0);
+
+        mplew.writeShort(0);
+
+
+
+        return mplew.getPacket();
+
+    }
+复制代码打开net.sf.odinms.net.channel.handler.RingActionHandler  这个JAVA
+
+   用以下的函数替换里面的全部：package net.sf.odinms.net.channel.handler;
+
+
+
+import net.sf.odinms.client.MapleClient;
+
+import net.sf.odinms.client.MapleCharacter;
+
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+
+import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+
+
+public class RingActionHandler extends AbstractMaplePacketHandler {
+
+
+
+    private static org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(RingActionHandler.class);
+
+
+
+    @Override
+
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+
+        
+
+        byte mode = slea.readByte();
+
+        MapleCharacter player = c.getPlayer();
+
+        switch (mode) {
+
+            case 0x00: //取消
+
+                String partnerName = slea.readMapleAsciiString();
+
+                MapleCharacter partner = c.getChannelServer().getPlayerStorage().getCharacterByName(partnerName);
+
+                if (partnerName.equalsIgnoreCase(player.getName())) {
+
+                    player.dropMessage(1, "你不能把自己的名字加在这里!.");
+
+                } else if (partner == null) {
+
+                    player.dropMessage(1, partnerName + " 在这个频道找不到你的伴侣，如果们都在线，请确认你们在同一频道！！.");
+
+                } else if (partner.getGender() == player.getGender()) {
+
+                    player.dropMessage(1, "不是吧，你们都是同一性别啊！！.");
+
+                }
+
+                break;
+
+            case 0x01: //取消发送
+
+                player.dropMessage(1, "返回，取消了你的请求！.");
+
+                break;
+
+            case 0x03: //爆率戒指，比率*3
+
+            default:
+
+                log.info("未处理的错误: " + slea.toString());
+
+                break;
+
+        }
+
+    }
+
+}
+复制代码打开net.sf.odinms.client.MapleRing  这个JAVA
+
+   用以下的函数替换里面的全部：package net.sf.odinms.client;
+
+
+
+import java.sql.Connection;
+
+import java.sql.PreparedStatement;
+
+import java.sql.ResultSet;
+
+import net.sf.odinms.database.DatabaseConnection;
+
+import net.sf.odinms.server.MapleInventoryManipulator;
+
+import net.sf.odinms.tools.MaplePacketCreator;
+
+
+
+public class MapleRing implements Comparable<MapleRing> {
+
+
+
+    private int ringId;
+
+    private int ringId2;
+
+    private int partnerId;
+
+    private int itemId;
+
+    private String partnerName;
+
+    private boolean equipped;
+
+
+
+    private MapleRing(int id, int id2, int partnerId, int itemid, String partnername) {
+
+        this.ringId = id;
+
+        this.ringId2 = id2;
+
+        this.partnerId = partnerId;
+
+        this.itemId = itemid;
+
+        this.partnerName = partnername;
+
+    }
+
+
+
+    public static MapleRing loadFromDb(int ringId) {
+
+        try {
+
+            Connection con = DatabaseConnection.getConnection();
+
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM rings WHERE id = ?");
+
+            ps.setInt(1, ringId);
+
+            ResultSet rs = ps.executeQuery();
+
+            rs.next();
+
+            MapleRing ret = new MapleRing(ringId, rs.getInt("partnerRingId"), rs.getInt("partnerChrId"), rs.getInt("itemid"), rs.getString("partnerName"));
+
+            rs.close();
+
+            ps.close();
+
+            return ret;
+
+        } catch (Exception ex) {
+
+            return null;
+
+        }
+
+    }
+
+
+
+    public static int[] createRing(MapleClient c, int itemid, int chrId, String chrName, int partnerId, String partnername, String message) {
+
+        try {
+
+            MapleCharacter chr = c.getChannelServer().getPlayerStorage().getCharacterById(partnerId);
+
+            if (chr == null) {
+
+                int[] ret_ = new int[2];
+
+                ret_[0] = -1;
+
+                ret_[1] = -1;
+
+                return ret_;
+
+            }
+
+            Connection con = DatabaseConnection.getConnection();
+
+            PreparedStatement ps = con.prepareStatement("INSERT INTO rings (itemid, partnerChrId, partnername) VALUES (?, ?, ?)");
+
+            ps.setInt(1, itemid);
+
+            ps.setInt(2, partnerId);
+
+            ps.setString(3, partnername);
+
+            ps.executeUpdate();
+
+            ResultSet rs = ps.getGeneratedKeys();
+
+            rs.next();
+
+            int[] ret = new int[2];
+
+            ret[0] = rs.getInt(1);
+
+            rs.close();
+
+            ps.close();
+
+            ps = con.prepareStatement("INSERT INTO rings (itemid, partnerRingId, partnerChrId, partnername) VALUES (?, ?, ?, ?)");
+
+            ps.setInt(1, itemid);
+
+            ps.setInt(2, ret[0]);
+
+            ps.setInt(3, chrId);
+
+            ps.setString(4, chrName);
+
+            ps.executeUpdate();
+
+            rs = ps.getGeneratedKeys();
+
+            rs.next();
+
+            ret[1] = rs.getInt(1);
+
+            rs.close();
+
+            ps.close();
+
+            ps = con.prepareStatement("UPDATE rings SET partnerRingId = ? WHERE id = ?");
+
+            ps.setInt(1, ret[1]);
+
+            ps.setInt(2, ret[0]);
+
+            ps.executeUpdate();
+
+            ps.close();
+
+            MapleCharacter player = c.getPlayer();
+
+            MapleInventoryManipulator.addRing(player, itemid, ret[0]);
+
+            MapleInventoryManipulator.addRing(chr, itemid, ret[1]);
+
+            c.getSession().write(MaplePacketCreator.getCharInfo(player));
+
+            if (message == null) {
+
+                player.getMap().removePlayer(player);
+
+                player.getMap().addPlayer(player);
+
+                chr.getClient().getSession().write(MaplePacketCreator.getCharInfo(chr));
+
+                chr.getMap().removePlayer(chr);
+
+                chr.getMap().addPlayer(chr);
+
+            }
+
+            chr.dropMessage(5, "你已收到来自 " + player.getName() + "的戒指！如果它的效果没显示，请退出游戏后再重新登录！！.");
+
+            if (message != null) {
+
+                chr.getClient().getSession().write(MaplePacketCreator.serverNotice(5, "收到戒指: " + message));
+
+            }
+
+            return ret;
+
+        } catch (Exception ex) {
+
+            int[] ret = new int[2];
+
+            ret[0] = -1;
+
+            ret[1] = -1;
+
+            return ret;
+
+        }
+
+    }
+
+
+
+    public int getRingId() {
+
+        return ringId;
+
+    }
+
+
+
+    public int getPartnerRingId() {
+
+        return ringId2;
+
+    }
+
+
+
+    public int getPartnerChrId() {
+
+        return partnerId;
+
+    }
+
+
+
+    public int getItemId() {
+
+        return itemId;
+
+    }
+
+
+
+    public String getPartnerName() {
+
+        return partnerName;
+
+    }
+
+
+
+    public boolean isEquipped() {
+
+        return equipped;
+
+    }
+
+
+
+    public void setEquipped(boolean equipped) {
+
+        this.equipped = equipped;
+
+    }
+
+
+
+    @Override
+
+    public boolean equals(Object o) {
+
+        if (o instanceof MapleRing) {
+
+            return (((MapleRing) o).getRingId() == getRingId());
+
+        }
+
+        return false;
+
+    }
+
+
+
+    @Override
+
+    public int hashCode() {
+
+        int hash = 5;
+
+        hash = 53 * hash + this.ringId;
+
+        return hash;
+
+    }
+
+
+
+    @Override
+
+    public int compareTo(MapleRing other) {
+
+        if (ringId < other.getRingId()) {
+
+            return -1;
+
+        } else if (ringId == other.getRingId()) {
+
+            return 0;
+
+        } else {
+
+            return 1;
+
+        }
+
+    }
+
+}
+复制代码打开net.sf.odinms.client.MapleCharacter 这个JAVA
+
+    找个位置增加（有些端已经有了，我用X端编译已经有了的，有了删除即可，但还是得增加看看）：public int getRingRequested() {
+
+        return this.ringRequest;
+
+    }
+
+
+
+    public void setRingRequested(int set) {
+
+        ringRequest = set;
+
+    }
+复制代码打开net.sf.odinms.net.channel.handler.BuyCSItemHandler 这个JAVA
+
+      查找搜索：c.getSession().write(MaplePacketCreator.sendWishList(c.getPlayer().getId(), true));
+复制代码在下面增加：  }  else if (slea.available() > 22) {
+
+            slea.skip(1);
+
+            int dob = slea.readInt();
+
+            int payment = slea.readByte();
+
+            slea.skip(3);
+
+            int snCS = slea.readInt();
+
+            CashItemInfo ring = CashItemFactory.getItem(snCS);
+
+            int userLength = slea.readByte();
+
+            slea.skip(1);
+
+            String partner = slea.readAsciiString(userLength);
+
+            slea.skip(2);
+
+            int left = (int) slea.available();
+
+            String text = slea.readAsciiString(left);
+
+            MapleCharacter partnerChar = c.getChannelServer().getPlayerStorage().getCharacterByName(partner);
+
+            if (partnerChar == null) {
+
+                c.getPlayer().getClient().getSession().write(MaplePacketCreator.serverNotice(1, "没有发现你所指定赠送戒指的玩家！.\r\n如果他在线，请确认你们在同一频道！."));
+
+            } else {
+
+                c.getSession().write(MaplePacketCreator.showBoughtCSItem(ring.getId()));
+
+                c.getPlayer().modifyCSPoints(payment, -ring.getPrice());
+
+                MapleRing.createRing(c, ring.getId(), c.getPlayer().getId(), c.getPlayer().getName(), partnerChar.getId(), partnerChar.getName(), text);
+
+                c.getPlayer().getClient().getSession().write(MaplePacketCreator.serverNotice(1, "赠送戒指成功！!\r\n如果它的效果没显示，请退出游戏后再重新登录！！."));
+
+            }
+
+            c.getSession().write(MaplePacketCreator.showNXMapleTokens(c.getPlayer()));
+
+            c.getSession().write(MaplePacketCreator.enableCSUse0());
+
+            c.getSession().write(MaplePacketCreator.enableCSUse1());
+
+            c.getSession().write(MaplePacketCreator.enableCSUse2());
+
+            c.getSession().write(MaplePacketCreator.enableCSUse3());
+复制代码OK啦！！没有错误即可编译了，如果有错误，请跟帖！！修复第三方戒指效果，戒指效果全部人可看到！

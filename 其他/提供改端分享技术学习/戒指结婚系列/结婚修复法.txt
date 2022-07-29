@@ -1,0 +1,234 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+首先,找到NPCConversationManager.java 
+
+                                                          在合适的位置上插入以下代码(请直接复制,本人亲自测试,无错..所有端均可通过): 
+
+        public boolean createMarriage(String partner_) {      //声明变量 
+        MapleCharacter partner = getCharByName(partner_);  //名字 
+        if (partner == null) { 
+            return false; 
+        } 
+        partner.setMarried(true); 
+        getPlayer().setMarried(true); 
+        partner.setPartnerId(getPlayer().getId()); 
+        getPlayer().setPartnerId(partner.getId()); 
+        if (partner.getGender() > 0) { 
+            Marriage.createMarriage(getPlayer(), partner); 
+        } else { 
+            Marriage.createMarriage(partner, getPlayer()); 
+        } 
+        return true; 
+    } 
+
+    public boolean createEngagement(String partner_) { 
+        MapleCharacter partner = getCharByName(partner_); 
+        if (partner == null) { 
+            return false; 
+        } 
+        if (partner.getGender() > 0) { 
+            Marriage.createEngagement(getPlayer(), partner); 
+        } else { 
+            Marriage.createEngagement(partner, getPlayer()); 
+        } 
+        return true; 
+    } 
+
+    public void divorceMarriage() {      //增加至XXXX 
+        getPlayer().setPartnerId(0); 
+        getPlayer().setMarried(false); 
+        Marriage.divorceMarriage(getPlayer());  ///结束至XXXX 
+    } 
+
+                        先别着急这编译..请继续看下去 
+
+                            打开 src\net\sf\odinms\scripting\npc  这个文件夹新建--文本文档--复制以下代码进去: 
+
+  /* 
+* @丶小_路. 
+*/ 
+
+package net.sf.odinms.scripting.npc; 
+
+import java.sql.Connection; 
+import java.sql.PreparedStatement; 
+import java.sql.ResultSet; 
+import java.sql.SQLException; 
+
+import net.sf.odinms.client.MapleCharacter; 
+
+import net.sf.odinms.database.DatabaseConnection; 
+
+public class Marriage { 
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Marriage.class); 
+
+        public static void createMarriage(MapleCharacter player, MapleCharacter partner) { 
+                try { 
+                        Connection con = DatabaseConnection.getConnection(); 
+                        PreparedStatement ps = con.prepareStatement("INSERT INTO marriages (husbandid, wifeid) VALUES (?, ?)"); 
+                        ps.setInt(1, player.getId()); 
+                        ps.setInt(2, partner.getId()); 
+                        ps.executeUpdate(); 
+                        ps.close(); 
+                } catch (SQLException ex) { 
+                        log.warn("结婚: " + player.getName() + " 和 " + partner.getName(), ex); 
+                } 
+        } 
+
+        public static void createEngagement(MapleCharacter player, MapleCharacter partner) { 
+                try { 
+                        Connection con = DatabaseConnection.getConnection(); 
+                        PreparedStatement ps = con.prepareStatement("INSERT INTO engagements (husbandid, wifeid) VALUES (?, ?)"); 
+                        ps.setInt(1, player.getId()); 
+                        ps.setInt(2, partner.getId()); 
+                        ps.executeUpdate(); 
+                } catch (SQLException ex) { 
+                        log.warn("宣布与参与 " + player.getName() + " 和" + partner.getName(), ex); 
+                } 
+        } 
+
+        public static void divorceEngagement(MapleCharacter player, MapleCharacter partner) { 
+                try { 
+                        Connection con = DatabaseConnection.getConnection(); 
+                        int pid = 0; 
+                        if (player.getGender() == 0) { 
+                                pid = player.getId(); 
+                        } else { 
+                                pid = partner.getId(); 
+                        } 
+                        PreparedStatement get = con.prepareStatement("SELECT FROM engagements WHERE husbandid = ?"); 
+                        get.setInt(1, pid); 
+                        ResultSet rs = get.executeQuery(); 
+                        PreparedStatement ps = con.prepareStatement("DELETE FROM engagements WHERE husbandid = ?"); 
+                        if (rs.next()) { 
+                                ps.setInt(1, pid); 
+                        } else { 
+                                return; 
+                        } 
+                        ps.executeUpdate(); 
+                        PreparedStatement ps1 = con.prepareStatement("UPDATE characters SET marriagequest = 0 WHERE id = ?, and WHERE id = ?"); 
+                        ps1.setInt(1, player.getId()); 
+                        ps1.setInt(2, partner.getId()); 
+                        ps1.executeUpdate(); 
+                } catch (SQLException ex) { 
+                        log.warn("宣布与参与 " + player.getName() + " 和 " + partner.getName(), ex); 
+                } 
+        } 
+
+        public static void divorceMarriage(MapleCharacter player, MapleCharacter partner) { 
+                try { 
+                        Connection con = DatabaseConnection.getConnection(); 
+                        int pid = 0; 
+                        if (player.getGender() == 0) { 
+                                pid = player.getId(); 
+                        } else { 
+                                pid = partner.getId(); 
+                        } 
+                        PreparedStatement get = con.prepareStatement("SELECT partnerid FROM characters WHERE id = ?"); 
+                        get.setInt(1, player.getId()); 
+                        ResultSet rs = get.executeQuery(); 
+                        if (rs.next()) { 
+                                PreparedStatement ps = con.prepareStatement("DELETE FROM marriages WHERE husbandid = ?"); 
+                                ps.setInt(1, pid); 
+                                ps.executeUpdate(); 
+                                PreparedStatement ps1 = con.prepareStatement("UPDATE characters SET married = 0 WHERE id = ?, and WHERE id = ?"); 
+                                ps1.setInt(1, player.getId()); 
+                                ps1.setInt(2, partner.getId()); 
+                                ps1.executeUpdate(); 
+                                ps.close(); 
+                                ps1.close(); 
+                        } else { 
+                                return; 
+                        } 
+                        get.close(); 
+                } catch (SQLException ex) { 
+                        log.warn("离婚:" + player.getName() + " 和 " + partner.getName(), ex); 
+                } 
+        } 
+} 
+
+            复制完毕后关闭并保存把文件命名为: Marriage.java   保存文件.必须在这个文件夹 
+src\net\sf\odinms\scripting\npc 
+
+                复制以下NPC脚本.结婚的教堂里的哪位人物都行.复制如下代码加入NPC脚本中!!! 
+
+
+    /* 
+*@丶小_路. 
+*/ 
+var status = 0; 
+var otherChar; 
+var Char; 
+
+importPackage(net.sf.odinms.client); 
+importPackage(net.sf.odinms.server); 
+
+function start(character3) { 
+        status = -1; 
+        action(1, 0, 0); 
+        otherChar = character3; 
+} 
+
+function action(mode, type, selection) { 
+        if (mode == -1) { 
+                otherChar.getClient().getSession().write 
+(net.sf.odinms.tools.MaplePacketCreator.serverNotice(1, "您的伴侣拒绝您的请求!")); 
+                cm.dispose(); 
+        } else { 
+                if (mode == 0 && status == 0) { 
+                        otherChar.getClient().getSession().write 
+(net.sf.odinms.tools.MaplePacketCreator.serverNotice(1, "您的伴侣拒绝您的请求..")); 
+                        cm.dispose(); 
+                        return; 
+                } 
+                if (mode == 1) { 
+                        status++; 
+                } else { 
+                        status--; 
+                } 
+                if (status == 0) { 
+                        cm.sendNext("有人想向您发送内容!."); 
+                } else if (status == 1) { 
+                        var t = otherChar.getName(); 
+                        cm.sendYesNo("你想不想参与 " + t + "的婚礼?") ; 
+                } else if (status == 2) { 
+                        otherChar.getClient().getSession().write 
+(net.sf.odinms.tools.MaplePacketCreator.serverNotice(1, "您的伴侣接受了您的请求!")); 
+                        otherChar.setMarriageQuestLevel(50); 
+                        cm.getPlayer().setMarriageQuestLevel(50); 
+                        cm.createEngagement(cm.getPlayer().getId(), otherChar.getId()); 
+                        if (otherChar.countItem(2240000) > 0) { 
+                                MapleInventoryManipulator.removeById(otherChar.getClient(), 
+MapleInventoryType.USE, 2240000, 1, false, false); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031358, 1, "shit!"); 
+                                MapleInventoryManipulator.addById(cm.getPlayer().getClient(), 4031358, 
+1, "shit!"); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031357, 1, "shit!"); 
+                        } else if (otherChar.countItem(2240001) > 0) { 
+                                MapleInventoryManipulator.removeById(otherChar.getClient(), 
+ MapleInventoryType.USE, 2240001, 1, false, false); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031360, 1, "shit!"); 
+                                MapleInventoryManipulator.addById(cm.getPlayer().getClient(), 4031360, 
+ 1, "shit!"); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031359, 
+ 1, "shit!");                        
+                        } else if (otherChar.countItem(2240002) > 0) { 
+                                MapleInventoryManipulator.removeById(otherChar.getClient(), MapleInventoryType.USE, 2240002, 1, false, false); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031362, 1, "shit!"); 
+                                MapleInventoryManipulator.addById(cm.getPlayer(), 4031362, 1, "shit!"); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031361, 1, "shit!"); 
+                        } else if (otherChar.countItem(2240003) > 0) { 
+                                MapleInventoryManipulator.removeById(otherChar.getClient(), 
+MapleInventoryType.USE, 2240003, 1, false, false); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031364, 1, "shit!"); 
+                                MapleInventoryManipulator.addById(cm.getPlayer(), 4031364, 1, "shit!"); 
+                                MapleInventoryManipulator.addById(otherChar.getClient(), 4031363, 
+1, "shit!");                        
+                        } 
+                        cm.dispose(); 
+                } 
+        } 
+} 

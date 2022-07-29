@@ -1,0 +1,12 @@
+打开 maplemonster.java  找到 
+import net.sf.odinms.client.MapleBuffStat; 
+下面加
+import net.sf.odinms.client.MapleInventoryType; 
+
+找到
+attacker.gainExp(personalExp, true, false, highestDamage); 
+上面加
+
+if(attacker.getInventory(MapleInventoryType.CASH). findById(5211003) !=null) 
+attacker.gainExp(personalExp*2, true, false, highestDamage);
+else 

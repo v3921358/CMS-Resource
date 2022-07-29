@@ -1,0 +1,90 @@
+编译部分：打开NPCConversationManager.java
+在最后一个}前加入
+public MapleCharacter getV1() {
+return getPlayer();
+}
+
+public void MakeVIP1Item (byte slot, MapleCharacter player) {
+MapleInventory equip = player.getInventory(MapleInventoryType.EQUIP);
+Equip eu = (Equip) equip.getItem(slot);
+int item = equip.getItem(slot).getItemId();
+MapleJob job = eu.getJob();
+short hand = eu.getHands();
+byte level = eu.getLevel();
+Equip nItem = new Equip(item, equip.getNextFreeSlot());
+nItem.setStr((short) 9999); // STR
+nItem.setDex((short) 9999); // DEX
+nItem.setInt((short) 9999); // INT
+nItem.setLuk((short) 9999); //LUK
+nItem.setHp((short) 9999); // HP
+nItem.setMp((short) 9999); // MP
+nItem.setWatk((short) 9999); //WATK
+nItem.setMatk((short) 9999); //MATK
+nItem.setWdef((short) 9999); //WDEF
+nItem.setMdef((short) 9999); //MDEF
+nItem.setAcc((short) 9999); // ACC
+nItem.setAvoid((short) 9999); // AVOID
+nItem.setSpeed((short) 40); // SPEED ( 140% is max speed )
+nItem.setJump((short) 30); //JUMP ( 130% is max jump )
+nItem.setUpgradeSlots((byte) 7); // 可升级次数
+nItem.setJob(job);
+nItem.setHands(hand);
+nItem.setLevel(level);
+nItem.setRingId(-1);
+player.getInventory(MapleInventoryType.EQUIP).addFromDB(nItem);
+equip.removeItem(slot);  // 原始物品删除
+}
+
+public String EquipList1(MapleClient c) { 
+StringBuilder str = new StringBuilder();
+MapleInventory equip = c.getPlayer().getInventory(MapleInventoryType.EQUIP);
+List<String> stra = new LinkedList<String>();
+for (IItem item : equip.list()) {
+stra.add("#L"+item.getPosition()+"##v"+item.getItemId()+"##l");
+}
+for (String strb : stra) {
+str.append(strb);
+}
+return str.toString();
+}
+脚本JS部分：
+importPackage(net.sf.odinms.client);
+var status = 0;
+var selected = 1;
+function start() {
+status = -1;
+action(1, 0, 0);
+}
+function action(mode, type, selection) {
+selected = selection;
+if (mode == -1) {
+cm.dispose();
+} else {
+if (mode == 0 && status == 0) {
+cm.dispose();
+return;
+}
+if (mode == 1)
+status++;
+else
+status--;
+if (status == 0) {
+if (cm.getChar().getVip() >= 1) {//是否达到等级
+if(cm.haveItem(物品代码，物品个数)) {
+var String = "你想要强化哪样装备?.rnrn";
+cm.sendSimple(String+cm.EquipList1(cm.getC()));
+}
+cm.sendOk("对不起，你没有我要的物品，我不能为你强化装备!");
+}
+} else if (status == 1) {
+cm.gainItem(-物品代码，物品个数);
+cm.MakeVIP1Item(selected, cm.getV1());
+cm.reloadChar();
+cm.dispose();
+}
+else
+{
+cm.sendOk("对不起，你不是VIP1");
+}
+}
+}

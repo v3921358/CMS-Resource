@@ -1,0 +1,61 @@
+world.properties增加設置最高能力值數值（提取於外國端THEPACK）
+找到world.properties增加以下： 
+複製代碼
+net.sf.odinms.world.maxstat=999
+
+
+
+找到ChannelServer.java增加以下： 
+複製代碼
+private int maxstat;
+
+
+
+這個必須增加2次（類似有2個地方） 
+複製代碼
+maxstat = Integer.parseInt(props.getProperty("net.sf.odinms.world.maxstat"));
+
+
+
+複製代碼
+
+public int getMaxStat(){ 
+return maxstat; 
+}
+
+
+
+找到DistributeAPHandler.java 
+
+類似於複製代碼
+if (c.getPlayer().getStr() >= 30000) 
+
+更改為複製代碼
+if (c.getPlayer().getStr() >= csver.getMaxStat())
+
+
+有str dex int luk 4個 
+
+找到PlayerCommand.java增加（替換也行）： 
+複製代碼
+} else if (splitted[0].equals("@str") || splitted[0].equals("@dex") || splitted[0].equals("@int") || splitted[0].equals("@luk")) { 
+int x = Integer.parseInt(splitted[1]), max = c.getChannelServer().getMaxStat(); 
+if (x > 0 && x <= player.getRemainingAp() && x < max - 4) { 
+if (splitted[0].equals("@str") && x + player.getStr() < max) { 
+player.addStat(1, x); 
+} else if (splitted[0].equals("@dex") && x + player.getDex() < max) { 
+player.addStat(2, x); 
+} else if (splitted[0].equals("@int") && x + player.getInt() < max) { 
+player.addStat(3, x); 
+} else if (splitted[0].equals("@luk") && x + player.getLuk() < max) { 
+player.addStat(4, x); 
+} else { 
+mc.dropMessage("請確保您提高的屬性不超過" + max + "."); 
+} 
+player.setRemainingAp(player.getRemainingAp() - x); 
+player.updateSingleStat(MapleStat.AVAILABLEAP, player.getRemainingAp()); 
+} else { 
+mc.dropMessage("您沒有足夠的屬性點分配了."); 
+}
+
+

@@ -1,0 +1,44 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+MapleCharacter.java
+头部适当位置加入
+private boolean invincible;
+适当位置加入
+        public boolean getInvincible() {
+            return invincible;
+        }
+        
+        public void setInvincible(boolean set) {
+            this.invincible = set;
+        }
+======================================
+再打开
+CharCommands.java
+找个位置加入
+else if (splitted[0].equals("!god")) {
+                    boolean choice = true;
+                    int set = Integer.parseInt(splitted[1]);
+                    if (set == 1) {
+                        choice = true;
+                    }
+                    else if (set == 2) {
+                        choice = false;
+                    }
+                    player.setInvincible(choice);
+                }
+找位置加入
+
+new CommandDefinition("god", "", "", 100),
+======================================
+继续打开TakeDamageHandler.java
+找到
+if (!player.isHidden() && !smokescreen)) {
+替换成
+if (!player.isHidden() && !smokescreen && !player.getInvincible()) {
+最后编译即可。
+GM命令
+!god 1          无敌状态
+!god 2          取消无敌

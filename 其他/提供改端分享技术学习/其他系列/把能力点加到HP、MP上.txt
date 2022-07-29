@@ -1,0 +1,72 @@
+把能力点加到HP AND MP 上的脚本更新!
+
+
+先找到: ****\src\net\sf\odinms\net\channel\handler\DistributeAPHandler.java
+找到:
+import java.util.ArrayList;
+import java.util.List;
+
+下面的改为:
+import net.sf.odinms.client.ISkill;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.MapleStat;
+import net.sf.odinms.client.SkillFactory;
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.tools.MaplePacketCreator;
+import net.sf.odinms.tools.Pair;
+
+找到:
+        List<Pair<MapleStat, Integer>> statupdate = new ArrayList<Pair<MapleStat, Integer>>(2);
+        c.getSession().write(MaplePacketCreator.updatePlayerStats(statupdate, true));
+        slea.readInt(); // whatever
+
+下面增加:
+//MP and HP adding
+                  ISkill improvingMaxHP = SkillFactory.getSkill(1000001);
+        ISkill improvingMaxMP = SkillFactory.getSkill(2000001);
+                  int improvingMaxHPLevel = c.getPlayer().getSkillLevel(improvingMaxHP);
+        int improvingMaxMPLevel = c.getPlayer().getSkillLevel(improvingMaxMP);
+                  int HPSkillAdd = 0;
+                int MPSkillAdd = 0;
+                  if (improvingMaxHPLevel > 0){
+                                        HPSkillAdd= improvingMaxHP.getEffect(improvingMaxHPLevel).getY();}
+                  if (improvingMaxMPLevel > 0) {
+                                        MPSkillAdd= improvingMaxMP.getEffect(improvingMaxMPLevel).getY();}
+
+找到:
+// case 2048: // hp
+                // c.getPlayer().setHpApUsed(c.getPlayer().getHpApUsed()+1);
+                // break;
+                // case 8192: // mp
+                // c.getPlayer().setMpApUsed(c.getPlayer().getMpApUsed()+1);
+                // break;    
+                                                                                  default: // TODO: implement hp and mp adding  
+
+替换为:
+case 2048: // hp
+                                        c.getPlayer().setMaxHP(c.getPlayer().getMaxHp() + 1 + HPSkillAdd);
+                                        statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXHP, c.getPlayer().getMaxHp()));
+                break;
+                case 8192: // mp
+                                        c.getPlayer().setMaxMP(c.getPlayer().getMaxMp() + 1 + MPSkillAdd);
+                                        statupdate.add(new Pair<MapleStat, Integer>(MapleStat.MAXMP, c.getPlayer().getMaxMp()));
+                break;
+                default:
+            
+
+在找开文件  ****\src\net\sf\odinms\client\MapleCharacter.java
+找到:
+        this.int_ = int_;
+        recalcLocalStats();
+    }
+在这里空一格,在添加:
+public void setMaxHP(int maxhp){
+            this.maxhp = maxhp;
+            recalcLocalStats();
+        }
+        
+        public void setMaxMP(int maxmp){
+            this.maxmp = maxmp;
+            recalcLocalStats();
+        }
+

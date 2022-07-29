@@ -1,0 +1,82 @@
+首先，请先确定你端里有MaplePvp.java
+没有的请按照第②种做法，有的请按照第①种做法
+=============================================================
+第①种做法:
+第一步:打开MaplePvp
+查找语句:
+ public static void doPvP(MapleCharacter player, MapleMap map, AbstractDealDamageHandler.AttackInfo attack) {
+        DamageBalancer(attack);
+        getDirection(attack);
+在上面添加:
+public static void doGuildPvP(MapleCharacter player, MapleMap map, AbstractDealDamageHandler.AttackInfo attack) {
+        DamageBalancer(attack);
+        getDirection(attack);
+        for (MapleCharacter attackedPlayers : player.getMap().getNearestPvpChar(player.getPosition(), maxDis, maxHeight, player.getMap().getCharacters())) {
+            if (attackedPlayers.isAlive() && (player.getGuildId() != attackedPlayers.getGuildId())) {
+                monsterBomb(player, attackedPlayers, map, attack);
+            }
+        }
+    }  
+
+第二步:继续打开MaplePvp.Java中
+并查找以下语句
+if (player.getGuildId() != 0 && player.getGuildId() != attackedPlayers.getGuildId()) {
+                try {
+                    MapleGuild guild = player.getClient().getChannelServer().getWorldInterface().getGuild(player.getGuildId(), null);
+                    guild.gainGP(gpReward);
+                } catch (Exception e) {
+                }
+            }  
+并将其更换为以下语句
+if (player.isGuildPvPMap()){
+            if (player.getGuildId() != 0 && player.getGuildId() != attackedPlayers.getGuildId()) {
+                try {
+                    MapleGuild guild = player.getClient().getChannelServer().getWorldInterface().getGuild(player.getGuildId(), null);
+                    guild.gainGP(gpReward);
+                } catch (Exception e) {
+                }
+            }
+            }  
+
+第三步:打开MapleCharacter.java
+查找语句:  
+ public boolean isGM() {
+        return gmLevel >= 3;
+    }
+在上面添加内容:  
+public boolean isGuildPvPMap() {
+    return getMapId() == 980010101;
+    }
+ 
+第四步
+查找语句:打开AbstractDealDamageHandler.java
+ int totDamage = 0;
+        final MapleMap map = player.getMap();
+在下面添加内容 
+if(player.isGuildPvPMap()){
+        MaplePvp.doGuildPvP(player, map, attack);
+          }
+
+================================================================
+第②种做法:
+第一步:在net.sf.odinms.net.channel.handler添加类MaplePvp
+MaplePvp内容为附件MaplePvp内容（直接复制附件内容至MaplePvp.java）
+
+第二步:打开MapleCharacter.java
+查找语句:  
+ public boolean isGM() {
+        return gmLevel >= 3;
+    }
+在上面添加内容:  
+public boolean isGuildPvPMap() {
+    return getMapId() == 980010101;
+    }
+
+第三步
+查找语句:打开AbstractDealDamageHandler.java
+ int totDamage = 0;
+        final MapleMap map = player.getMap();
+在下面添加内容 
+if(player.isGuildPvPMap()){
+        MaplePvp.doGuildPvP(player, map, attack);
+          }

@@ -1,0 +1,209 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+/* 
+MySQL Data Transfer 
+Source Host: localhost 
+Source Database: odinms 
+Target Host: localhost 
+Target Database: odinms 
+Date: 2008-11-16 14:36:15 
+*/ 
+SET FOREIGN_KEY_CHECKS=0; 
+-- ---------------------------- 
+-- Table structure for bank 
+-- ---------------------------- 
+DROP TABLE IF EXISTS `bank`; 
+CREATE TABLE `bank` ( 
+  `id` int(11) NOT NULL auto_increment, 
+  `charid` int(11) NOT NULL UNIQUE, 
+  `money` int(11) NOT NULL, 
+  PRIMARY KEY  (`id`) 
+) ENGINE=InnoDB DEFAULT CHARSET=latin1; 
+-- ---------------------------- 
+-- Records 
+-- ---------------------------- 
+JAVA： 
+找到net.sf.odinms.scripting.npc.NPCConversationManager 
+找到package net.sf.odinms.scripting.npc; 
+添加import java.sql.*;import 
+net.sf.odinms.database.DatabaseConnection; 
+在最后一个大括号前添加 
+引用
+public int getMoney() 
+        { 
+            int money=0; 
+            try { 
+                int cid = getPlayer().getId(); 
+                Connection con = DatabaseConnection.getConnection(); 
+                PreparedStatement limitCheck = con.prepareStatement("SELECT * FROM Bank WHERE charid="+cid+""); 
+                ResultSet rs = limitCheck.executeQuery(); 
+                if(rs.next()) 
+                { 
+                    money=rs.getInt("money"); 
+                } 
+                limitCheck.close(); 
+                rs.close(); 
+                } catch (SQLException ex) { 
+                } 
+                return money; 
+        } 
+        
+        public int addMoney(int money,int type) 
+        {    
+            try { 
+                int cid = getPlayer().getId(); 
+              
+                Connection con = DatabaseConnection.getConnection(); 
+                PreparedStatement ps = con.prepareStatement("select * from bank where charid=?"); 
+                ps.setInt(1, cid); 
+                ResultSet rs=ps.executeQuery(); 
+                if(rs.next()) 
+                { 
+                    if(type==1) 
+                    { 
+                        if(money>rs.getInt("money")) 
+                        { 
+                            return -1; 
+                        } 
+                    } 
+                    ps = con.prepareStatement("UPDATE Bank SET money =money+ " + money + " WHERE charid = " + cid + ""); 
+                    return ps.executeUpdate();                    
+                } 
+                
+            } catch (SQLException ex) {                
+            } 
+              return 0; 
+        } 
+        public int addBank() 
+        { 
+            int r=0; 
+        try { 
+            Connection con = DatabaseConnection.getConnection(); 
+            PreparedStatement ps = con.prepareStatement("insert into bank (charid,money) values (?,0)"); 
+            ps.setInt(1, getPlayer().getId());            
+            r=ps.executeUpdate(); 
+            ps.close(); 
+            
+        } catch (SQLException ex) { 
+          r=0; 
+        } 
+            
+            return r; 
+        } 
+NPC代码如下：
+引用
+
+/* KIN
+annfine制作-银行系统测试版-Memory修正
+*/
+var status = 0;
+var t=new Array("存钱","取钱","查看","开户");
+var money=new Array("100W","300W","500W","1000W"); 
+var money1=new Array("1000000","3000000","5000000","10000000"); 
+var x=0;
+function start() {
+status = -1;
+action(1, 0, 0);
+}
+function action(mode, type, selection) {
+    if (mode == -1) {
+      cm.dispose();
+    } else {
+          if (mode == 0 && status == 0) {
+          cm.dispose();
+          return;
+      }
+      if (mode == 1)
+      status++;
+      else
+      status--;
+      if (status == 0) 
+      {
+        cm.sendNext("欢迎使用 #b甜甜的冒险岛银行系统#k 我的朋友!"); 
+      } 
+      else if (status == 1) { 
+        var a = "请选择你需要的功能.#b"; 
+                    for (var i=0; i < t.length; i++) { 
+                    a += "\r\n#L" + i + "#" + t[ i ]+""; 
+                    } 
+                  cm.sendSimple(a); 
+        }
+      else if(status == 2)
+      {
+            x=selection;
+          if(x==2)
+          {
+            cm.sendOk("您的存款有"+cm.getMoney()+" ");
+            cm.dispose();
+          }
+          else if (x==3)
+            {
+                if(cm.addBank()>0)
+                {
+                    cm.sendOk("恭喜您,开户成功!"); 
+                    }
+                    else
+                    {
+                        cm.sendOk("很抱歉,开户失败!可能您已经开户过了哦!");
+                    }
+                    cm.dispose();
+            }
+          else
+          {
+          
+          var b = " 请选择数量.#b"; 
+                        for (var i=0; i < money.length; i++) { 
+                        b += "\r\n#L" + i + "#" + money[ i ]+""; 
+                        } 
+                        cm.sendSimple(b); 
+          }
+      }
+      else if (status == 3) { 
+          var choose=money1[selection];
+          if(x==0)//存 
+            { 
+            if(cm.getMeso()<choose)
+            {
+                cm.sendOk("Oh,Sorry,您的钱不够!");    
+            }
+            else if(cm.addMoney(choose,0)>0)
+                {
+                cm.gainMeso(-choose);
+                cm.sendOk("好的,已经存入!");
+                }
+                else
+                {
+                cm.sendOk("Error:请反馈给管理员!");
+
+                }
+                cm.dispose();
+            } 
+            else if(x==1)//取 
+            { 
+            if(cm.getMoney()<choose)
+            {
+                cm.sendOk("Oh,Sorry,您存款没有那么多呢!");    
+            }
+                else if(cm.addMoney(-choose,1)>0)
+                {
+                cm.gainMeso(choose);
+                cm.sendOk("好的,请收好您的钱!");
+                }
+                else
+                {
+                cm.sendOk("Error:请反馈给管理员!");
+                }
+                cm.dispose();
+              }
+            
+      
+      }
+      else
+      {
+      cm.dispose();
+      }
+    }
+}

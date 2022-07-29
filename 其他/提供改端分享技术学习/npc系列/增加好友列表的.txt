@@ -1,0 +1,58 @@
+偶来发个增加好友列表的吧，最大数量可以增加到50，NPC是明珠的智慧爷爷
+
+也是转自OD的，只是把patch文件里面的涉及的内容直观的表现出来，有空把那个扎洞任务的也搞下，论坛里面现在那篇帖子内容差的太多，11个文件的更改要慢慢找下，如果会用diff或者patch文件的，也可以下载自己改。先说好友列表的吧，修改过程如下：
+
+1. 打开BuddyList.java，在import net.sf.odinms.database.DatabaseConnection;上添加import net.sf.odinms.client.MapleClient;
+
+2. 打开MapleCharacter.java，修改throw new RuntimeException("Loading the Char Failed ");为throw new RuntimeException("Loading the Char Failed (char not found)");  （947版本此处已修改）
+
+删除map = to;和setPosition (pos);之间的
+controlled.clear();
+visibleMapObjects.clear();
+if (chair != 0)
+    chair = 0
+（947版本此处已删除）
+
+在public void changeJob(MapleJob newJob) {上面添加
+public void leaveMap() {
+        controlled.clear();
+        visibleMapObjects.clear();
+        if(chair != 0) {
+            chair = 0;
+        }
+    }
+（947版本此处已添加）
+
+在文件最后的}上面添加
+public int getBuddyCapacity() {
+                return buddylist.getCapacity();    
+        }
+        
+        public void setBuddyCapacity(int capacity) {
+                buddylist.setCapacity(capacity);
+                client.getSession().write(MaplePacketCreator.updateBuddyCapacity(capacity));
+        }
+
+3. 打开NPCConversationManager.java，在文件最后的}上面添加
+public void updateBuddyCapacity(int capacity) {
+            getPlayer().setBuddyCapacity(capacity);
+        }
+        
+        public int getBuddyCapacity() {
+            return getPlayer().getBuddyCapacity();
+        }
+
+4. 打开MaplePacketCreator.java，把mplew.write(0x14);修改为mplew.write(chr.getBuddyCapacity());
+
+在public static MaplePacket itemEffect(int characterid, int itemid) {上面添加
+public static MaplePacket updateBuddyCapacity(int capacity) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+
+        mplew.writeShort(SendPacketOpcode.BUDDYLIST.getValue());
+        mplew.write(0x15);
+        mplew.write(capacity);
+
+        return mplew.getPacket();
+    }
+
+最后编译下，把脚本文件放到脚本目录，055下测试通过。附件的ZPQ是扎昆3阶段任务的diff文件，有兴趣的就拿去，不会的等教程。

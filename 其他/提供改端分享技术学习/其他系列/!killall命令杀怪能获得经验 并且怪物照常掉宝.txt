@@ -1,0 +1,12 @@
+打开client.messages.commands.CommandProcessor.java 
+
+找到 map.killMonster(monster, c.getPlayer(), false);
+替换为 map.killMonster(monster, c.getPlayer(), true);
+并在下面添加 monster.giveExpToCharacter(c.getPlayer(), monster.getExp(), true, 1);
+
+再打开 MapleMonster.java
+找到 private void giveExpToCharacter(MapleCharacter attacker, int exp, boolean highestDamage, int numExpSharers) {
+
+替换为
+public void giveExpToCharacter(MapleCharacter attacker, int exp, boolean highestDamage, int numExpSharers) {
+public void giveExpToCharacter(MapleCharacter attacker, int exp, boolean highestDamage, int numExpSharers) {

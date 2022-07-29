@@ -1,0 +1,436 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+
+
+
+找到MaplePacketCreator.java
+
+找到原文：
+public static MaplePacket enableCSUse1() {
+
+上面添加：
+
+public static MaplePacket enableCSUse0() {
+    MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+    mplew.write(HexTool.getByteArrayFromHexString("12 00 00 00 00 00 00"));
+    return mplew.getPacket();
+}
+
+找到 MapleMount mount = chr.getMount();
+
+删除下面以下语句：
+if (chr.getBuffedValue(MapleBuffStat.MONSTER_RIDING) != null && mount != null) {
+            mplew.writeInt(mount.getId());
+            mplew.writeInt(mount.getSkillId());
+            mplew.writeInt(0x34F9D6ED);
+        } else {
+            mplew.writeLong(0);
+
+MapleMount mount = chr.getMount();下面增加以下语句：
+
+        boolean showMount = false;
+        if (chr.getBuffedValue(MapleBuffStat.MONSTER_RIDING) != null) {
+            if (mount != null) {
+                if (mount.isActive()) {
+                    if (chr.getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -19) != null) {
+                        mplew.writeInt(mount.getItemId());
+                        mplew.writeInt(mount.getSkillId());
+                        mplew.writeInt(0x2D4DFC2A);
+                        showMount = true;
+                    }
+                } else {
+                    mplew.writeInt(1932000);
+                    mplew.writeInt(5221006);
+                    mplew.writeInt(0x2D4DFC2A);
+                    showMount = true;
+                }
+            }
+
+        }
+        if (!showMount) {
+            mplew.writeInt(0);
+            mplew.writeInt(0);
+
+找到 addAnnounceBox(mplew, chr.getMiniGame(), 1, 0, 2, 1);
+
+删除以下语句：
+          } else {
+               mplew.write(0);
+============================================================================================
+覆盖源文件：BuyCSItemHandler.java
+
+package net.sf.odinms.net.channel.handler;
+
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.MaplePet;
+import net.sf.odinms.client.MapleRing;
+import net.sf.odinms.database.DatabaseConnection;
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.server.CashItemFactory;
+import net.sf.odinms.server.CashItemInfo;
+import net.sf.odinms.server.MapleInventoryManipulator;
+import net.sf.odinms.tools.MaplePacketCreator;
+import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+public class BuyCSItemHandler extends AbstractMaplePacketHandler {
+
+    @Override
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+        if (slea.available() > 22) {
+            slea.skip(1);
+            int dob = slea.readInt();
+            int payment = slea.readByte();
+            slea.skip(3);
+            int snCS = slea.readInt();
+            CashItemInfo ring = CashItemFactory.getItem(snCS);
+            int userLength = slea.readByte();
+            slea.skip(1);
+            String partner = slea.readAsciiString(userLength);
+            slea.skip(2);
+            int left = (int) slea.available();
+            String text = slea.readAsciiString(left);
+            MapleCharacter partnerChar = c.getChannelServer().getPlayerStorage().getCharacterByName(partner);
+            if (partnerChar == null) {
+                c.getPlayer().getClient().getSession().write(MaplePacketCreator.serverNotice(1, "The partner you specified cannot be found.\r\nPlease make sure your partner is online and in the same channel."));
+            } else {
+                c.getSession().write(MaplePacketCreator.showBoughtCSItem(ring.getId()));
+                c.getPlayer().modifyCSPoints(payment, -ring.getPrice());
+                MapleRing.createRing(c, ring.getId(), c.getPlayer().getId(), c.getPlayer().getName(), partnerChar.getId(), partnerChar.getName(), text);
+                c.getPlayer().getClient().getSession().write(MaplePacketCreator.serverNotice(1, "Successfully created a ring for both you and your partner!\r\nIf you cannot see the effect, please try relogging."));
+            }
+            c.getSession().write(MaplePacketCreator.showNXMapleTokens(c.getPlayer()));
+            c.getSession().write(MaplePacketCreator.enableCSUse0());
+            c.getSession().write(MaplePacketCreator.enableCSUse1());
+            c.getSession().write(MaplePacketCreator.enableCSUse2());
+            c.getSession().write(MaplePacketCreator.enableCSUse3());
+        } else {
+            int action = slea.readByte();
+            if (action == 3) {
+                slea.skip(1);
+                int useNX = slea.readInt();
+                int snCS = slea.readInt();
+                CashItemInfo item = CashItemFactory.getItem(snCS);
+                if (c.getPlayer().getCSPoints(useNX) >= item.getPrice()) {
+                    c.getPlayer().modifyCSPoints(useNX, -item.getPrice());
+                } else {
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                    return;
+                }
+                if (item.getId() >= 5000000 && item.getId() <= 5000100) {
+                    int petId = MaplePet.createPet(item.getId());
+                    if (petId == -1) {
+                        return;
+                    }
+                    MapleInventoryManipulator.addById(c, item.getId(), (short) 1, "Cash Item was purchased.", null, petId);
+                } else {
+                    MapleInventoryManipulator.addById(c, item.getId(), (short) item.getCount(), "Cash Item was purchased.");
+                }
+                c.getSession().write(MaplePacketCreator.showBoughtCSItem(item.getId()));
+                c.getSession().write(MaplePacketCreator.showNXMapleTokens(c.getPlayer()));
+                c.getSession().write(MaplePacketCreator.enableCSUse0());
+                c.getSession().write(MaplePacketCreator.enableCSUse1());
+                c.getSession().write(MaplePacketCreator.enableCSUse2());
+                c.getSession().write(MaplePacketCreator.enableActions());
+            } else if (action == 5) {
+                try {
+                    PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("DELETE FROM wishlist WHERE charid = ?");
+                    ps.setInt(1, c.getPlayer().getId());
+                    ps.executeUpdate();
+                    ps.close();
+                    int i = 10;
+                    while (i > 0) {
+                        int sn = slea.readInt();
+                        if (sn != 0) {
+                            ps = DatabaseConnection.getConnection().prepareStatement("INSERT INTO wishlist(charid, sn) VALUES(?, ?) ");
+                            ps.setInt(1, c.getPlayer().getId());
+                            ps.setInt(2, sn);
+                            ps.executeUpdate();
+                            ps.close();
+                        }
+                        i--;
+                    }
+                } catch (SQLException se) {
+                }
+                c.getSession().write(MaplePacketCreator.sendWishList(c.getPlayer().getId(), true));
+            } else if (action == 7) {
+                slea.skip(1);
+                byte toCharge = slea.readByte();
+                int toIncrease = slea.readInt();
+                if (c.getPlayer().getCSPoints(toCharge) >= 4000 && c.getPlayer().getStorage().getSlots() < 48) { // 48 is max.
+                    c.getPlayer().modifyCSPoints(toCharge, 4000);
+                    if (toIncrease == 0) {
+                        c.getPlayer().getStorage().gainSlots((byte) 4);
+                    }
+                    c.getSession().write(MaplePacketCreator.showNXMapleTokens(c.getPlayer()));
+                    c.getSession().write(MaplePacketCreator.enableCSUse0());
+                    c.getSession().write(MaplePacketCreator.enableCSUse1());
+                    c.getSession().write(MaplePacketCreator.enableCSUse2());
+                    c.getSession().write(MaplePacketCreator.enableCSUse3());
+                    c.getSession().write(MaplePacketCreator.enableActions());
+                }
+            } else if (action == 30) {
+                CashItemInfo item = CashItemFactory.getItem(slea.readInt());
+                if (c.getPlayer().getMeso() >= item.getPrice()) {
+                    c.getPlayer().gainMeso(-item.getPrice(), false);
+                    MapleInventoryManipulator.addById(c, item.getId(), (short) item.getCount(), "Quest Item was purchased.");
+                } else {
+                    //c.getPlayer().ban("Trying to purchase from the CS with an insufficient amount.", false);
+                    c.getSession().close();
+                }
+            }
+        }
+    }
+}
+============================================================================================
+找到 MapleStorage.java
+
+找到原文：
+public int getMeso() {
+
+上面增加：
+public int getSlots() {
+    return slots;
+}
+
+public void gainSlots(byte gain) {
+    setSlots((byte) (gain  getSlots()));
+}
+
+public void setSlots(byte set) {
+   this.slots = set;
+}
+============================================================================================
+找到 MapleMount.java
+
+增加以下语句：
+private boolean active;
+
+public boolean isActive() {
+    return active;
+}
+
+============================================================================================
+找到 MapleRing.java
+
+覆盖原文：
+package net.sf.odinms.client;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import net.sf.odinms.database.DatabaseConnection;
+import net.sf.odinms.server.MapleInventoryManipulator;
+import net.sf.odinms.tools.MaplePacketCreator;
+
+public class MapleRing implements Comparable<MapleRing> {
+
+    private int ringId;
+    private int ringId2;
+    private int partnerId;
+    private int itemId;
+    private String partnerName;
+    private boolean equipped;
+
+    private MapleRing(int id, int id2, int partnerId, int itemid, String partnername) {
+        this.ringId = id;
+        this.ringId2 = id2;
+        this.partnerId = partnerId;
+        this.itemId = itemid;
+        this.partnerName = partnername;
+    }
+
+    public static int[] createRing(MapleClient c, int itemid, int chrId, String chrName, int partnerId, String partnername, String message) {
+        try {
+            MapleCharacter chr = c.getChannelServer().getPlayerStorage().getCharacterById(partnerId);
+            if (chr == null) {
+                int[] ret_ = new int[2];
+                ret_[0] = -1;
+                ret_[1] = -1;
+                return ret_;
+            }
+            Connection con = DatabaseConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("INSERT INTO rings (itemid, partnerChrId, partnername) VALUES (?, ?, ?)");
+            ps.setInt(1, itemid);
+            ps.setInt(2, partnerId);
+            ps.setString(3, partnername);
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            rs.next();
+            int[] ret = new int[2];
+            ret[0] = rs.getInt(1);
+            rs.close();
+            ps.close();
+            ps = con.prepareStatement("INSERT INTO rings (itemid, partnerRingId, partnerChrId, partnername) VALUES (?, ?, ?, ?)");
+            ps.setInt(1, itemid);
+            ps.setInt(2, ret[0]);
+            ps.setInt(3, chrId);
+            ps.setString(4, chrName);
+            ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            rs.next();
+            ret[1] = rs.getInt(1);
+            rs.close();
+            ps.close();
+            ps = con.prepareStatement("UPDATE rings SET partnerRingId = ? WHERE id = ?");
+            ps.setInt(1, ret[1]);
+            ps.setInt(2, ret[0]);
+            ps.executeUpdate();
+            ps.close();
+            MapleCharacter player = c.getPlayer();
+            MapleInventoryManipulator.addRing(player, itemid, ret[0]);
+            MapleInventoryManipulator.addRing(chr, itemid, ret[1]);
+            c.getSession().write(MaplePacketCreator.getCharInfo(player));
+            if (message == null) {
+                player.getMap().removePlayer(player);
+                player.getMap().addPlayer(player);
+                chr.getClient().getSession().write(MaplePacketCreator.getCharInfo(chr));
+                chr.getMap().removePlayer(chr);
+                chr.getMap().addPlayer(chr);
+            }
+            chr.dropMessage(5, "You have received a ring from " + player.getName() + ". Please log out and log back in again if it does not work correctly.");
+            if (message != null) {
+                chr.getClient().getSession().write(MaplePacketCreator.serverNotice(5, "The message that came with the ring is: " + message));
+            }
+            return ret;
+        } catch (Exception ex) {
+            int[] ret = new int[2];
+            ret[0] = -1;
+            ret[1] = -1;
+            return ret;
+        }
+    }
+
+
+    public static MapleRing loadFromDb(int ringId) {
+        try {
+            Connection con = DatabaseConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM rings WHERE id = ?");
+            ps.setInt(1, ringId);
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            MapleRing ret = new MapleRing(ringId, rs.getInt("partnerRingId"), rs.getInt("partnerChrId"), rs.getInt("itemid"), rs.getString("partnerName"));
+            rs.close();
+            ps.close();
+            return ret;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    public static int[] createRing(MapleClient c, int itemid, int chrId, String chrName, int partnerId, String partnername) {
+        try {
+            MapleCharacter chr = c.getChannelServer().getPlayerStorage().getCharacterById(partnerId);
+            if (chr == null) {
+                int[] ret_ = new int[2];
+                ret_[0] = -1;
+                ret_[1] = -1;
+                return ret_;
+            }
+            Connection con = DatabaseConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("INSERT INTO rings (itemid, partnerChrId, partnername) VALUES (?, ?, ?)");
+            ps.setInt(1, itemid);
+            ps.setInt(2, partnerId);
+            ps.setString(3, partnername);
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            rs.next();
+            int[] ret = new int[2];
+            ret[0] = rs.getInt(1);
+            rs.close();
+            ps.close();
+            ps = con.prepareStatement("INSERT INTO rings (itemid, partnerRingId, partnerChrId, partnername) VALUES (?, ?, ?, ?)");
+            ps.setInt(1, itemid);
+            ps.setInt(2, ret[0]);
+            ps.setInt(3, chrId);
+            ps.setString(4, chrName);
+            ps.executeUpdate();
+            rs = ps.getGeneratedKeys();
+            rs.next();
+            ret[1] = rs.getInt(1);
+            rs.close();
+            ps.close();
+            ps = con.prepareStatement("UPDATE rings SET partnerRingId = ? WHERE id = ?");
+            ps.setInt(1, ret[1]);
+            ps.setInt(2, ret[0]);
+            ps.executeUpdate();
+            ps.close();
+            MapleCharacter player = c.getPlayer();
+            MapleInventoryManipulator.addRing(player, itemid, ret[0]);
+            MapleInventoryManipulator.addRing(chr, itemid, ret[1]);
+            c.getSession().write(MaplePacketCreator.getCharInfo(player));
+            player.getMap().removePlayer(player);
+            player.getMap().addPlayer(player);
+            chr.getClient().getSession().write(MaplePacketCreator.getCharInfo(chr));
+            chr.getMap().removePlayer(chr);
+            chr.getMap().addPlayer(chr);
+            chr.dropMessage(5, "You have received a ring from " + player.getName() + ". Please log out and log back in again if it does not work correctly.");
+            return ret;
+        } catch (Exception ex) {
+            int[] ret = new int[2];
+            ret[0] = -1;
+            ret[1] = -1;
+            return ret;
+        }
+    }
+
+    public int getRingId() {
+        return ringId;
+    }
+
+    public int getPartnerRingId() {
+        return ringId2;
+    }
+
+    public int getPartnerChrId() {
+        return partnerId;
+    }
+
+    public int getItemId() {
+        return itemId;
+    }
+
+    public String getPartnerName() {
+        return partnerName;
+    }
+
+    public boolean isEquipped() {
+        return equipped;
+    }
+
+    public void setEquipped(boolean equipped) {
+        this.equipped = equipped;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof MapleRing) {
+            return (((MapleRing) o).getRingId() == getRingId());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 5;
+        hash = 53 * hash + this.ringId;
+        return hash;
+    }
+
+    @Override
+    public int compareTo(MapleRing other) {
+        if (ringId < other.getRingId()) {
+            return -1;
+        } else if (ringId == other.getRingId()) {
+            return 0;
+        } else {
+            return 1;
+        }
+    }
+}
+============================================================================================

@@ -1,0 +1,41 @@
+乱刷东西~背包会出现0占位置，一点就掉~
+在数据库清理很麻烦~~因为每次都要下线去清理~
+不是GM还要找GM清理，现在好了~用NPC清理~方便快捷~
+打开src>net>sf>odinms>scripting>NPCConversationManager.java
+找到
+public void setHair(int hair) {
+           c.getPlayer().setHair(hair);
+           c.getPlayer().updateSingleStat(MapleStat.HAIR, hair);
+           c.getPlayer().equipChanged();
+    }
+下面添加
+public void fixNullItems() throws SQLException
+        {
+            c.getPlayer().deleteNullItem(getPlayer().getId());
+        }
+再打开src>net>sf>odinms>client>MapleCharacter.java
+找到
+public void deleteNote(int id) throws SQLException {
+        Connection con = DatabaseConnection.getConnection();
+        PreparedStatement ps = con.prepareStatement("DELETE FROM notes WHERE `id`=?");
+        ps.setInt(1, id);
+        ps.executeUpdate();
+        ps.close();
+    }
+下面添加
+public void deleteNullItem(int characterid) throws SQLException
+        {
+        Connection con = DatabaseConnection.getConnection();
+        PreparedStatement ps = con.prepareStatement("DELETE FROM `inventoryitems` WHERE `quantity` = 0 AND `characterid` = ?");
+                ps.setInt(1, characterid);
+                ps.executeUpdate();
+                ps.close();
+        }
+
+自己找个没用的NPC 
+把脚本复制进去~
+function action(mode, type, selection) {
+        cm.sendOk("我来帮你清理背包里的"0"物品?");
+        cm.fixNullItems();
+        cm.dispose();
+}

@@ -1,0 +1,15 @@
+/*
+LuNaTic改端技术、
+由疯子收集、现正式发布！
+
+
+
+查找SBossMapMonitor.Java这文件,并找到原文:
+
+To the crew that have finally congquered Horned Tail after numerous attempts. I salute thee! You are the true heroes of Leafre!!
+改成:
+[BOSS公告]经过勇士们的努力暗黑龙王终于挂了!大家热烈祝贺吧！
+然后编译。。。
+编译时会出个问题,就是把这些文字改成乱码,只需在NetBeans里把乱码改了再编译就行了.
+
+cserv.broadcastPacket(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6, cserv.getChannel(), "[BOSS公告]经过勇士们的努力暗黑龙王终于挂了!大家热烈祝贺吧!"));

@@ -1,0 +1,59 @@
+打开N8。。。 
+对准account那个表右击，选择设计表。。。。 
+创建一个列，叫NMaple 类型int 长度11 十进位0 不允许空 
+
+打开MapleCharacter.java 
+查找private int paypalnx = 0, maplepoints = 0, cardnx = 0; 
+下面增加private int donatorpoints; 
+查找 ret.cardnx = rs.getInt("cardNX"); 
+下面增加ret.donatorpoints = rs.getInt("donatorpoints"); 
+查找public int getNX() { 
+return paypalnx; 
+} 
+上面增加 public void gainNMaple(int gain) { 
+this.nmaple += gain; 
+} 
+查找 public void addHP(int delta) { 
+setHp(hp + delta); 
+updateSingleStat(MapleStat.HP, hp); 
+} 
+下面增加 public void setNMaple(int v) { 
+this.nmaple = v; 
+} 
+查找 public boolean haveItem(int itemid, int quantity, boolean checkEquipped, boolean greaterOrEquals) { 
+int possesed = getItemQuantity(itemid, checkEquipped); 
+上面增加 
+public int getNMaple() { 
+return this.nmaple; 
+} 
+
+NPCConversationManager.java 
+查找 public int getBossLog(String bossid) { 
+return getPlayer().getBossLog(bossid); 
+在上面添加 
+public void setNMaple(int Nset) { 
+getPlayer().setNMaple(Nset); 
+} 
+public int getNMaple() { 
+return getPlayer().getNMaple(); 
+} 
+
+public void gainNMaple(int gain) { 
+getPlayer().gainNMaple(gain); 
+} 
+
+编译即可 
+NPC命令: 
+gainNMaple 
+getNMaple 
+setNMaple 
+
+另:若你想添加上GM在线给积分的命令，请进行以下步骤 
+
+打开SuperGM.java 
+适当位置添加 } else if (splitted[0].equals("!NMaple")) { 
+cserv.getPlayerStorage().getCharacterByName(splitted[1]).gainNMaple(Integer.parseInt(splitted[2])); 
+mc.dropMessage("您已经给予了玩家[" + splitted[1] + "] [" + splitted[2] + "]枫梦币了."); 
+编译即可 
+GM命令: 
+!NMaple

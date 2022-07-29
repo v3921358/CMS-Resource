@@ -1,0 +1,66 @@
+tools  MaplePacketCreator.java
+找到public static MaplePacket getPacketFromHexString
+上面加入
+public static MaplePacket sendYellowTip(String message) {
+     MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+     mplew.writeShort(74);
+     mplew.write(5);
+     mplew.writeMapleAsciiString(message);
+     return mplew.getPacket();
+   }
+
+
+
+net  channel  handler  GeneralchatHandler.java
+的全部内容
+package net.sf.odinms.net.channel.handler;
+
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.messages.CommandProcessor;
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.tools.MaplePacketCreator;
+import net.sf.odinms.tools.StringUtil;
+import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+public class GeneralchatHandler extends AbstractMaplePacketHandler {
+
+    @Override
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+        String text = slea.readMapleAsciiString();
+        String lctext = text.toLowerCase();
+        int show = slea.readByte();
+        MapleCharacter player = c.getPlayer();
+        int gmlvl = player.gmLevel();
+        boolean chatwhite = gmlvl > 2 && player.getGMChat() && c.getChannelServer().allowGmWhiteText();
+        if (StringUtil.countCharacters(text, '@') > 4) {
+            if (!player.isGM()) {
+                text = "DISREGARD THAT I SUCK COCK";
+            }
+            if (player.spawned) {
+                player.removeOne(c);
+            }
+        }
+        if (!CommandProcessor.processCommand(c, text))
+//核心部分开始
+            if (gmlvl > 4) {
+                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getPlayer().getId(), (new StringBuilder()).append("┈━═☆[GM]☆═━┈").append(text).toString(), chatwhite, show));
+            } else if (c.getPlayer().getVip() == 2) {
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.serverNotice(5, (new StringBuilder()).append("┈━═☆").append(c.getPlayer().getName()).append("[VIP2] : ").append(text).toString()));
+                                }else if (c.getPlayer().getVip() == 3){
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.sendYellowTip((new StringBuilder()).append("┈━═☆").append(c.getPlayer().getName()).append("[VIP3] : ").append(text).toString()));
+                                } else if (c.getPlayer().getVip() == 4){
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.serverNotice(2, (new StringBuilder()).append("┈━═☆").append(c.getPlayer().getName()).append("[至尊VIP4] : ").append(text).toString())); 
+//核心部分结束                              
+}else{
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getPlayer().getId(), text, chatwhite, show));
+                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getPlayer().getId(), text, false, 1));
+            }
+        if (lctext.length() > 6 && c.getChannelServer().getSexBot() != null) {
+            if (lctext.substring(0, 6).equals("sexbot")) {
+                String res = c.getChannelServer().getSexBot().handleChat(lctext, c.getPlayer().getName());
+                c.getChannelServer().getSexBot().getCharacter().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getChannelServer().getSexBot().getCharacter().getId(), res, false, 1));
+            }
+        }
+    }
+}

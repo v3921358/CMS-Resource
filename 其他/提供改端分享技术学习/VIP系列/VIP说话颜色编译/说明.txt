@@ -1,0 +1,91 @@
+VIP说话的颜色 
+
+关于我发的这个 有些人说编译错误...
+那是肯定的 这代码是基于ThePack端的 
+
+看我演示一下怎么加的 怎么会报错
+
+
+
+
+tools  MaplePacketCreator.java  //所以开始我就说了要在这里加人这个
+找到public static MaplePacket getPacketFromHexString
+上面加入
+public static MaplePacket sendYellowTip(String message) {
+     MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+     mplew.writeShort(74);
+     mplew.write(5);
+     mplew.writeMapleAsciiString(message);
+     return mplew.getPacket();
+   }
+
+
+这个我先不加 看他会爆什么错误  我先加下面的
+
+
+net  channel  handler  GeneralchatHandler.java
+的全部内容
+package net.sf.odinms.net.channel.handler;
+
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.client.messages.CommandProcessor;
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.tools.MaplePacketCreator;
+import net.sf.odinms.tools.StringUtil;
+import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+public class GeneralchatHandler extends AbstractMaplePacketHandler {
+
+    @Override
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+        String text = slea.readMapleAsciiString();
+        String lctext = text.toLowerCase();
+        int show = slea.readByte();
+        MapleCharacter player = c.getPlayer();
+        int gmlvl = player.gmLevel();
+        boolean chatwhite = gmlvl > 2 && player.getGMChat() && c.getChannelServer().allowGmWhiteText();
+        if (StringUtil.countCharacters(text, '@') > 4) {
+            if (!player.isGM()) {
+                text = "DISREGARD THAT I SUCK COCK";
+            }
+            if (player.spawned) {
+                player.removeOne(c);
+            }
+        }
+        if (!CommandProcessor.processCommand(c, text))
+//核心部分开始
+            if (gmlvl > 4) {
+                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getPlayer().getId(), (new StringBuilder()).append("┈━═☆[GM]☆═━┈").append(text).toString(), chatwhite, show));
+            } else if (c.getPlayer().getVip() == 2) {
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.serverNotice(5, (new StringBuilder()).append("┈━═☆").append(c.getPlayer().getName()).append("[VIP2] : ").append(text).toString()));
+                                }else if (c.getPlayer().getVip() == 3){
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.sendYellowTip((new StringBuilder()).append("┈━═☆").append(c.getPlayer().getName()).append("[VIP3] : ").append(text).toString()));
+                                } else if (c.getPlayer().getVip() == 4){
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.serverNotice(2, (new StringBuilder()).append("┈━═☆").append(c.getPlayer().getName()).append("[至尊VIP4] : ").append(text).toString())); 
+                             
+}else{
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getPlayer().getId(), text, chatwhite, show));
+                c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getPlayer().getId(), text, false, 1));
+            }
+//核心部分结束 其实应该到这里....
+        if (lctext.length() > 6 && c.getChannelServer().getSexBot() != null) {
+            if (lctext.substring(0, 6).equals("sexbot")) {
+                String res = c.getChannelServer().getSexBot().handleChat(lctext, c.getPlayer().getName());
+                c.getChannelServer().getSexBot().getCharacter().getMap().broadcastMessage(MaplePacketCreator.getChatText(c.getChannelServer().getSexBot().getCharacter().getId(), res, false, 1));
+            }
+        }
+    }
+}
+
+成功生成（总时间：9 秒）
+ 看吧 并没有错误 要是有错误 都有可能是 UTF8的字符错误...
+
+好了 就到这里 
+
+
+爆的错误是
+C:\Documents and Settings\Administrator\桌面\src\net\sf\odinms\net\channel\handler\GeneralchatHandler.java:35: 找不到符号
+符号： 方法 sendYellowTip(java.lang.String)// 就是找不到这个方法....
+位置： 类 net.sf.odinms.tools.MaplePacketCreator//就是要把这个方法加到这个地方 
+                    c.getPlayer().getMap().broadcastMessage(MaplePacketCreator.sendYellowTip((new StringBuilder()).append("┈━═☆").append(c.getPlayer().getName()).append("[VIP3] : ").append(text).toString()));

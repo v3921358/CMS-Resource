@@ -1,0 +1,21 @@
+
+µ½£ºMapleCharacter.java 
+
+ÊÕŒ¤ÕÒµ½£º 
+
+
+  if (party != null) { 
+  ps.setInt(25, party.getId()); 
+  } else { 
+  ps.setInt(25, -1); 
+  } 
+
+
+
+Ìæ“Qžé£º 
+
+  if (party != null) { 
+  ps.setInt(25, party.getId()); 
+  } else { 
+  ps.setInt(25, 0); 
+  }

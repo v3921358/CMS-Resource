@@ -1,0 +1,50 @@
+MaplePacketCreator.java
+找到下面这样的语句
+mplew.writeShort(SendPacketOpcode.SPAWN_PLAYER.getValue());
+        mplew.writeInt(chr.getId());
+        mplew.writeMapleAsciiString(chr.getName());
+在下面加入
+
+                         String marry = "";
+                         String pked = "";
+        if (chr.isMarried())
+        {
+            if (chr.getjhname() == null)
+                marry = (new StringBuilder()).append("[<已婚>: ").append(chr.getjhname()).append("]").toString();
+            else
+                marry = "[已婚]";
+        } else
+        {
+            marry = "[未婚]";
+        }
+        if (chr.getPvpKills() >= 0 && chr.getPvpKills() <= 50)
+            pked = "[PK菜鸟]";
+        else
+        if (chr.getPvpKills() >= 51 && chr.getPvpKills() <= 200)
+            pked = "[PK圣人]";
+        else
+        if (chr.getPvpKills() >= 201 && chr.getPvpKills() <= 800)
+            pked = "[PK尊者]";
+        else
+        if (chr.getPvpKills() >= 801 && chr.getPvpKills() <= 2000)
+            pked = "[PK霸主]";
+        else
+        if (chr.getPvpKills() >= 2001)
+            pked = "[PK王者]";
+        
+在下面在添加
+
+if (chr.getGuildId() <= 0)
+        {
+            mplew.writeMapleAsciiString((new StringBuilder()).append(pked).append("_>无门无派<_").append(marry).toString());
+            mplew.write(new byte[6]);
+        } else
+        {
+            MapleGuildSummary gs = chr.getClient().getChannelServer().getGuildSummary(chr.getGuildId());
+            if (gs != null)
+            {
+                mplew.writeMapleAsciiString((new StringBuilder()).append(pked).append(gs.getName()).append(marry).toString());
+                mplew.writeShort(gs.getLogoBG());
+                mplew.write(gs.getLogoBGColor());
+                mplew.writeShort(gs.getLogo());
+                mplew.write(gs.getLogoColor());

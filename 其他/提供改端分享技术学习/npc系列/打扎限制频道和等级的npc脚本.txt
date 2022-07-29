@@ -1,0 +1,85 @@
+/* 
+    This file is part of the OdinMS Maple Story Server 
+    Copyright (C) 2008 Patrick Huy <[email]patrick.huy@frz.cc[/email]> 
+                      Matthias Butz <[email]matze@odinms.de[/email]> 
+                      Jan Christian Meyer <[email]vimes@odinms.de[/email]> 
+  
+    This program is free software: you can redistribute it and/or modify 
+    it under the terms of the GNU Affero General Public License version 3 
+    as published by the Free Software Foundation. You may not use, modify 
+    or distribute this program under any other version of the 
+    GNU Affero General Public License. 
+  
+    This program is distributed in the hope that it will be useful, 
+    but WITHOUT ANY WARRANTY; without even the implied warranty of 
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
+    GNU Affero General Public License for more details. 
+  
+    You should have received a copy of the GNU Affero General Public License 
+    along with this program.  If not, see <[url]http://www.gnu.org/licenses/[/url]>. 
+*/ 
+  
+importPackage(net.sf.odinms.tools); 
+importPackage(net.sf.odinms.client); 
+  
+/* Adobis 
+    Zakum entrance 
+*/ 
+var status = 0; 
+var price = 20000000; 
+var map = Array(240010501); 
+  
+function start() { 
+status = -1; 
+action(1, 0, 0); 
+} 
+  
+function action(mode, type, selection) { 
+if (mode == -1) { 
+cm.dispose(); 
+} else { 
+if (mode == 0 && status == 0) { 
+cm.dispose(); 
+return; 
+} 
+if (mode == 1) 
+status++; 
+else 
+status--; 
+if (status == 0) { 
+cm.sendSimple("你好! 欢迎你来到扎昆祭台 !你想要进去挑战#b扎昆#k吗 ? 如果你想要挑战他, 你需要有#b火焰的眼#k, 才能召唤出扎昆,并且需要等级达到150级 .\r\n#L0##b购买一个#b火焰的眼需要1,000,000金币#k\r\n\#L1##b进入扎昆祭台.#l"); 
+} else if (status == 1) { 
+if (selection == 0) { 
+if(cm.getMeso() >= 10000000) { 
+cm.gainMeso(-10000000); 
+cm.gainItem(4001017, 1); 
+cm.sendOk("购买成功!"); 
+} else { 
+cm.sendOk("金币不足."); 
+} 
+cm.dispose(); 
+} else if (status == 2) { 
+} else if (selection == 1 && cm.getLevel() >= 150) { 
+if (cm.getC().getChannel() > 3 && cm.getC().getChannel() < 5) 
+{ 
+cm.warp(280030000, 0); 
+cm.dispose(); 
+} 
+else 
+{ 
+cm.sendOk("扎昆大怪物只在能在4频道被召唤."); 
+mode = 1; 
+status = -1; 
+cm.dispose(); 
+} 
+  
+} 
+else{ 
+cm.sendOk("你必须达到150级以上才能挑战#b扎昆#k."); 
+mode = 1; 
+status = -1; 
+cm.dispose(); 
+} 
+} 
+} 
+} 

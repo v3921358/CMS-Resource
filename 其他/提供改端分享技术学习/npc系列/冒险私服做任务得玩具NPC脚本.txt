@@ -1,0 +1,90 @@
+/* 
+*活动脚本 
+*Final by 颩白勺傳讠兑 
+*/ 
+var status = 0; 
+  
+function start() { 
+status = -1; 
+action(1, 0, 0); 
+} 
+  
+function action(mode, type, selection) { 
+if (mode == -1) { 
+cm.dispose(); 
+} else { 
+if (mode == 0 && status == 0) { 
+cm.dispose(); 
+return; 
+} 
+if (mode == 1) 
+status++; 
+else 
+status--; 
+if (status == 0) { 
+  
+cm.sendSimple("#d你好,我是 玩具 活动NPC,,我需要请选择: \r\n#L1# 接受任务1 \r\n#L2# 接受任务2 \r\n#L3# 接受任务3 "); 
+} else if (status == 1) { 
+if (selection == 1) { 
+if (cm.haveItem(4011006, 10)) { 
+cm.gainItem(4011006, -10); 
+cm.gainItem(4031225, 10); 
+cm.gainItem(1402037, 1); 
+cm.sendOk("#r真是太感谢你了 帮我找了我心爱的东西！#r 这东西给你 去接下一个任务"); 
+cm.dispose(); 
+} else { 
+cm.sendOk("#b由于我昨天打瞌睡 不小心弄失了我的加工品 我现在急需要#v4011006#你可以帮我找回来吗？任务奖励#v1402037#"); 
+cm.dispose(); 
+} 
+} else if (selection == 2) { 
+if (cm.itemQuantity(4031225) >= 10) { 
+if ((cm.haveItem(4005000, 1)) && (cm.haveItem(4005001)) && (cm.haveItem(4005002)) && (cm.haveItem(4005003))) { 
+cm.sendOk("#r啊 这么快就搜集好了这些东西了我真是太感谢你咯 奖励你#v1442039#"); 
+cm.gainItem(4005000, -1); 
+cm.gainItem(4005001, -1); 
+cm.gainItem(4005002, -1); 
+cm.gainItem(4005003, -1); 
+cm.gainItem(1442039, 1); 
+cm.gainItem(4031018, 1); 
+cm.dispose(); 
+} else{ 
+cm.sendOk("#g啊 又是你善良个孩子哟 谢谢上次你帮了我可是麻烦又来了 要重新加工这批东西要很多矿石啊 请您帮我收集这些吧 1个#v4005000#1个#v4005001#1#v4005002#1个#v4005003# 任务奖励#v1442039#"); 
+cm.dispose(); 
+} 
+  
+} else{ 
+cm.sendOk("#e你没有完成任务1"); 
+cm.dispose(); 
+} 
+  
+} else if (status == 3) { 
+} else if (selection == 3 && cm.itemQuantity(4031018) >= 1) { 
+if (cm.getBossLog('renwu') < 1){ 
+if ((cm.haveItem(1432038, 1)) && (cm.haveItem(1472051)) && (cm.haveItem(1432011)) && (cm.haveItem(1452044))) { 
+cm.sendOk("#r哎呀 ！哎呀 我的天啊 这样都被你搜集得到 真是太感谢了 这 东西给你 收好了"); 
+cm.gainItem(1432038, -1); 
+cm.gainItem(1472051, -1); 
+cm.gainItem(1432011, -1); 
+cm.gainItem(1452044, -1); 
+cm.gainItem(4031018, -1); 
+cm.gainItem(1402014, 1); 
+cm.serverNotice("『活动公告』：恭喜"+ cm.getChar().getName() +"，在乐于助人活动中获取 总共获取了 龙背刃 冻冻鱼 温度计 玩具!"); 
+cm.dispose(); 
+} else{ 
+cm.sendOk("#k这位帅哥帮了我这么多次 现在我又有事请求了 请您帮我收集这些吧 1个#v1432038#1个#v1472051#1个#v1432011#1个#v1452044# 如果完成好我这里刚磨练出一把 能上天下海的温度计#v1402014# 送给你算了 "); 
+cm.dispose(); 
+} 
+  
+} else { 
+cm.sendOk("你已经帮过我很多了 去休息一会儿吧"); 
+mode = 1; 
+status = -1; 
+} 
+} else{ 
+cm.sendOk("你没有完成任务2"); 
+mode = 1; 
+status = -1; 
+} 
+} 
+} 
+} 

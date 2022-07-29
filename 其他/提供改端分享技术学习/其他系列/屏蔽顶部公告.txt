@@ -1,0 +1,30 @@
+打开ChannelServer.java
+
+找到
+private String serverMessage =
+
+删除整句private String serverMessage ="XXXXXXXXXXXXXXXXXXXX";
+
+找到chr.getClient().getSession().write(MaplePacketCreator.serverMessage(serverMessage));
+
+前面加//或删除
+
+
+找到        public void setServerMessage(String newMessage) {
+                serverMessage = newMessage;
+                broadcastPacket(MaplePacketCreator.serverMessage(serverMessage));
+        }
+分别在                serverMessage = newMessage;
+                broadcastPacket(MaplePacketCreator.serverMessage(serverMessage));
+这两句前加//
+
+找到        public String getServerMessage() {
+                //return serverMessage;
+        }
+
+删除这些内容
+
+打开ChannelServerMBean.java
+
+找到String getServerMessage();
+前面加//或删除

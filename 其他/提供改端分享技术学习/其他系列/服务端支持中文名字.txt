@@ -1,0 +1,134 @@
+首先打开 net.sf.odinms.tools StringUtil.java 
+
+找到 
+         public static String getRightPaddedStr(String in, char padchar, int length) {
+                StringBuilder builder = new StringBuilder(in); 
+                for (int x = in.length(); x < length; x++) { 
+
+改成 
+
+   public static int getlength(String str){ 
+         int i,t=0; 
+         byte[] bt = str.getBytes(); 
+         for(i=1;i<=bt.length;i++){ 
+         if (bt[i-1]<0) {t=t+2;i++;} 
+         else t=t+1; 
+         } 
+         return t; 
+         }
+
+
+         public static String getRightPaddedStr(String in, char padchar, int length) { 
+                StringBuilder builder = new StringBuilder(in); 
+                for (int x = getlength(in); x < length; x++) {
+
+
+再打开:net.sf.odinms.tools MaplePacketCreator.java 
+
+查找：
+
+        private static void addCharStats(MaplePacketLittleEndianWriter mplew, MapleCharacter chr) {
+
+在上面加入 
+
+        public static int getlength(String str){ 
+        int i,t=0; 
+        byte[] bt = str.getBytes(); 
+        for (i=1;i<=bt.length;i++){ 
+        if (bt[i-1]<0) {t=t+2;i++;} 
+        else t=t+1; 
+        } 
+        return t; 
+        }
+
+在下面找到 
+                for (int x = chr.getName().length(); x < 13; x++) { 
+
+改成
+                for (int x = getlength(chr.getName()); x < 13; x++) { 
+
+----------------------------------------------------------------------------------------------
+
+
+再打开： net.sf.odinms.tools.data.input.GenericLittleEndianAccessor.java
+
+找到
+public final String readAsciiString(int n) {
+char ret[] = new char[n]; 
+for (int x = 0; x < n; x++) { 
+ret[x] = (char) readByte(); 
+} 
+return String.valueOf(ret); 
+} 
+
+
+
+修改为：
+public final String readAsciiString(int n) {
+        byte ret[] = new byte[n]; 
+          for (int x = 0; x < n; x++) { 
+           ret[x] = (byte) readByte(); 
+           } 
+         try { 
+           String str= new String(ret,"gbk"); 
+          return str; 
+         } catch (Exception e) { 
+         System.err.println(e); 
+       } 
+    return null; 
+         }
+
+
+
+  繁体的就是：public final String readAsciiString(int n) {
+
+                //char ret[] = new char[n];
+
+                byte ret[] = new byte[n];
+
+                for (int x = 0; x < n; x++) {
+
+                ret[x] = (byte) readByte();
+
+       }
+
+                try {
+
+                String str= new String(ret,"BIG5");
+
+                return str;
+
+       } catch (Exception e) {
+
+                System.err.println(e);
+
+       }
+
+                return null;
+
+       }
+复制代码继续打开： net.sf.odinms.tools.data.output中的GenericLittleEndianWriter.java
+
+private static Charset ASCII = Charset.forName("US-ASCII");
+改成
+private static Charset ASCII = Charset.forName("GBK");
+
+繁体就是：private static Charset ASCII = Charset.forName("BIG5");
+复制代码同样是该文件中
+
+在 private ByteOutputStream bos;下面加入
+
+  public  int  getlength(String  str){  
+        int  i,t=0;  
+        byte[]  bt  =  str.getBytes();  
+        for  (i=1;i<=bt.length;i++){  
+            if  (bt[i-1]<0)  {t=t+2;i++;}  
+            else  t=t+1;  
+        }  
+        return  t;  
+    }  
+
+找到 writeShort((short)s.length());
+改成 writeShort((short)getlength(s));
+
+编译！完成！！！OK啦~~你的端就支持中文名字了！繁体只需要改两个地方而已！简单明了！

@@ -1,0 +1,10 @@
+找到AbstractDealDamageHandler.java
+
+查找 
+private int PVP_MAP =
+注释或者删除掉 
+
+查找 
+if (attack.skill != 2301002 && attack.skill != 4201004 && attack.skill != 1111008 && player.getMapId() == PVP_MAP) {//checksTo
+
+将 && player.getMapId() == PVP_MAP删除掉即可开放全地图PK          

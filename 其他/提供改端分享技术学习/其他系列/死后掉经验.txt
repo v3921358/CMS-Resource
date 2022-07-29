@@ -1,0 +1,105 @@
+找到 MapleCharacter.java. 
+
+找到 
+    private void playerDead() { 
+        if (getEventInstance() != null) { 
+            getEventInstance().playerKilled(this); 
+        } 
+        cancelAllBuffs(); 
+              getClient().getSession().write(MaplePacketCreator.enableActions()); 
+    } 
+
+替换 
+    private void playerDead() { 
+        if (getEventInstance() != null) { 
+            getEventInstance().playerKilled(this); 
+        } 
+        cancelAllBuffs(); 
+                
+                int[] charmID = {5130000, 4031283, 4140903}; //NOTE Also checks in this order 
+                MapleCharacter player = getClient().getPlayer(); 
+                int possesed = 0; 
+                int i; 
+                
+                //Check for charms 
+                for (i = 0; i < charmID.length; i++) 
+                { 
+                  int quantity = getItemQuantity(charmID, false); 
+                  if (possesed == 0 && quantity > 0) 
+                  { 
+                    possesed = quantity; 
+                    break; 
+                  } 
+                } 
+                
+                if (possesed > 0) 
+                { 
+                  //Our player got lucky this time! 
+                  possesed -= 1; 
+                  getClient().getSession().write(MaplePacketCreator.serverNotice(5, "Your EXP did not drop after using " + MapleItemInformationProvider.getInstance().getName(charmID) + ". (" + possesed + " time(s) left)")); 
+                  MapleInventoryManipulator.removeById(getClient(), MapleItemInformationProvider.getInstance().getInventoryType(charmID), charmID, 1, true, false); 
+                } 
+                else 
+                { 
+                  if (player.getJob() != MapleJob.BEGINNER) 
+                  { 
+                    //Lose XP 
+                    int XPdummy = ExpTable.getExpNeededForLevel(player.getLevel() + 1); 
+                    
+                    switch (player.getMapId()) 
+                    { 
+                      case 280030000: //Zakum 
+                      case 220080001: //Papulatus 
+                        XPdummy *= 0.01; 
+                      break; 
+                      default: 
+                        //Check for FM 
+                        for (int index = 0; index <= 22; index++) 
+                        { 
+                          if (player.getMapId() == (910000000 + index)) 
+                          { 
+                            XPdummy *= 0.01; 
+                            break; 
+                          } 
+                        } 
+                      break; 
+                    } 
+                    
+                    if (XPdummy == ExpTable.getExpNeededForLevel(player.getLevel() + 1)) 
+                    { 
+                      //Thank you LaiLaiNoob for the information 
+                      if (player.getLuk() <= 100 && player.getLuk() > 8) 
+                        XPdummy *= 0.10 - (player.getLuk() * 0.0005); 
+                      else if (player.getLuk() < 8) 
+                        XPdummy *= 0.10; //Otherwise they lose about 9 percent 
+                      else 
+                        XPdummy *= 0.10 - (100 * 0.0005); 
+                    } 
+
+                    if ((player.getExp() - XPdummy) > 0) 
+                      player.gainExp(-XPdummy, false, false); 
+                    else 
+                      player.gainExp(-player.getExp(), false, false); 
+                  } 
+                } 
+                
+        getClient().getSession().write(MaplePacketCreator.enableActions()); 
+    } 
+
+在MapleCharacter.java添加 
+Code:import net.sf.odinms.server.MapleInventoryManipulator 
+
+找到 mapleCharacter.java 
+
+在最后面添加 
+
+    public int getItemQuantity(int itemid, boolean checkEquipped) { 
+        MapleInventoryType type = MapleItemInformationProvider.getInstance().getInventoryType(itemid); 
+        MapleInventory iv = inventory[type.ordinal()]; 
+        int possesed = iv.countById(itemid); 
+        if (checkEquipped) { 
+            possesed += inventory[MapleInventoryType.EQUIPPED.ordinal()].countById(itemid); 
+        } 
+                
+                return possesed; 
+    }

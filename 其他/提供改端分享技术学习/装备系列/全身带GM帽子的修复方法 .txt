@@ -1,0 +1,94 @@
+找到 
+MapleInventoryManipulator.java 
+
+再找到 
+public static void equip(MapleClient c, byte src, byte dst) 
+替换这个子程序下全部内容 
+public static void equip(MapleClient c, byte src, byte dst) {
+MapleItemInformationProvider ii = MapleItemInformationProvider.getInstance();
+Equip source = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIP).getItem(src); 
+Equip target = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem(dst);
+if (source == null) { 
+return; 
+}
+int s =source.getItemId(); 
+if (dst == -1 && s >= 1000000 && s <= 1010000 || dst == -2 && s >= 1010000 && s <= 1040000 || dst == -3 && s >= 1020000 && s <= 1030000 || dst == -4 && s >= 1030000 && s <= 1040000 || dst == -5 && s >= 1040000 && s <= 1060000 || dst == -6 && s >= 1060000 && s <= 1070000 || dst == -7 && s >= 1070000 && s <= 1080000 || dst == -8 && s >= 1080000 && s <= 1090000 || dst == -9 && s >= 1102000 && s <= 1112000 || dst == -10 && s >= 1090000 && s <= 1102000 || dst == -11 && s >= 1302000 && s <= 1802000 || dst == -12 && s >= 1112000 && s <= 1302000 || dst == -13 && s >= 1112000 && s <= 1302000 || dst == -15 && s >= 1112000 && s <= 1302000 || dst == -16 && s >= 1112000 && s <= 1302000 || dst == -17 && s >= 1120000 && s <= 1130000 || dst == -18 && s >= 1902000 && s <= 1950000 || dst == -19 && s >= 1902000 && s <= 1950000 || dst == -101 && s >= 1000000 && s <= 1010000 || dst == -102 && s >= 1010000 && s <= 1040000 || dst == -103 && s >= 1020000 && s <= 1030000 || dst == -104 && s >= 1030000 && s <= 1040000 || dst == -105 && s >= 1040000 && s <= 1060000 || dst == -106 && s >= 1060000 && s <= 1070000 || dst == -107 && s >= 1070000 && s <= 1080000 || dst == -108 && s >= 1080000 && s <= 1090000 || dst == -109 && s >= 1102000 && s <= 1112000 || dst == -110 && s >= 1090000 && s <= 1102000 || dst == -111 && s >= 1302000 && s <= 1802000 || dst == -112 && s >= 1112000 && s <= 1302000 || dst == -113 && s >= 1112000 && s <= 1302000 || dst == -114 && s >= 1802000 && s <= 1902000 || dst == -115 && s >= 1112000 && s <= 1302000 || dst == -116 && s >= 1112000 && s <= 1302000 || dst == -118 && s >= 1902000 && s <= 1950000 || dst == -119 && s >= 1902000 && s <= 1950000 || dst == -122 && s >= 1810000 && s <= 1900000 || dst == -123 && s >= 1802000 && s <= 1902000 || dst == -124 && s >= 1810000 && s <= 1900000 || dst == -125 && s >= 1810000 && s <= 1900000 || dst == -126 && s >= 1810000 && s <= 1900000 || dst == -127 && s >= 1810000 && s <= 1900000){ 
+if (dst == -6) { 
+// unequip the overa
+IItem top = c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -5); 
+if (top != null && ii.isOverall(top.getItemId())) { 
+if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).isFull()) { 
+c.getSession().write(MaplePacketCreator.getInventoryFull()); 
+c.getSession().write(MaplePacketCreator.getShowInventoryFull()); 
+return; 
+} 
+unequip(c, (byte) -5, c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNextFreeSlot());
+} 
+} else if (dst == -5) { 
+// unequip the bottom and top a
+IItem top = c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -5); 
+IItem bottom = c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -6);
+if (top != null && ii.isOverall(source.getItemId())) {
+if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).isFull(bottom != null && ii.isOverall(source.getItemId()) ? 1 : 0)) { 
+c.getSession().write(MaplePacketCreator.getInventoryFull()); 
+c.getSession().write(MaplePacketCreator.getShowInventoryFull()); 
+return; 
+} 
+unequip(c, (byte) -5, c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNextFreeSlot()); {
+}
+if (bottom != null && ii.isOverall(source.getItemId())) { 
+if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).isFull()) { 
+c.getSession().write(MaplePacketCreator.getInventoryFull()); 
+c.getSession().write(MaplePacketCreator.getShowInventoryFull()); 
+return; 
+} 
+unequip(c, (byte) -6, c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNextFreeSlot());  
+} 
+} else if (dst == -10) { 
+// check if weapon is two-handed F}
+IItem weapon = c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -11);
+if (weapon != null && ii.isTwoHanded(weapon.getItemId())) {
+if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).isFull()) { 
+c.getSession().write(MaplePacketCreator.getInventoryFull());
+c.getSession().write(MaplePacketCreator.getShowInventoryFull());
+return; 
+} 
+unequip(c, (byte) -11, c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNextFreeSlot()); 
+} 
+} else if (dst == -11) {   
+IItem shield = c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem((byte) -10); 
+if (shield != null && ii.isTwoHanded(source.getItemId())) { 
+if (c.getPlayer().getInventory(MapleInventoryType.EQUIP).isFull()) { 
+c.getSession().write(MaplePacketCreator.getInventoryFull()); 
+c.getSession().write(MaplePacketCreator.getShowInventoryFull()); 
+return;
+} 
+unequip(c, (byte) -10, c.getPlayer().getInventory(MapleInventoryType.EQUIP).getNextFreeSlot()); 
+} 
+}
+if (dst == -18) {
+if (c.getPlayer().getMount() != null) { 
+c.getPlayer().getMount().setItemId(source.getItemId()); 
+} 
+} 
+source = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIP).getItem(src); =
+target = (Equip) c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).getItem(dst); 
+c.getPlayer().getInventory(MapleInventoryType.EQUIP).removeSlot(src); 
+if (target != null) { 
+c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).removeSlot(dst); 
+} 
+source.setPosition(dst); 
+c.getPlayer().getInventory(MapleInventoryType.EQUIPPED).addFromDB(source); 
+if (target != null) { 
+target.setPosition(src); 
+c.getPlayer().getInventory(MapleInventoryType.EQUIP).addFromDB(target); 
+} 
+if (c.getPlayer().getBuffedValue(MapleBuffStat.BOOSTER) != null && ii.isWeapon(source.getItemId())) { 
+c.getPlayer().cancelBuffStats(MapleBuffStat.BOOSTER); 
+} 
+c.getSession().write(MaplePacketCreator.moveInventoryItem(MapleInventoryType.EQUIP, src, dst, (byte) 2)); 
+c.getPlayer().equipChanged(); 
+} else {
+new ServernoticeMapleClientMessageCallback(5, c).dropMessage("非法操作!驳回请求"); 
+}
+} 

@@ -1,0 +1,26 @@
+/*
+LuNaTic改端技术、
+由疯子收集、现正式发布！
+
+打开文件  MapleStatEffect.java 
+找到:
+        if (hpchange != 0) {
+            if (hpchange < 0 && (-hpchange) > applyto.getHp()) {
+                return false;
+            }
+            applyto.setHp(applyto.getHp() + hpchange);
+            hpmpupdate.add(new Pair<MapleStat, Integer>(MapleStat.HP, Integer.valueOf(applyto.getHp())));
+        }
+
+替换成:
+
+
+                if (applyto.getMapId() != 这里填你PK的地图ID) {
+        if (hpchange != 0) {
+            if (hpchange < 0 && (-hpchange) > applyto.getHp()) {
+                return false;
+            }
+            applyto.setHp(applyto.getHp() + hpchange);
+            hpmpupdate.add(new Pair<MapleStat, Integer>(MapleStat.HP, Integer.valueOf(applyto.getHp())));
+        }
+                }

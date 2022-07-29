@@ -1,0 +1,19 @@
+PlayerLoggedinHandler.java
+
+找到
+
+if (player.isGM()) {
+// GM gets super haste when logging in
+SkillFactory.getSkill(5101001).getEffect(1).applyTo(player); 
+
+
+
+下面加
+MaplePacket packet = MaplePacketCreator.serverNotice(6, "【GM管理員】：" + c.getPlayer().getName() + " 來到了我們的世界！大家熱烈歡迎！");
+try {
+c.getChannelServer().getWorldInterface().broadcastMessage(c.getPlayer().getName(), packet.getBytes());
+} catch (RemoteException e) {
+c.getChannelServer().reconnectWorld();
+}
+
+}

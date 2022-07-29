@@ -1,0 +1,61 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+这个原创是杜蕾斯的吧          
+/*
+annfine 制作在线排名
+*/
+var status = 0;
+
+
+function start() {
+    status = -1;
+    action(1, 0, 0);
+}
+
+function action(mode, type, selection) {
+    if (mode == -1) {
+        cm.dispose();
+    } else {
+        if (mode == 0 && status == 0) {
+            cm.dispose();
+            return;
+        }
+        if (mode == 1)
+            status++;
+        else
+            status--;
+        if (status == 0) {
+            //p=cm.paiMing();
+            var a = "当前排名：#b \r\n"; 
+            a+=cm.paiMing();        
+            cm.sendOk(a);
+            cm.dispose();
+            } else {                      
+                    cm.dispose();
+        }
+    }
+}
+
+JAVA部分
+
+public String paiMing()
+        {
+            String result="";
+            
+        try {
+            Connection con = DatabaseConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement("select * from characters order by reborns desc limit 0, 10");
+            ResultSet rs = ps.executeQuery();
+            while(rs.next())
+            {                
+                result = result+rs.getString("name")+" 转生次数： "+rs.getInt("reborns")+"\r\n";
+            }
+            
+        } catch (SQLException ex) {
+            return "";
+        }
+            return result;
+        }

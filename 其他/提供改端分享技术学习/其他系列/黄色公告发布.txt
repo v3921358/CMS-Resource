@@ -1,0 +1,55 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+就是跟平常游戏中黄色的MapleTip，自动发的黄色字条一样~ 聪明人应该清楚吧？已经一步步教你们怎么做了~ 当然也要用那个Netbeans生成一下.. 如果不会的话，我也没办法了！
+在MaplePacketCreator.java 中添加
+复制代码
+  
+  public static MaplePacket sendYellowTip(String message) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort((int) 0x4A); 
+        mplew.write(5);
+        mplew.writeMapleAsciiString(message);
+        return mplew.getPacket();
+    }
+把automsg.js 里面改成（注意备份你原来的）
+var setupTask;
+
+function init() {
+    scheduleNew();
+}
+
+function scheduleNew() {
+    var cal = java.util.Calendar.getInstance();
+    cal.set(java.util.Calendar.HOUR, 3);
+    cal.set(java.util.Calendar.MINUTE, 0);
+    cal.set(java.util.Calendar.SECOND, 0);
+    var nextTime = cal.getTimeInMillis();
+    while (nextTime <= java.lang.System.currentTimeMillis())
+        nextTime += 1000*600; //10 分钟
+    setupTask = em.scheduleAtTimestamp("start", nextTime);
+}
+
+function cancelSchedule() {
+    setupTask.cancel(true);
+}
+
+function start() {
+    var Message = new Array("你想每10分钟发的消息","依此类推，随机的");
+    em.getChannelServer().broadcastPacket(net.s f.odinms.tools.MaplePacketCreator.sendYellowTip("[MapleTip] " + Message[Math.floor(Math.random() * Message.length)]));
+}  
+想要GM命令发黄色公告的话：
+
+复制代码
+                    } else if (splitted[0].equals("!yellowtip")) {
+            if (splitted.length > 1) {
+                String abc= StringUtil.joinStringFrom(splitted, 1);
+                        for (ChannelServer cservs : ChannelServer.getAllInstances()){
+                                for (MapleCharacter z: cservs.getPlayerStorage().getAllCharacters()) {
+                                                z.getClient().getSession().write(MaplePacketCreator.sendYellowTip(abc));
+                                        
+                                }
+                        }
+            }

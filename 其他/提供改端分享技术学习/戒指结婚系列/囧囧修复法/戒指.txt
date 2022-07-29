@@ -1,0 +1,77 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+MapleCharacter.Java
+
+在这个函数的下面：
+复制代码public static int getIdByName(String name, int world)
+
+
+
+加入如下函数：
+复制代码
+        //hairi 通过ID得到角色名 修复戒指命令
+    public static String getNameById(int id, int world) {
+        Connection con = DatabaseConnection.getConnection();
+        PreparedStatement ps;
+        try {
+            ps = con.prepareStatement("SELECT name FROM characters WHERE id = ? AND world = ?");
+            ps.setInt(1, id);
+            ps.setInt(2, world);
+            ResultSet rs = ps.executeQuery();
+            if (!rs.next()) {
+                ps.close();
+                return "WrongName";
+            }
+            String name = rs.getString("name");
+            ps.close();
+            return name;
+        } catch (SQLException e) {
+            log.error("ERROR", e);
+        }
+        return "WrongName";
+    }
+
+
+
+
+PlayerCommand.Java
+
+适当位置加入这个代码：
+
+复制代码
+                } else if (splitted[0].equals("@ring")) {
+                    mc.dropMessage("命令格式 @ring <戒指代码> <目标角色ID>");
+                    mc.dropMessage("戒指代码清单如下：");
+                    mc.dropMessage("1112001 - 恋人戒指");
+                    mc.dropMessage("1112002 - 纯爱恋人戒指");
+                    mc.dropMessage("1112003 - 丘比特戒指");
+                    mc.dropMessage("1112005 - 多个大红心围绕");
+                    mc.dropMessage("1112006 - 头上两把剑");
+                    mc.dropMessage("1112800 - 四叶挚友戒指");
+                    mc.dropMessage("1112801 - 雏菊挚友戒指");
+                    mc.dropMessage("1112802 - 闪星挚友戒指");
+                    mc.dropMessage("特别说明：每次执行该命令系统将自动扣除您的戒指费用5000万游戏币！");
+                    mc.dropMessage("建议您通知目标玩家到网站上修改自己的角色名为英文，然后再执行命令！");
+                    int itemId = Integer.parseInt(splitted[1]);
+                    //String partnerName = splitted[2];
+                    //int partnerId = MapleCharacter.getIdByName(partnerName, 0);
+                    int partnerId = Integer.parseInt(splitted[2]);
+                    String partnerName = MapleCharacter.getNameById(partnerId, 0);
+                    if (c.getPlayer().getMeso() < 50000000) { //每次执行的戒指费用5000万
+                        mc.dropMessage("{ 玩家指令 } 每次执行该命令系统将自动扣除您的戒指费用5000万游戏币！");
+                    } else {
+                        if (itemId == 1112001 || itemId == 1112002 || itemId == 1112003 || itemId == 1112005 || itemId == 1112006 || itemId == 1112800 || itemId == 1112801 || itemId == 1112802) {
+                            int[] ret = MapleRing.createRing(c, itemId, c.getPlayer().getId(), c.getPlayer().getName(), partnerId, partnerName);
+                            c.getPlayer().gainMeso(-50000000, true);
+                            if (ret[0] == -1 || ret[1] == -1) {
+                                mc.dropMessage("{ 玩家指令 } 请确保您要送出戒指的玩家当前处于在线状态，建议被送玩家与您在同一个地图内！");
+                            }else{
+                                mc.dropMessage("{ 玩家指令 } 您已经成功的给指定玩家送出指定戒指，系统将自动扣除您的戒指费用！");
+                            }
+                        } else {
+                            mc.dropMessage("{ 玩家指令 } 您输入的戒指代码是错误的，系统无法为您送出指定的戒指！");
+                        }
+                    }

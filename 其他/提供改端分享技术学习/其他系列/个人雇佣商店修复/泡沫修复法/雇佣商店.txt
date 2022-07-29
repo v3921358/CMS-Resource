@@ -1,0 +1,553 @@
+´ò¿ªsrc\net\sf\odinms\net\channel\handler
+name it HiredMerchantRequest
+
+
+/*
+* To change this template, choose Tools | Templates
+* and open the template in the editor.
+*/
+package net.sf.odinms.net.channel.handler;
+
+import java.util.Arrays;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.net.AbstractMaplePacketHandler;
+import net.sf.odinms.server.maps.MapleMapObjectType;
+import net.sf.odinms.tools.MaplePacketCreator;
+import net.sf.odinms.tools.data.input.SeekableLittleEndianAccessor;
+
+/**
+*
+* @author XoticStory
+*/
+public class HiredMerchantRequest extends AbstractMaplePacketHandler {
+
+    @Override
+    public void handlePacket(SeekableLittleEndianAccessor slea, MapleClient c) {
+        if (!c.isGuest()) {
+            if (c.getPlayer().getMap().getMapObjectsInRange(c.getPlayer().getPosition(), 23000, Arrays.asList(MapleMapObjectType.HIRED_MERCHANT, MapleMapObjectType.SHOP)).size() == 0) {
+                if (!c.getPlayer().hasMerchant()) {
+                    c.getSession().write(MaplePacketCreator.hiredMerchantBox());
+                } else {
+                    c.getPlayer().dropMessage(1, "You already have a store open, please go close that store first");
+                }
+            } else {
+                c.getPlayer().dropMessage(1, "You may not establish a store here.");
+            }
+        } else {
+            c.getPlayer().dropMessage(1, "Guest users are not allowed to open hired merchants.");
+        }
+    }
+}
+
+
+\src\net\sf\odinms\server\PlayerInteraction
+Name it Hiredmerchant.java
+
+
+package net.sf.odinms.server.PlayerInteraction;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.concurrent.ScheduledFuture;
+import net.sf.odinms.client.IItem;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.client.MapleClient;
+import net.sf.odinms.database.DatabaseConnection;
+import net.sf.odinms.server.MapleInventoryManipulator;
+import net.sf.odinms.server.TimerManager;
+import net.sf.odinms.server.maps.MapleMap;
+import net.sf.odinms.server.maps.MapleMapObjectType;
+import net.sf.odinms.tools.MaplePacketCreator;
+
+/**
+*
+* @author XoticStory
+*/
+public class HiredMerchant extends PlayerInteractionManager {
+
+    private boolean open;
+    public ScheduledFuture<?> schedule = null;
+    private MapleMap map;
+    private int itemId;
+
+    public HiredMerchant(MapleCharacter owner, int itemId, String desc) {
+        super(owner, itemId % 10, desc, 3);
+        this.itemId = itemId;
+        this.map = owner.getMap();
+        this.schedule = TimerManager.getInstance().schedule(new Runnable() {
+
+            @Override
+            public void run() {
+                HiredMerchant.this.closeShop(true);
+            }
+        }, 1000 * 60 * 60 * 24);
+    }
+
+    public byte getShopType() {
+        return IPlayerInteractionManager.HIRED_MERCHANT;
+    }
+
+    @Override
+    public void buy(MapleClient c, int item, short quantity) {
+        MaplePlayerShopItem pItem = items.get(item);
+        if (pItem.getBundles() > 0) {
+            synchronized (items) {
+                IItem newItem = pItem.getItem().copy();
+                newItem.setQuantity(quantity);
+                if (c.getPlayer().getMeso() >= pItem.getPrice() * quantity) {
+                    if (MapleInventoryManipulator.addFromDrop(c, newItem)) {
+                        Connection con = DatabaseConnection.getConnection();
+                        try {
+                            PreparedStatement ps = con.prepareStatement("UPDATE characters SET MerchantMesos = MerchantMesos + " + pItem.getPrice() * quantity + " WHERE id = ?");
+                            ps.setInt(1, getOwnerId());
+                            ps.executeUpdate();
+                            ps.close();
+                        } catch (SQLException se) {
+                            se.printStackTrace();
+                        }
+                        c.getPlayer().gainMeso(-pItem.getPrice() * quantity, false);
+                        pItem.setBundles((short) (pItem.getBundles() - quantity));
+                    } else {
+                        c.getPlayer().dropMessage(1, "Your inventory is full.");
+                    }
+                } else {
+                    c.getPlayer().dropMessage(1, "You do not have enough mesos.");
+                }
+            }
+        }
+    }
+
+    @Override
+    public void closeShop(boolean saveItems) {
+        map.removeMapObject(this);
+        map.broadcastMessage(MaplePacketCreator.destroyHiredMerchant(getOwnerId()));
+        try {
+            PreparedStatement ps = DatabaseConnection.getConnection().prepareStatement("UPDATE characters SET HasMerchant = 0 WHERE id = ?");
+            ps.setInt(1, getOwnerId());
+            ps.executeUpdate();
+            ps.close();
+            if (saveItems) {
+                saveItems();
+            }
+        } catch (SQLException se) {
+        }
+        schedule.cancel(false);
+    }
+
+    public boolean isOpen() {
+        return this.open;
+    }
+
+    public void setOpen(boolean set) {
+        this.open = set;
+    }
+
+    public MapleMap getMap() {
+        return map;
+    }
+
+    public int getItemId() {
+        return itemId;
+    }
+
+    @Override
+    public void sendDestroyData(MapleClient client) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MapleMapObjectType getType() {
+        return MapleMapObjectType.HIRED_MERCHANT;
+    }
+
+    @Override
+    public void sendSpawnData(MapleClient client) {
+        client.getSession().write(MaplePacketCreator.spawnHiredMerchant(this));
+    }
+}
+
+
+
+add in iplayerinteractionmanager
+
+
+public final byte HIRED_MERCHANT = 1;
+
+
+add in mapleclient.java
+
+
+import net.sf.odinms.server.PlayerInteraction.HiredMerchant;
+
+and this
+
+
+            IPlayerInteractionManager interaction = chr.getInteraction(); // just for safety.
+            if (interaction != null) {
+                if (interaction.isOwner(chr)) {
+                    if (interaction.getShopType() == 1) {
+                        HiredMerchant hm = (HiredMerchant) interaction;
+                        hm.setOpen(true);
+                    } else if (interaction.getShopType() == 2) {
+                        for (MaplePlayerShopItem items : interaction.getItems()) {
+                            if (items.getBundles() > 0) {
+                                IItem item = items.getItem();
+                                item.setQuantity(items.getBundles());
+                                MapleInventoryManipulator.addFromDrop(this, item);
+                            }
+                        }
+                        interaction.removeAllVisitors(3, 1);
+                        interaction.closeShop(false); // wont happen unless some idiot hacks, hopefully ?
+                    } else if (interaction.getShopType() == 3 || interaction.getShopType() == 4) {
+                        interaction.removeAllVisitors(3, 1);
+                        interaction.closeShop(false);
+                    }
+                } else {
+                    interaction.removeVisitor(chr);
+                }
+            }
+
+also in MapleCharacter.java
+
+
+import net.sf.odinms.server.PlayerInteraction.HiredMerchant;
+
+
+
+
+                    IPlayerInteractionManager interaction = MapleCharacter.this.getInteraction(); // just for safety.
+                    if (interaction != null) {
+                        if (interaction.isOwner(MapleCharacter.this)) {
+                            if (interaction.getShopType() == 1) {
+                                HiredMerchant hm = (HiredMerchant) interaction;
+                                hm.setOpen(true);
+                            } else if (interaction.getShopType() == 2) {
+                                for (MaplePlayerShopItem items : interaction.getItems()) {
+                                    if (items.getBundles() > 0) {
+                                        IItem item = items.getItem();
+                                        item.setQuantity(items.getBundles());
+                                        MapleInventoryManipulator.addFromDrop(client, item);
+                                    }
+                                }
+                                interaction.removeAllVisitors(3, 1);
+                                interaction.closeShop(false); // wont happen unless some idiot hacks, hopefully ?
+                            } else if (interaction.getShopType() == 3 || interaction.getShopType() == 4) {
+                                interaction.removeAllVisitors(3, 1);
+                                interaction.closeShop(false);
+                            }
+                        } else {
+                            interaction.removeVisitor(MapleCharacter.this);
+                        }
+                    }
+
+
+also add this in channelserver.java
+
+
+import net.sf.odinms.server.PlayerInteraction.HiredMerchant;
+
+and this
+
+                for (ChannelServer channel : getAllInstances()) {
+                    for (int i = 910000001; i <= 910000022; i++) {
+                        for (MapleMapObject obj : channel.getMapFactory().getMap(i).getMapObjectsInRange(new Point(0, 0), Double.POSITIVE_INFINITY, Arrays.asList(MapleMapObjectType.HIRED_MERCHANT))) {
+                            HiredMerchant hm = (HiredMerchant) obj;
+                            hm.closeShop(true);
+                        }
+                    }
+                    for (MapleCharacter mc : channel.getPlayerStorage().getAllCharacters()) {
+                        mc.saveToDB(true, true);
+                    }
+                }
+            }
+        });
+    }
+
+
+add this in npcconversationmanager.java
+
+    public void removeHiredMerchantItem(int id) {
+        Connection con = DatabaseConnection.getConnection();
+        try {
+            PreparedStatement ps = con.prepareStatement("DELETE FROM hiredmerchant WHERE id = ?");
+            ps.setInt(1, id);
+            ps.executeUpdate();
+            ps.close();
+        } catch (SQLException se) {
+        }
+    }
+
+    public int getHiredMerchantMesos() {
+        Connection con = DatabaseConnection.getConnection();
+        int mesos;
+        try {
+            PreparedStatement ps = con.prepareStatement("SELECT MerchantMesos FROM characters WHERE id = ?");
+            ps.setInt(1, getPlayer().getId());
+            ResultSet rs = ps.executeQuery();
+            rs.next();
+            mesos = rs.getInt("MerchantMesos");
+            rs.close();
+            ps.close();
+
+        } catch (SQLException se) {
+            return 0;
+        }
+        return mesos;
+    }
+
+    public void setHiredMerchantMesos(int set) {
+        Connection con = DatabaseConnection.getConnection();
+        try {
+            PreparedStatement ps = con.prepareStatement("UPDATE characters SET MerchantMesos = ? WHERE id = ?");
+            ps.setInt(1, set);
+            ps.setInt(2, getPlayer().getId());
+            ps.executeUpdate();
+            ps.close();
+
+        } catch (SQLException se) {
+        }
+    }
+
+    public List<Pair<Integer, IItem>> getHiredMerchantItems() {
+        Connection con = DatabaseConnection.getConnection();
+        List<Pair<Integer, IItem>> items = new ArrayList<Pair<Integer, IItem>>();
+        try {
+            PreparedStatement ps = con.prepareStatement("SELECT * FROM hiredmerchant WHERE ownerid = ?");
+            ps.setInt(1, getPlayer().getId());
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                if (rs.getInt("type") == 1) {
+                    Equip eq = new Equip(rs.getInt("itemid"), (byte) 0, -1);
+                    eq.setUpgradeSlots((byte) rs.getInt("upgradeslots"));
+                    eq.setLevel((byte) rs.getInt("level"));
+                    eq.setStr((short) rs.getInt("str"));
+                    eq.setDex((short) rs.getInt("dex"));
+                    eq.setInt((short) rs.getInt("int"));
+                    eq.setLuk((short) rs.getInt("luk"));
+                    eq.setHp((short) rs.getInt("hp"));
+                    eq.setMp((short) rs.getInt("mp"));
+                    eq.setWatk((short) rs.getInt("watk"));
+                    eq.setMatk((short) rs.getInt("matk"));
+                    eq.setWdef((short) rs.getInt("wdef"));
+                    eq.setMdef((short) rs.getInt("mdef"));
+                    eq.setAcc((short) rs.getInt("acc"));
+                    eq.setAvoid((short) rs.getInt("avoid"));
+                    eq.setHands((short) rs.getInt("hands"));
+                    eq.setSpeed((short) rs.getInt("speed"));
+                    eq.setJump((short) rs.getInt("jump"));
+                    eq.setOwner(rs.getString("owner"));
+                    items.add(new Pair<Integer, IItem>(rs.getInt("id"), eq));
+                } else if (rs.getInt("type") == 2) {
+                    Item newItem = new Item(rs.getInt("itemid"), (byte) 0, (short) rs.getInt("quantity"));
+                    newItem.setOwner(rs.getString("owner"));
+                    items.add(new Pair<Integer, IItem>(rs.getInt("id"), newItem));
+                }
+            }
+            ps.close();
+            rs.close();
+        } catch (SQLException se) {
+            se.printStackTrace();
+            return null;
+        }
+        return items;
+    }
+}
+
+
+add this in changechannelhandler
+
+
+import net.sf.odinms.server.PlayerInteraction.HiredMerchant;
+
+and this
+
+
+        IPlayerInteractionManager playershop = player.getInteraction(); // just for safety.
+        if (playershop != null) {
+            if (playershop.isOwner(player)) {
+                if (playershop instanceof HiredMerchant) {
+                    HiredMerchant hm = (HiredMerchant) playershop;
+                    hm.setOpen(true);
+                } else if (playershop instanceof MaplePlayerShop) {
+                    for (MaplePlayerShopItem items : playershop.getItems()) {
+                        if (items.getBundles() > 0) {
+                            IItem item = items.getItem();
+                            item.setQuantity(items.getBundles());
+                            MapleInventoryManipulator.addFromDrop(c, item);
+                        }
+                    }
+                    playershop.closeShop(false); // wont happen unless some idiot hacks, hopefully ?
+                }
+            } else {
+                playershop.removeVisitor(player);
+            }
+
+
+add this in maplepacketcreator
+
+import net.sf.odinms.server.PlayerInteraction.HiredMerchant;
+
+
+and this
+
+
+    public static MaplePacket hiredMerchantBox() {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(0x2F); // header.
+        mplew.write(0x07);
+        return mplew.getPacket();
+    }
+
+    public static MaplePacket getInteraction(MapleCharacter chr, boolean firstTime) {
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.PLAYER_INTERACTION.getValue()); // header.
+
+        IPlayerInteractionManager ips = chr.getInteraction();
+        int type = ips.getShopType();
+        if (type == 1) {
+            mplew.write(HexTool.getByteArrayFromHexString("05 05 04"));
+        } else if (type == 2) {
+            mplew.write(HexTool.getByteArrayFromHexString("05 04 04"));
+        } else if (type == 3) {
+            mplew.write(HexTool.getByteArrayFromHexString("05 02 02"));
+        } else if (type == 4) {
+            mplew.write(HexTool.getByteArrayFromHexString("05 01 02"));
+        }
+
+        mplew.write(ips.isOwner(chr) ? 0 : 1);
+        mplew.write(0);
+        if (type == 2 || type == 3 || type == 4) {
+            addCharLook(mplew, ((MaplePlayerShop) ips).getMCOwner(), false);
+            mplew.writeMapleAsciiString(ips.getOwnerName());
+        } else {
+            mplew.writeInt(((HiredMerchant) ips).getItemId());
+            mplew.writeMapleAsciiString("Hired Merchant");
+        }
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- Definition of table `hiredmerchant`
+--
+
+DROP TABLE IF EXISTS `hiredmerchant`;
+CREATE TABLE `hiredmerchant` (
+  `id` int(11) NOT NULL auto_increment,
+  `ownerid` int(11) default '0',
+  `itemid` int(10) unsigned NOT NULL default '0',
+  `quantity` int(10) unsigned NOT NULL default '0',
+  `upgradeslots` int(11) default '0',
+  `level` int(11) default '0',
+  `str` int(11) default '0',
+  `dex` int(11) default '0',
+  `int` int(11) default '0',
+  `luk` int(11) default '0',
+  `hp` int(11) default '0',
+  `mp` int(11) default '0',
+  `watk` int(11) default '0',
+  `matk` int(11) default '0',
+  `wdef` int(11) default '0',
+  `mdef` int(11) default '0',
+  `acc` int(11) default '0',
+  `avoid` int(11) default '0',
+  `hands` int(11) default '0',
+  `speed` int(11) default '0',
+  `jump` int(11) default '0',
+  `owner` varchar(13) default '',
+  `type` tinyint(1) unsigned NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data for table `hiredmerchant`
+--
+
+/*!40000 ALTER TABLE `hiredmerchant` DISABLE KEYS */;
+/*!40000 ALTER TABLE `hiredmerchant` ENABLE KEYS */;
+
+
+
+
+add this in packetprocessor
+
+
+registerHandler(RecvPacketOpcode.HIRED_MERCHANT_REQUEST, new HiredMerchantRequest());
+
+
+
+NPC½Å±¾
+
+
+/*Made by Noob Media.
+Aka Hector of LastStory 
+*/
+importPackage(net.sf.odinms.server);
+
+var status;
+var choice;
+
+function start() {
+    status = -1;
+    action(1, 0, 0);
+} 
+
+function action(mode, type, selection) {
+    if (mode == 1)
+        status++;
+    else {
+        cm.dispose();
+        return;
+    }
+    
+    if (status == 0)
+        cm.sendNext("Hi, I'm the store banker for LastStory!");
+    else if (status == 1)
+        cm.sendSimple("Would you like to withdraw\r\n#b#L0#Mesos#l    #L1#Items#l");
+    else if (status == 2) {
+        cm.sendNext("Let me pull up your files...");
+        choice = selection;
+    } else {
+        if (choice == 0) {
+            if (status == 3) {
+                var mesoEarnt = cm.getHiredMerchantMesos();
+                if (mesoEarnt > 0)
+                    cm.sendYesNo("You have made "+mesoEarnt+" mesos in your store so far. Would you like to withdraw them?");
+                else {
+                    cm.sendNext("You have not made any mesos");
+                    cm.dispose();
+                }
+            } else if (status == 4) {
+                cm.sendNext("Thank you for using my services, your mesos has been recieved");
+                cm.gainMeso(cm.getHiredMerchantMesos());
+                cm.setHiredMerchantMesos(0);
+                cm.dispose();
+            }
+        } else {
+            if (status == 3) {
+                var items = cm.getHiredMerchantItems();
+                if (items.size() > 0) {
+                    var text = "Please select an item\r\n";
+                    for (var i = 0; i < items.size(); i++)
+                        text += "#L"+i+"##i"+items.get(i).getRight().getItemId()+"##l ";
+                    cm.sendSimple(text);
+                } else {
+                    cm.sendNext("You have not got items in the database");
+                    cm.dispose();
+                }
+            } else if (status == 4) {
+                var items = cm.getHiredMerchantItems();
+                if (cm.getC() == null)
+                    cm.getPlayer().dropMessage("RAWR");
+                MapleInventoryManipulator.addFromDrop(cm.getC(), items.get(selection).getRight(), "");
+                cm.sendNext("Thank you for using my services, your item has been recieved");
+                cm.removeHiredMerchantItem(items.get(selection).getLeft());
+                cm.dispose();
+            }
+        }
+    }
+}

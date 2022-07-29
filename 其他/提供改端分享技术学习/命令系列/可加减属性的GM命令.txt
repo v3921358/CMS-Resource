@@ -1,0 +1,58 @@
+今天早上逛外国的论坛发现的
+
+可以发挥下改为玩家命令哟!!!
+
+复制代码if (splitted[0].equals("!str") || splitted[0].equals("!int") || splitted[0].equals("!luk") || splitted[0].equals("!dex")) {
+
+                        int amount = Integer.parseInt(splitted[1]);
+                        boolean str = splitted[0].equals("!str");
+                        boolean Int = splitted[0].equals("!int");
+                        boolean luk = splitted[0].equals("!luk");
+                        boolean dex = splitted[0].equals("!dex");
+
+                        if (amount > 0 && amount <= player.getRemainingAp() && amount <= 32763 || amount < 0 && amount >= -32763 && Math.abs(amount) + player.getRemainingAp() <= 32767) {
+                                if (str && amount + player.getStr() <= 32767 && amount + player.getStr() >= 4) {
+                                        player.setStr(player.getStr() + amount);
+                                        player.updateSingleStat(MapleStat.STR, player.getStr());
+                                        player.setRemainingAp(player.getRemainingAp() - amount);
+                                        player.updateSingleStat(MapleStat.AVAILABLEAP, player.getRemainingAp());
+                                } else if (Int && amount + player.getInt() <= 32767 && amount + player.getInt() >= 4) {
+                                        player.setInt(player.getInt() + amount);
+                                        player.updateSingleStat(MapleStat.INT, player.getInt());
+                                        player.setRemainingAp(player.getRemainingAp() - amount);
+                                        player.updateSingleStat(MapleStat.AVAILABLEAP, player.getRemainingAp());
+                                } else if (luk && amount + player.getLuk() <= 32767 && amount + player.getLuk() >= 4) {
+                                        player.setLuk(player.getLuk() + amount);
+                                        player.updateSingleStat(MapleStat.LUK, player.getLuk());
+                                        player.setRemainingAp(player.getRemainingAp() - amount);
+                                        player.updateSingleStat(MapleStat.AVAILABLEAP, player.getRemainingAp());
+                                } else if (dex && amount + player.getDex() <= 32767 && amount + player.getDex() >= 4) {
+                                        player.setDex(player.getDex() + amount);
+                                        player.updateSingleStat(MapleStat.DEX, player.getDex());
+                                        player.setRemainingAp(player.getRemainingAp() - amount);
+                                        player.updateSingleStat(MapleStat.AVAILABLEAP, player.getRemainingAp());
+                                } else {
+                                        mc.dropMessage("Please make sure the stat you are trying to raise is not over ***767 or under 4.");
+                                }
+                        } else {
+                                mc.dropMessage("Please make sure your AP is not over ***767 and you have enough to distribute.");
+                        }
+                }
+
+ 
+
+
+有些端还需要加下面这段
+复制代码new CommandDefinition("str", "<amount>", "Sets your strength to a higher amount if you have enough AP or takes it away if you aren't over 32767 AP.", 0),
+new CommandDefinition("int", "<amount>", "Sets your intelligence to a higher amount if you have enough AP or takes it away if you aren't over 32767 AP.", 0),
+new CommandDefinition("luk", "<amount>", "Sets your luck to a higher amount if you have enough AP or takes it away if you aren't over 32767 AP.", 0),
+new CommandDefinition("dex", "<amount>", "Sets your dexterity to a higher amount if you have enough AP or takes it away if you aren't over 32767 AP.", 0),
+
+ 
+
+
+加的属性的命令都会的吧 
+比如
+!str 100
+那么减去就是
+!str -100

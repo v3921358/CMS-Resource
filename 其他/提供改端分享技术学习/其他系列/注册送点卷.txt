@@ -1,0 +1,4 @@
+src\net\sf\odinms\clientMapleCharacter.java
+ret.buddylist = new BuddyList(25);
+
+newchar.modifyCSPoints(0,30000);

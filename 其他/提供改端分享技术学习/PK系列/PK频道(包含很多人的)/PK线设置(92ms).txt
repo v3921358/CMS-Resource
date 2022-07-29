@@ -1,0 +1,99 @@
+找到src\net\sf\odinms\net\channel\ChannelServer.java 
+   查找private boolean mts; //如果没有这个的话就在类private boolean 这样的下面添加如下代码: 
+  
+                private short pvpChannel; 
+
+     然后找到 public void reconnectWorld() {  这个.. 
+  在众多类似的代码中添加  pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpchannel")); 
+
+  再找到   public void run() { 
+  也是在众多类似的代码中添加    pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpChannel")); 
+
+   然后增加两个赋值函数量: 
+  
+        public short getPvpChannel() { 
+        return pvpChannel; 
+    } 
+    public void setPvpChannel(Short blahblah) { 
+        this.pvpChannel = blahblah; 
+    } 
+
+     然后打开\src\net\sf\odinms\net\channel\handler\AbstractDealDamageHandler.java 
+
+        在类似的地方添加  import net.sf.odinms.server.maps.pvp.PvPLibrary;   
+                     然后查找: if (attackCount != attack.numDamage && attack.skill != 4211006) { 
+            player.getCheatTracker().registerOffense(CheatingOffense.MISMATCHING_BULLETCOUNT, attack.numDamage + "/" + attackCount); 
+            return; 
+        } 
+    把找到这些代码下面的一段替换为: 
+      int totDamage = 0; 
+        final MapleMap map = player.getMap(); 
+        if ((attack.skill != 2301002 && attack.skill != 4201004 && attack.skill != 1111008) && player.getClient().getChannel() == player.getClient().getChannelServer ().getPvpChannel()) {//PK线路函数 
+              PvPLibrary.doPvP(player, attack); 
+        } 
+   如果说有错误的话,请按下面的做: 
+  
+             新建立一个JAVA类,名称为 PvPLibrary.java     
+   编译保存即可!!! 
+
+       最后记得在world.properties里面增加 
+     net.sf.odinms.world.pvpChannel=1 //1就1线PK频道
+(转）
+您正在看的文章来自92MS冒险岛私服研究中心 http://www.92ms.cn,原文地址:http://www.92ms.cn/read.php?tid=12
+1.打开ChannelServer.java 
+查找类似下列的语句 
+private int expRate; 
+    private int mesoRate; 
+    private int dropRate; 
+    private int bossdropRate; 
+    private int petExpRate; 
+    private boolean dropUndroppables; 
+    private boolean moreThanOne; 
+    private int channel; 
+我们可以在这些语句中添加一句 private short pvpChannel; 
+2.继续打开ChannelServer.java 
+查找public void reconnectWorld() { 
+下面有一大堆代码，我们找到 
+itemStatMultiplier = Short.parseShort(props.getProperty("net.sf.odinms.world.itemStatMultiplier")); 
+                                          godlyItemRate = Short.parseShort(props.getProperty("net.sf.odinms.world.godlyItemRate")); 
+我们可以在这两句之中添加一句  
+pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpchannel")); 
+3.仍然打开ChannelServer.java（第三步和第二步差不多操作，但不要搞乱） 
+查找public void run() { 
+下面同样有一大堆代码，我们找到 
+itemStatMultiplier = Short.parseShort(props.getProperty("net.sf.odinms.world.itemStatMultiplier")); 
+                                          godlyItemRate = Short.parseShort(props.getProperty("net.sf.odinms.world.godlyItemRate")); 
+我们可以在这两句之中添加一句  
+pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpchannel")); 
+4.仍然是打开ChannelServer.java 
+  查找public boolean allowMTS() { 
+        return mts; 
+    } 
+下面增加public short getPvpChannel() { 
+        return pvpChannel; 
+    } 
+    public void setPvpChannel(Short blahblah) { 
+        this.pvpChannel = blahblah; 
+    } 
+5.打开AbstractDealDamageHandler.java 
+查找:import net.sf.odinms.server.maps.MapleMapObjectType; 
+下面增加import net.sf.odinms.server.maps.pvp.PvPLibrary;   
+6.继续打开AbstractDealDamageHandler.java 
+查找 if (attackCount != attack.numDamage && attack.skill != 4211006) { 
+            player.getCheatTracker().registerOffense(CheatingOffense.MISMATCHING_BULLETCOUNT, attack.numDamage + "/" + attackCount); 
+            return; 
+        } 
+下面有一段代码，把它更换为（如果下面没有代码，那就直接添加下面代码） 
+ int totDamage = 0; 
+        final MapleMap map = player.getMap(); 
+        if ((attack.skill != 2301002 && attack.skill != 4201004 && attack.skill != 1111008) && player.getClient().getChannel() == player.getClient().getChannelServer ().getPvpChannel()) { 
+              PvPLibrary.doPvP(player, attack); 
+        } 
+
+基本上完成了，然后在 
+net.sf.odinms.net.channel.handler这里新建一个JAVA类，命名为PvPLibrary 
+PvPLibrary类内容为附件PvPLibrary内容，自己直接覆盖吧 
+对了，别忘记还要打开端里的 world.properties 
+  适当位置 加入一段 
+# PK频道，0为不开启，自己理解吧 
+net.sf.odinms.world.pvpChannel=4 

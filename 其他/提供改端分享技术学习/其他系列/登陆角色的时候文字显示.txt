@@ -1,0 +1,23 @@
+找到world.properties 
+增加： 
+net.sf.odinms.world.serverName= 
+
+找到：AbstractPlayerInteraction.java 
+public String serverName() { 
+return c.getChannelServer().getServerName(); 
+} 
+
+找到:ChannelServer.java 
+增加（如果存在就不用增加了） 
+private String serverName; 
+
+public String getServerName() { 
+return serverName; 
+} 
+
+serverName = props.getProperty("net.sf.odinms.world.serverName"); （类似的增加，共2次） 
+
+找到PlayerLoggedinHandler.java 
+
+适当的位置增加： 
+c.getSession().write(MaplePacketCreator.sendHint("欢迎来到 "+ c.getChannelServer().getServerName() + "。\r\n#r#e欢迎您来到本服", 350, 5)); 

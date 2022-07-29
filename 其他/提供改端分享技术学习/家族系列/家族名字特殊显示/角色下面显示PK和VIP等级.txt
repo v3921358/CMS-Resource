@@ -1,0 +1,41 @@
+src   net    sf   odinms   tools   MaplePacketCreator.java
+找到下面这样的语句
+mplew.writeShort(SendPacketOpcode.SPAWN_PLAYER.getValue());
+        mplew.writeInt(chr.getId());
+        mplew.writeMapleAsciiString(chr.getName());
+在下面加入
+String pked = "";//定义pked这个字符串
+String vip = "";//定义vip这个字符串
+    if (chr.getVip() == 1) {
+           vip = "VIP1";
+        } else if (chr.getVip() == 2) {
+           vip = "VIP2";
+        } else if (chr.getVip() == 3) {
+           vip = "VIP3";
+        } else if (chr.getVip() == 4) {
+           vip = "VIP4";
+         }
+        if ((chr.getPvpKills() >= 0) && (chr.getPvpKills() <= 50)) {
+                    pked = "[PK菜鸟]";
+        } else if ((chr.getPvpKills() >= 51) && (chr.getPvpKills() <= 200)) {
+                    pked = "[PK圣人]";
+        } else if ((chr.getPvpKills() >= 201) && (chr.getPvpKills() <= 800)) {
+                    pked = "[PK尊者]";
+        } else if ((chr.getPvpKills() >= 801) && (chr.getPvpKills() <= 2000)) {
+                    pked = "[PK霸主]";
+        } else if (chr.getPvpKills() >= 2001) {
+                    pked = "[PK王者]";
+        }
+找到下面类似于这一的加入 vip和pked
+if (chr.getGuildId() <= 0) {
+            mplew.writeMapleAsciiString(vip + "囧~可怜虫,都还没家族!" + pked);//加入了vip及pked值
+            mplew.write(new byte[6]);
+        } else {
+            MapleGuildSummary gs = chr.getClient().getChannelServer().getGuildSummary(chr.getGuildId());
+
+            if (gs != null) {
+                mplew.writeMapleAsciiString(vip + gs.getName() + pked);//加入了vip及pked值
+                mplew.writeShort(gs.getLogoBG());
+                mplew.write(gs.getLogoBGColor());
+                mplew.writeShort(gs.getLogo());
+                mplew.write(gs.getLogoColor());

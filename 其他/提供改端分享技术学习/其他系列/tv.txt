@@ -1,0 +1,230 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+打开这个文件 
+UseCashItemHandler
+
+找到
+if (itemType == 507) {
+将下面的用替换
+
+if (itemType == 507) {
+                        switch (itemId / 1000 % 10) {
+                            case 1: // Megaphone
+                                if (player.getLevel() >= 10) {
+                                    player.getMap().broadcastMessage(MaplePacketCreator.serverNotice(2, player.getName() + " : " + slea.readMapleAsciiString()));
+                                } else { // Client does it but ehh..
+                                    player.dropMessage("You may not use this until you're level 10");
+                                }
+                                break;
+                            case 2: // Super megaphone
+                                c.getChannelServer().getWorldInterface().broadcastMessage(null, MaplePacketCreator.serverNotice(3, c.getChannel(), player.getName() + " : " + slea.readMapleAsciiString(), (slea.readByte() != 0)).getBytes());
+                                break;
+                            case 3: // Heart megaphone
+                                log.info("Unhandled Megaphone Packet : " + slea.toString());
+                                log.info("Megaphone ID: " + itemId);
+                                break;
+                            case 4: // Skull megaphone
+                                log.info("Unhandled Megaphone Packet : " + slea.toString());
+                                log.info("Megaphone ID: " + itemId);
+                                break;
+                            case 5: // Maple TV
+                                int tvType = itemId % 10;
+                                boolean megassenger = false;
+                                boolean ear = false;
+                                MapleCharacter victim = null;
+
+                                if (tvType != 1) { // 1 is the odd one out since it doesnt allow 2 players.
+                                    if (tvType >= 3) {
+                                        megassenger = true;
+                                        if (tvType == 3) {
+                                            slea.readByte();
+                                        }
+                                        ear = 1 == slea.readByte();
+                                    } else if (tvType != 2) {
+                                        slea.readByte();
+                                    }
+                                    if (tvType != 4) {
+                                        victim = c.getChannelServer().getPlayerStorage().getCharacterByName(slea.readMapleAsciiString());
+                                    }
+                                }
+                                List<String> messages = new LinkedList<String>();
+                                StringBuilder builder = new StringBuilder();
+                                for (int i = 0; i < 5; i++) {
+                                    String message = slea.readMapleAsciiString();
+                                    if (megassenger) {
+                                        builder.append(" ");
+                                        builder.append(message); // builder.append(" "+message);
+                                    }
+                                    messages.add(message);
+                                }
+                                slea.readInt(); // some random shit
+                                if (megassenger) {
+                                    c.getChannelServer().getWorldInterface().broadcastMessage(null, MaplePacketCreator.serverNotice(3, c.getChannel(), player.getName() + " : " + builder.toString(), ear).getBytes());
+                                }
+                                if (!MapleTVEffect.isActive()) {
+                                    new MapleTVEffect(player, victim, messages, tvType);
+                                    MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false);
+                                } else {
+                                    player.dropMessage("MapleTV is already in use :D");
+                                }
+                                break;
+                        }
+                        MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false);
+                  } 
+
+然后在
+MaplePacketCreator
+添加
+  public static MaplePacket enableTV() {
+        // [0F 01] [00 00 00 00] [00] <-- 0x112 in v63,
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.ENABLE_TV.getValue()); // enableTV = 0x10F
+        mplew.writeInt(0);
+        mplew.write(0);
+        return mplew.getPacket();
+    }
+
+    public static MaplePacket removeTV() {
+        // 11 01 <-- 0x10E in v62
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.REMOVE_TV.getValue()); // removeTV = 0x111 <-- v63
+        return mplew.getPacket();
+    }
+
+    public static MaplePacket sendTV(MapleCharacter chr, List<String> messages, int type, MapleCharacter partner) {
+        // [10 01] [01] [00 00 03 B1 4F 00 00 00 67 75 00 00 01 75 4B 0F 00 0C E3 FA 10 00 FF FF
+        // 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00] [0B 00 64 75 73 74 72 65 6D 6F 76
+        // 65 72] [00 00] [07 00] [70 61 63 6B 65 74 73] 00 00 00 00 00 00 00 00 0F 00 00 00
+        
+        MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter();
+        mplew.writeShort(SendPacketOpcode.SEND_TV.getValue()); // SEND_TV = 0x11D
+        mplew.write(partner != null ? 2 : 0);
+        mplew.write(type); // type   Heart = 2  Star = 1  Normal = 0
+        addCharLook(mplew, chr, false);
+        mplew.writeMapleAsciiString(chr.getName());
+        if (partner != null) {
+            mplew.writeMapleAsciiString(partner.getName());
+        } else {
+            mplew.writeShort(0); // could be partner
+        }
+        for (int i = 0; i < messages.size(); i++) { // for (String message : messages) {
+            if (i == 4 && messages.get(4).length() > 15) {
+                mplew.writeMapleAsciiString(messages.get(4).substring(0, 15)); // hmm ?
+            } else {
+                mplew.writeMapleAsciiString(messages.get(i));
+            }
+        }
+        mplew.writeInt(1337); // time limit shit lol 'Your thing still start in blah blah seconds'
+        if (partner != null) {
+            addCharLook(mplew, partner, false);
+        }
+        return mplew.getPacket();
+    } 
+
+然后在
+maps
+里面添加 
+MapleTVEffect
+
+
+内容是
+package net.sf.odinms.server.maps;
+
+import java.rmi.RemoteException;
+import java.util.LinkedList;
+import java.util.List;
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.net.MaplePacket;
+import net.sf.odinms.net.world.remote.WorldChannelInterface;
+import net.sf.odinms.server.TimerManager;
+import net.sf.odinms.tools.MaplePacketCreator;
+//@This file is property of Cheetah and XoticStory. ;D
+//*
+
+public class MapleTVEffect {
+
+    private static List<String> message = new LinkedList<String>();
+    private static MapleCharacter user;
+    private static boolean active;
+    private static int type;
+    private static MapleCharacter partner = null;
+
+    public MapleTVEffect(MapleCharacter user_, MapleCharacter partner_, List<String> msg, int type_) {
+        message = msg;
+        user = user_;
+        type = type_;
+        partner = partner_;
+        broadCastTV(true);
+    }
+
+    public static boolean isActive() {
+        return active;
+    }
+
+    private static void setActive(boolean set) {
+        active = set;
+    }
+
+    private static MaplePacket removeTV() {
+        return MaplePacketCreator.removeTV();
+    }
+
+    public static MaplePacket startTV() {
+        return MaplePacketCreator.sendTV(user, message, type <= 2 ? type : type - 3, partner);
+    }
+
+    public static void broadCastTV(boolean active_) {
+        WorldChannelInterface wci = user.getClient().getChannelServer().getWorldInterface();
+        setActive(active_);
+        try {
+            if (active_) {
+                wci.broadcastMessage(null, MaplePacketCreator.enableTV().getBytes());
+                wci.broadcastMessage(null, startTV().getBytes());
+                scheduleCancel();
+            } else {
+                wci.broadcastMessage(null, removeTV().getBytes());
+            }
+
+        } catch (RemoteException noob) {
+        }
+    }
+
+    private static void scheduleCancel() {
+        int delay = 15000; // default. cbf adding it to switch
+        switch (type) {
+            case 0:
+            case 3:
+                delay = 15000;
+                break;
+            case 1:
+            case 4:
+                delay = 30000;
+                break;
+            case 2:
+            case 5:
+                delay = 60000;
+        }
+        TimerManager.getInstance().schedule(new Runnable() {
+
+            @Override
+            public void run() {
+                broadCastTV(false);
+            }
+        }, delay);
+    }
+} 
+
+SendPacketOpcode
+添加
+        ENABLE_TV,
+        REMOVE_TV,
+        SEND_TV
+最后在
+sendops.properties 
+添加
+SEND_TV = 0x10D
+REMOVE_TV = 0x10E
+ENABLE_TV = 0x10F 

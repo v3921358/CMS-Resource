@@ -1,0 +1,77 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+1. 按照以下方法创建数据库表项bosslog
+
+
+
+CREATE TABLE `odinms`.`bosslog` (
+`bosslogid` INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+`characterid` INTEGER UNSIGNED NOT NULL,
+`bossid` VARCHAR(20) NOT NULL,
+`lastattempt` TIMESTAMP NOT NULL,
+PRIMARY KEY (`bosslogid`)
+);
+
+
+2. 增加以下语句到文件MapleCharacter.java 末尾最后一个}前面
+
+
+后面添加
+//getBossLog module
+public int getBossLog(String bossid) {
+Connection con1 = DatabaseConnection.getConnection();
+try {
+int ret_count = 0;
+PreparedStatement ps;
+ps = con1.prepareStatement("select count(*) from bosslog where characterid = ? and bossid = ? and lastattempt >= subtime (current_timestamp, '1 0:0:0.0')");
+ps.setInt(1, id);
+ps.setString(2, bossid);
+ResultSet rs = ps.executeQuery();
+if (rs.next()) {
+ret_count = rs.getInt(1);
+} else {
+ret_count = -1;
+}
+rs.close();
+ps.close();
+return ret_count;
+} catch (Exception Ex) {
+log.error("Error while read bosslog.", Ex);
+return -1;
+}
+}  
+
+
+//setBossLog module
+public void setBossLog(String bossid) {
+Connection con1 = DatabaseConnection.getConnection();
+try {
+PreparedStatement ps;
+ps = con1.prepareStatement("insert into bosslog (characterid, bossid) values (?,?)");
+ps.setInt(1, id);
+ps.setString(2, bossid);
+ps.executeUpdate();
+ps.close();
+} catch (Exception Ex) {
+log.error("Error while insert bosslog.", Ex);
+}
+}  
+
+3. 添加以下语句到文件NPCConversationManager.java 
+最后一个}前面
+
+//getBossLog
+public int getBossLog(String bossid)
+{
+return getPlayer().getBossLog(bossid);
+}  
+
+
+//setBossLog
+public void setBossLog(String bossid)
+{
+getPlayer().setBossLog(bossid);
+}

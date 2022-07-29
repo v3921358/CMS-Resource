@@ -1,0 +1,20 @@
+如下：
+
+打开src\net\sf\odinms\tools\MaplePacketCreator.java
+查找
+mplew.writeMapleAsciiString(chr.getName());
+会出现
+if (chr.getGuildId() <= 0)
+        {
+            mplew.writeMapleAsciiString("");
+            mplew.write(new byte[6]);
+        }
+        else
+        {
+            MapleGuildSummary gs = chr.getClient().getChannelServer().getGuildSummary(
+                    chr.getGuildId());
+
+把mplew.writeMapleAsciiString("");改为
+mplew.writeMapleAsciiString("你想加入字就行");
+
+就这样了。。原自泡沫论坛！

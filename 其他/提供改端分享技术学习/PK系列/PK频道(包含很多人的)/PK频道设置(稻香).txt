@@ -1,0 +1,94 @@
+  打开：  ChannelServer.java
+
+    找到： private int maxStat;
+
+  加入如下：  private short pvpChannel;
+
+    找到： maxStat = Integer.parseInt(props.getProperty("net.sf.odinms.world.maxStat"));
+
+
+     下面加入： pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpchannel"));
+
+    
+   再找到： maxStat = Integer.parseInt(props.getProperty("net.sf.odinms.world.maxStat"));
+
+
+   下面加入：  pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpChannel"));
+
+   
+
+   查找： public boolean getMultiLevel() {
+
+   删除最后一个  }  这样是为了让最后一条函数返回于一条赋予值！
+
+   最后加入： 
+
+    public short getPvpChannel() {
+        return pvpChannel;
+    }
+
+    public void setPvpChannel(Short blahblah) {
+        this.pvpChannel = blahblah;
+    }
+}
+
+   
+
+  然后打开：AbstractDealDamageHandler.java
+
+
+     查找： int totDamage = 0;
+            final MapleMap map = player.getMap();
+
+
+  把这两句删除，然后在if (attack.skill == 4211006) {  上面增加如下代码：
+
+
+  int totDamage = 0;
+        final MapleMap map = player.getMap();
+
+        if ((attack.skill != 2301002 && attack.skill != 4201004 && attack.skill != 1111008) && player.getClient().getChannel() == player.getClient().getChannelServer().getPvpChannel()) {
+            PvPLibrary.doPvP(player, attack);
+        }
+
+     
+
+        最后然后在：package net.sf.odinms.net.channel.handler这里新建一个JAVA类，命名为        PvPLibrary
+
+
+  然后在里面输入代码：
+
+package net.sf.odinms.net.channel.handler;
+
+import net.sf.odinms.client.MapleCharacter;
+import net.sf.odinms.net.channel.handler.AbstractDealDamageHandler.AttackInfo;
+
+/**
+ *
+ * @By  ZreHy
+ */
+
+class PvPLibrary {  //声明类是公共的
+
+    static void doPvP(MapleCharacter player, AttackInfo attack) {
+        throw new UnsupportedOperationException("没有赋值！");
+    }
+
+}
+
+
+
+OK。。编译即可！！！很详细！！
+
+
+  最后一步，
+ 
+   打开端里的 world.properties
+
+  加入一段
+
+# PK频道，0为不开启！这里4就是第四频道开放PK！
+net.sf.odinms.world.pvpChannel=4 
+
+
+            

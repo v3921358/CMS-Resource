@@ -1,0 +1,89 @@
+修改GM命令，只封MAC和号,不封IP
+
+net.sf.odinms.client.messages中的CommandProcessor.java 
+找到 
+else if (splitted[0].equals("!ban")) { 
+if (splitted.length < 3) { 
+new ServernoticeMapleClientMessageCallback(2, c).dropMessage("Syntaxhelper : Syntax: !ban charname reason"); 
+return true; 
+} 
+String originalReason = StringUtil.joinStringFrom(splitted, 2); 
+String reason = c.getPlayer().getName() + " banned " + splitted[1] + ": " + 
+originalReason; 
+MapleCharacter target = cserv.getPlayerStorage().getCharacterByName(splitted[1]); 
+if (target != null) { 
+String readableTargetName = MapleCharacterUtil.makeMapleReadable(target.getName()); 
+String ip = target.getClient().getSession().getRemoteAddress().toString().split(":")[0]; 
+reason += " (IP: " + ip + ")"; 
+target.ban(reason); 
+mc.dropMessage("Banned " + readableTargetName + " ipban for " + ip + " reason: " + originalReason); 
+} else { 
+if (MapleCharacter.ban(splitted[1], reason, false)) { 
+mc.dropMessage("Offline Banned " + splitted[1]); 
+} else { 
+mc.dropMessage("Failed to ban " + splitted[1]); 
+} 
+} 
+} 
+
+复制 在下面 注意要复制全哦 
+把复制好的“ban”改下名字任意取 
+注释掉reason += " (IP: " + ip + ")"; 
+mc.dropMessage("Banned " + readableTargetName + " ipban for " + ip + " reason: " + originalReason); 
+改为 
+mc.dropMessage("Banned " + readableTargetName + " reason: " + originalReason); 
+然后找到 
+target.ban(reason); 
+改为target.ban1(reason); 
+鼠标右击他-导航-转至源 
+会转到MapleCharacter.java 
+查找：ban 
+找到这个方法： 
+public void ban(String reason) { 
+  if (lastmonthfameids == null) { 
+  throw new RuntimeException("Trying to ban a non-loaded character (testhack)"); 
+  } 
+  try { 
+  getClient().banMacs(); 
+  Connection con = DatabaseConnection.getConnection(); 
+  PreparedStatement ps = con.prepareStatement("UPDATE accounts SET banned = ?, banreason = ? WHERE id = ?"); 
+  ps.setInt(1, 1); 
+  ps.setString(2, reason); 
+  ps.setInt(3, accountid); 
+  ps.executeUpdate(); 
+  ps.close(); 
+  ps = con.prepareStatement("INSERT INTO ipbans VALUES (DEFAULT, ?)"); 
+  String[] ipSplit = client.getSession().getRemoteAddress().toString().split(":"); 
+  ps.setString(1, ipSplit[0]); 
+  ps.executeUpdate(); 
+  ps.close(); 
+  } catch (SQLException ex) { 
+  log.error("Error while banning", ex); 
+  } 
+  client.getSession().close(); 
+} 
+
+复制一份 粘贴 修改看下面红色显示的 
+public void ban1(String reason) { 
+  if (lastmonthfameids == null) { 
+  throw new RuntimeException("Trying to ban a non-loaded character (testhack)"); 
+  } 
+  try { 
+  getClient().banMacs(); 
+  Connection con = DatabaseConnection.getConnection(); 
+  PreparedStatement ps = con.prepareStatement("UPDATE accounts SET banned = ?, banreason = ? WHERE id = ?"); 
+  ps.setInt(1, 1); 
+  ps.setString(2, reason); 
+  ps.setInt(3, accountid); 
+  ps.executeUpdate(); 
+  ps.close(); 
+  //ps = con.prepareStatement("INSERT INTO ipbans VALUES (DEFAULT, ?)"); 
+  //String[] ipSplit = client.getSession().getRemoteAddress().toString().split(":"); 
+  //ps.setString(1, ipSplit[0]); 
+  // ps.executeUpdate(); 
+  //ps.close(); 
+  } catch (SQLException ex) { 
+  log.error("Error while banning", ex); 
+  } 
+  client.getSession().close(); 
+}

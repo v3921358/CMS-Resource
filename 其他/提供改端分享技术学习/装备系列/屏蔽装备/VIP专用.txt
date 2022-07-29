@@ -1,0 +1,21 @@
+打开：  \src\net\sf\odinms\server\MapleInventoryManipulator.java
+
+
+   找到：public static void equip(MapleClient c, byte src, byte dst) {  
+
+
+在这段的  return;
+        }
+
+下面增加：
+
+  if(cm.getChar().getVip() < 1) {
+            switch (source.getItemId()) {
+                case 1002140: //隐屏GM帽子不能给普通玩家使用
+           case 5390001: //隐屏喇叭不能给普通玩家使用
+    //如果需要增加其他的就 添加 case 代码;  即可
+                    removeAllById(c, source.getItemId(), false);
+                    c.getPlayer().getClient().getSession().write(MaplePacketCreator.serverNotice(1, "对不起！这个装备只允许VIP1以上的玩家使用！如果你坚持使用！请联系GM在线购买！"));     //上面这句（就是红色的)如果有错可以删了，那个只是提示不能带装备而已，那个我在稻香7.0弄了会出错！要是用囧的应该可以！
+                    return;
+            }
+        }

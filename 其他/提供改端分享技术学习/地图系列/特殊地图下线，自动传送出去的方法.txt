@@ -1,0 +1,26 @@
+在MapleCharacter.java中
+找到
+
+ps.setInt(17, job.getId());
+ps.setInt(18, hair);
+ps.setInt(19, face);
+
+下面
+
+修改为
+
+if (map == null) {
+    ps.setInt(20, 0);
+    } else {
+                if(map.getId()==280030000 || map.getId()==211042400){
+                                ps.setInt(20, 211000000);
+                            }else if (map.getId()==220080001){
+                                ps.setInt(20, 220000000);
+                            }else if (map.getId()==109020001){
+                                ps.setInt(20, 220000000);
+                            }else if (map.getId()==109020001){
+                                ps.setInt(20, 220000000);
+                            }else{
+                                ps.setInt(20, map.getId());
+                            }
+            }

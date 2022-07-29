@@ -1,0 +1,137 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+打开： 
+MapleGuild.java 
+找到： 
+复制代码public static void displayGuildRanks(MapleClient c, int npcid) { 
+
+
+在上面添加： 
+复制代码public static void showlvl(MapleClient c, int npcid) 
+{ 
+  try 
+  { 
+   Connection con = DatabaseConnection.getConnection(); 
+   PreparedStatement ps = con.prepareStatement( 
+     "SELECT `name`, `level`, `str`, `dex`, " + 
+     "`int`, `luk` FROM characters ORDER BY `level` DESC LIMIT 100"); 
+    
+   ResultSet rs = ps.executeQuery(); 
+   c.getSession().write(MaplePacketCreator.showGuildRanks3(npcid, rs)); 
+    
+   ps.close(); 
+   rs.close(); 
+  } 
+  catch (Exception e) {log.error("failed to display guild ranks.", e);} 
+} 
+    
+    public static void showfame(MapleClient c, int npcid) 
+{ 
+  try 
+  { 
+   Connection con = DatabaseConnection.getConnection(); 
+   PreparedStatement ps = con.prepareStatement( 
+     "SELECT `name`, `fame`, `str`, `dex`, " + 
+     "`int`, `luk` FROM characters ORDER BY `fame` DESC LIMIT 100"); 
+    
+   ResultSet rs = ps.executeQuery(); 
+   c.getSession().write(MaplePacketCreator.showGuildRanks5(npcid, rs)); 
+    
+   ps.close(); 
+   rs.close(); 
+  } 
+  catch (Exception e) {log.error("failed to display guild ranks.", e);} 
+} 
+
+
+打开MaplePacketCreator.jvava 
+
+找到： 
+复制代码public static MaplePacket showGuildRanks(int npcid, ResultSet rs) throws SQLException { 
+
+
+在上面添加： 
+复制代码public static MaplePacket showGuildRanks3(int npcid, ResultSet rs) throws SQLException 
+{ 
+  MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(); 
+   
+  mplew.writeShort(SendPacketOpcode.GUILD_OPERATION.getValue()); 
+  mplew.write(0x49); 
+  mplew.writeInt(npcid); 
+  if (!rs.last())  //no guilds o.o 
+  { 
+   mplew.writeInt(0); 
+   return mplew.getPacket(); 
+  } 
+   
+  mplew.writeInt(rs.getRow());  //number of entries 
+   
+  rs.beforeFirst(); 
+  while (rs.next()) 
+  { 
+   mplew.writeMapleAsciiString(rs.getString("name")); 
+   mplew.writeInt(rs.getInt("level")); 
+   mplew.writeInt(rs.getInt("str")); 
+   mplew.writeInt(rs.getInt("dex")); 
+   mplew.writeInt(rs.getInt("int")); 
+   mplew.writeInt(rs.getInt("luk")); 
+  } 
+   
+  return mplew.getPacket(); 
+} 
+
+public static MaplePacket showGuildRanks5(int npcid, ResultSet rs) throws SQLException 
+{ 
+  MaplePacketLittleEndianWriter mplew = new MaplePacketLittleEndianWriter(); 
+   
+  mplew.writeShort(SendPacketOpcode.GUILD_OPERATION.getValue()); 
+  mplew.write(0x49); 
+  mplew.writeInt(npcid); 
+  if (!rs.last())  //no guilds o.o 
+  { 
+   mplew.writeInt(0); 
+   return mplew.getPacket(); 
+  } 
+   
+  mplew.writeInt(rs.getRow());  //number of entries 
+   
+  rs.beforeFirst(); 
+  while (rs.next()) 
+  { 
+   mplew.writeMapleAsciiString(rs.getString("name")); 
+   mplew.writeInt(rs.getInt("fame")); 
+   mplew.writeInt(rs.getInt("str")); 
+   mplew.writeInt(rs.getInt("dex")); 
+   mplew.writeInt(rs.getInt("int")); 
+   mplew.writeInt(rs.getInt("luk")); 
+  } 
+   
+  return mplew.getPacket(); 
+} 
+
+
+
+在打开NPCConversationManager.java 
+找到： 
+复制代码public void displayGuildRanks() { 
+
+
+在上面添加： 
+复制代码public void showlvl() { 
+        MapleGuild.showlvl(getClient(), npc); 
+    } 
+     
+    public void showfame() { 
+        MapleGuild.showfame(getClient(), npc); 
+    } 
+
+
+
+
+OK，编译吧，在游戏中的NPC调用方法： 
+cm.showlvl() //等级排行 
+和 
+cm.showfame() //人气排行

@@ -1,0 +1,11 @@
+MapleInventoryManipulator.java
+查找 
+// add new slots if there is still something left
+找到3处，改为：
+else { //Now if a 
+                            slotMax = (short)quantity;
+                        }                                                
+            // add new slots if there is still something left
+
+在那个文件里面有3处// add new slots if there is still something left都要改
+编译后就可以了

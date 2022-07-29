@@ -1,0 +1,46 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+var wui = 0;
+
+function start() {
+if (cm.getMeso() >= 10000000) {
+    cm.sendYesNo ("我是卖属性点的! \n\r\n\r你只需要花费1000万金币就能增加10属性喔!");
+        } else {
+            cm.sendOk("对不起，你的钱不够,你只需要花费1000万金币就能增加10属性喔! ");
+cm.gainFame(0);
+            cm.dispose();
+}
+}
+
+
+
+function action(mode, type, selection) {
+if (cm.getMeso() >= 10000000) {
+    if (mode == 0 || wui == 1) {
+        cm.dispose();
+    } else {
+
+    cm.gainMeso(-10000000);
+        wui = 1;
+        var statup = new java.util.ArrayList();
+        var p = cm.c.getPlayer();
+        var totAp = p.getRemainingAp() + p.getStr() + p.getDex() + p.getInt() + p.getLuk();
+                p.setStr(4);
+                p.setDex(4);
+                p.setInt(4);
+                p.setLuk(4);
+        p.setRemainingAp (totAp -6);
+        statup.add (new net.sf.odinms.tools.Pair(net.sf.odinms.client.MapleStat.STR, java.lang.Integer.valueOf(4)));
+        statup.add (new net.sf.odinms.tools.Pair(net.sf.odinms.client.MapleStat.DEX, java.lang.Integer.valueOf(4)));
+        statup.add (new net.sf.odinms.tools.Pair(net.sf.odinms.client.MapleStat.LUK, java.lang.Integer.valueOf(4)));
+        statup.add (new net.sf.odinms.tools.Pair(net.sf.odinms.client.MapleStat.INT, java.lang.Integer.valueOf(4)));
+        statup.add (new net.sf.odinms.tools.Pair(net.sf.odinms.client.MapleStat.AVAILABLEAP, java.lang.Integer.valueOf(p.getRemainingAp())));
+        p.getClient().getSession().write (net.sf.odinms.tools.MaplePacketCreator.updatePlayerStats(statup));
+        cm.sendOk ("噢，你的属性又增加了，你真是太历害了！");
+    }
+}
+}
+

@@ -1,0 +1,40 @@
+找到src\net\sf\odinms\net\channel\ChannelServer.java 
+   查找private boolean mts; //如果没有这个的话就在类private boolean 这样的下面添加如下代码: 
+  
+                private short pvpChannel; 
+
+     然后找到 public void reconnectWorld() {  这个.. 
+  在众多类似的代码中添加  pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpchannel")); 
+
+  再找到   public void run() { 
+  也是在众多类似的代码中添加    pvpChannel = Short.parseShort(props.getProperty("net.sf.odinms.world.pvpChannel")); 
+
+   然后增加两个赋值函数量: 
+  
+        public short getPvpChannel() { 
+        return pvpChannel; 
+    } 
+    public void setPvpChannel(Short blahblah) { 
+        this.pvpChannel = blahblah; 
+    } 
+
+     然后打开\src\net\sf\odinms\net\channel\handler\AbstractDealDamageHandler.java 
+
+        在类似的地方添加  import net.sf.odinms.server.maps.pvp.PvPLibrary;   
+                     然后查找: if (attackCount != attack.numDamage && attack.skill != 4211006) { 
+            player.getCheatTracker().registerOffense(CheatingOffense.MISMATCHING_BULLETCOUNT, attack.numDamage + "/" + attackCount); 
+            return; 
+        } 
+    把找到这些代码下面的一段替换为: 
+      int totDamage = 0; 
+        final MapleMap map = player.getMap(); 
+        if ((attack.skill != 2301002 && attack.skill != 4201004 && attack.skill != 1111008) && player.getClient().getChannel() == player.getClient().getChannelServer ().getPvpChannel()) {//PK线路函数 
+              PvPLibrary.doPvP(player, attack); 
+        } 
+   如果说有错误的话,请按下面的做: 
+  
+             新建立一个JAVA类,名称为 PvPLibrary.java     
+   编译保存即可!!! 
+
+       最后记得在world.properties里面增加 
+     net.sf.odinms.world.pvpChannel=1 //1就1线PK频道

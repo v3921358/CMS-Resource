@@ -1,0 +1,323 @@
+当你能看到它的时候，或者在它周围的时候，它就会攻击你= =
+
+找到MapleMonster.java，打开
+
+在
+Copy codeprivate MapleMap map;  
+
+的下面添加
+Copy codeprivate boolean lock;  
+
+把
+Copy code    private void initWithStats (MapleMonsterStats stats) {
+        setStance(5);
+        this.stats = stats;
+        hp = stats.getHp();
+        mp = stats.getMp();
+    }  
+
+该为
+Copy code    private void initWithStats (MapleMonsterStats stats) {
+        setStance(5);
+        this.stats = stats;
+        hp = stats.getHp();
+        mp = stats.getMp();
+                lock=false;
+    }  
+
+在
+Copy codepublic void damage(MapleCharacter from, int damage, boolean updateAttackTime) {  
+
+的下面添加
+Copy codeif(lock)return;  
+
+在
+Copy codepublic void setControllerHasAggro(boolean controllerHasAggro) {  
+
+的下面添加
+Copy codeif(lock)return;  
+
+在
+Copy codepublic void setControllerKnowsAboutAggro(boolean controllerKnowsAboutAggro) {  
+
+的下面添加
+Copy codeif(lock)return;  
+
+在
+Copy codepublic MaplePacket makeBossHPBarPacket() {
+        return MaplePacketCreator.showBossHP(getId(), getHp(), getMaxHp(), getTagColor(), getTagBgColor());
+    }  
+
+的上面添加
+Copy code        public void setLock(boolean lock)
+        {
+            this.lock=lock;
+        }  
+
+找到ReactorActionManager.java，打开
+[/code]
+把
+Copy code  public void createMapMonitor(int type,int pMapId,String pName,String sMobId)
+  {
+      switch(type)
+      {
+          case MapleMapMonitor.BOSS_MAP:
+                createMapMonitor(type,pMapId,pName);
+              break;
+          case MapleMapMonitor.SBOSS_MAP:
+              MapleMap pMap=getClient().getChannelServer().getMapFactory().getMap(pMapId);
+              MaplePortal portal=pMap.getPortal(pName);
+              String[] st=sMobId.split(",");
+              int[] data=new int[st.length];
+              for(int i=0;i<st.length;i++)
+              {
+                  data[i]=Integer.parseInt(st[i]);
+              }
+              SBossMapMonitor sbmm=new SBossMapMonitor(getPlayer().getMap(),pMap,portal,data,getClient().getChannelServer());
+              sbmm.start();
+              break;
+      }
+  }  
+
+改为
+Copy code  public void createMapMonitor(int type,int pMapId,String pName,String sMobId,short type2,int trigger)
+  {
+      switch(type)
+      {
+          case MapleMapMonitor.BOSS_MAP:
+                createMapMonitor(type,pMapId,pName);
+              break;
+          case MapleMapMonitor.SBOSS_MAP:
+              MapleMap pMap=getClient().getChannelServer().getMapFactory().getMap(pMapId);
+              MaplePortal portal=pMap.getPortal(pName);
+              String[] st=sMobId.split(",");
+              int[] data=new int[st.length];
+              for(int i=0;i<st.length;i++)
+              {
+                  data[i]=Integer.parseInt(st[i]);
+              }
+              SBossMapMonitor sbmm=new SBossMapMonitor(getPlayer().getMap(),pMap,portal,data,getClient().getChannelServer(),type2,trigger);
+              sbmm.start();
+              break;
+      }
+  }  
+
+创建一个文件SBossMapMonitor.java
+Copy codepackage net.sf.odinms.server.maps;
+
+import java.awt.Point;
+import java.util.Arrays;
+import java.util.List;
+
+import net.sf.odinms.server.MaplePortal;
+import net.sf.odinms.server.life.MapleMonster;
+import net.sf.odinms.net.channel.ChannelServer;
+
+
+/**
+*
+* @author alex_soh
+*/
+public class SBossMapMonitor extends BossMapMonitor {
+
+    protected int[] mobs;
+    protected boolean deadCount[];
+    protected ChannelServer cserv;
+    protected boolean hasHappen;
+    protected short type;
+    protected int trigger;
+    public static final short HORNTAIL=0;
+    public static final short ZAKUM=1;
+
+    public SBossMapMonitor(MapleMap map,MapleMap pMap,MaplePortal portal,int[] mobs,ChannelServer cserv)
+    {
+        super(map,pMap,portal);
+        this.mobs=mobs;
+        this.deadCount=new boolean[mobs.length];
+        this.cserv=cserv;
+        for(int i=0;i<deadCount.length;i++)
+        {
+            deadCount[i]=type!=SBossMapMonitor.HORNTAIL;
+        }
+        hasHappen=false;
+        type=SBossMapMonitor.HORNTAIL;
+    }
+    
+    public SBossMapMonitor(MapleMap map,MapleMap pMap,MaplePortal portal,int[] mobs,ChannelServer cserv,short type,int trigger)
+    {
+        super(map,pMap,portal);
+        this.mobs=mobs;
+        this.deadCount=new boolean[mobs.length];
+        this.cserv=cserv;
+        for(int i=0;i<deadCount.length;i++)
+        {
+            deadCount[i]=type!=SBossMapMonitor.HORNTAIL;
+        }
+        hasHappen=false;
+        this.type=type;
+        this.trigger=trigger;
+    }    
+
+    private boolean chkDeadCount()
+    {
+        boolean result=true;
+        for(int i=0;i<deadCount.length;i++)
+        {
+            if(!deadCount[i] && type==SBossMapMonitor.HORNTAIL)
+            {
+                result=false;
+                break;
+            }
+            else if(deadCount[i] && type==SBossMapMonitor.ZAKUM)
+            {
+                result=false;
+                break;
+            }
+        }
+        return result;
+    }
+    
+    private MapleMonster getMonster(int id)
+    {
+        MapleMonster m=null;
+        List<MapleMapObject> list=getAllMob();
+        for(int i=0;i<list.size();i++)
+        {
+            MapleMonster monster = (MapleMonster) list.get(i);
+            if(monster.getId()==id)
+            {
+                m=monster;
+                break;
+            }
+        }        
+        return m;        
+    }
+
+    private List<MapleMapObject> getAllMob()
+    {
+      return map.getMapObjectsInRange(new Point(0,0), Double.POSITIVE_INFINITY, Arrays
+                    .asList(MapleMapObjectType.MONSTER));
+    }
+
+    private boolean chkSpecialBoss()
+    {
+        List<MapleMapObject> list=getAllMob();
+        for(int j=0;j<deadCount.length;j++)
+        {
+            if(!deadCount[j] && type==SBossMapMonitor.HORNTAIL)
+            {
+                for(int i=0;i<list.size();i++)
+                {
+                    MapleMonster monster = (MapleMonster) list.get(i);
+                    if(monster.getId()==mobs[j])
+                    {
+                        deadCount[j]=true;
+                        break;
+                    }
+                }
+            }
+            else if(deadCount[j] && type==SBossMapMonitor.ZAKUM)
+            {
+                boolean found=false;
+                for(int i=0;i<list.size();i++)
+                {
+                    MapleMonster monster = (MapleMonster) list.get(i);
+                    if(monster.getId()==mobs[j])
+                    {
+                        found=true;
+                        break;
+                    }
+                }                
+                deadCount[j]=found;
+            }
+        }
+        return chkDeadCount();
+    }
+
+    @Override
+    public void run()
+    {
+        MapleMonster triggerMob=null;
+        switch(type)
+        {
+            case SBossMapMonitor.HORNTAIL:                    
+                break;
+            case SBossMapMonitor.ZAKUM:
+                triggerMob=getMonster(trigger);
+                triggerMob.setLock(true);
+                break;
+        }
+        while(map.playerCount()>0)
+        {
+            if(chkSpecialBoss() && !hasHappen)
+            {                
+                //special event happen
+                switch(type)
+                {
+                    case SBossMapMonitor.HORNTAIL:
+                            map.killAllMonster(true);
+                            cserv.broadcastPacket(net.sf.odinms.tools.MaplePacketCreator.serverNotice(6, cserv.getChannel(), "Congratulations to the crew who successfully defeated Horntail after numerous attempt, you are    the true hero of Leafre"));
+                            hasHappen=true;
+                            break;
+                    case SBossMapMonitor.ZAKUM:
+                            triggerMob.setLock(false);
+                            triggerMob.setHp(triggerMob.getMaxHp());
+                            triggerMob.setMp(triggerMob.getMaxMp());
+                            hasHappen=true;
+                            break;
+                }
+            }
+            try
+            {
+                switch(type)
+                {
+                    case SBossMapMonitor.HORNTAIL:
+                        Thread.sleep(3000);//how often it chk for the existence of deads parts,increase to reduce server lag
+                        break;
+                    case SBossMapMonitor.ZAKUM:
+                        Thread.sleep(3000);//how often it chk for the existence of arms,increase to reduce server lag
+                        break;
+                }
+                
+            }
+            catch(InterruptedException e)
+            {
+                //e.printStackTrace();
+            }
+        }
+        while(map.mobCount()>0)
+        {
+            map.killAllMonster();
+            try
+            {
+                Thread.sleep(5000);
+            }
+            catch(InterruptedException e)
+            {
+                //e.printStackTrace();
+            }
+        }
+        map.resetReactors();
+        pMap.resetReactors();
+        portal.setPortalState(MapleMapPortal.OPEN);
+    }
+}  
+
+找到2401000.js，打开
+
+把
+Copy coderm.createMapMonitor(2,240050400,"sp","8810010,8810011,8810012,8810013,8810014,8810015,8810016,8810017");  
+
+改为
+Copy coderm.createMapMonitor(2,240050400,"sp","8810010,8810011,8810012,8810013,8810014,8810015,8810016,8810017",0,8810018);  
+
+找到2111001.js，打开
+
+把
+Copy coderm.createMapMonitor(1,211042300,"sp");  
+
+改为
+Copy coderm.createMapMonitor(2,211042300,"sp","8800003,8800004,8800005,8800006,8800007,8800008,8800009,8800010",1,8800000);  
+
+
+完成.!

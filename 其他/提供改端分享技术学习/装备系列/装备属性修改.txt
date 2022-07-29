@@ -1,0 +1,5 @@
+======更改物品(装备,武器)属性================================== 
+
+按角色名更改角色 载在身上所有装备 的属性值 
+
+update inventoryequipment a, inventoryitems b,characters c set a.level=0, a.upgradeslots=100,a.str=29999,a.dex=29999,a.int=29999,a.luk=29999,a.hp=29999,a.mp=29999,a.watk=29999,a.matk=29999,a.wdef=29999,a.mdef=29999,a.acc=29999,a.avoid=29999,a.hands=2999,a.speed=29999,a.jump=29999 where b.characterid=c.id and a.inventoryitemid=b.inventoryitemid and b.inventorytype <0 and c.name='∥　超,  尐ɡ' ;

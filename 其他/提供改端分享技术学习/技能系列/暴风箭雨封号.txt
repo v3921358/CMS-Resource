@@ -1,0 +1,15 @@
+方法:
+
+从以下路径：
+
+\src\net\sf\odinms\client\anticheat  
+
+找到CheatTracker.java文件里的以下内容：
+
+
+                                      if (skillId != 3121004) { // hurricane
+                divisor = 350;
+            } else {
+                divisor = 350;
+            }
+修改两个350为50,这样使用暴风箭雨和其它的技能加速就不会封号了

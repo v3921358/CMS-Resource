@@ -1,0 +1,25 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+
+
+
+源 BuddylistModifyHandler.java   
+找到 String addName = slea.readMapleAsciiString();  
+下面增加  
+Connection con = DatabaseConnection.getConnection();
+            try {
+                PreparedStatement ps = con.prepareStatement("SELECT * FROM characters WHERE gm > 0 AND name = ?");
+                ps.setString(1, addName);
+                ResultSet rs = ps.executeQuery();
+
+                if (rs.next() && !player.isGM()) {
+                    player.dropMessage(1, "Gamemaster is not available as a buddy.");
+                    return;
+                }
+
+                rs.close();
+                ps.close();
+            } catch (SQLException sqlE) {}

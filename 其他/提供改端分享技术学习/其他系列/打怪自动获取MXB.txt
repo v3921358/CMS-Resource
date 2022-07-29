@@ -1,0 +1,79 @@
+/*
+LuNaTic改端技术、
+由疯子收集、现正式发布！
+
+
+打開 \src\net\sf\odinms\net\channel\handler\UseCashItemHandler.java
+
+新增以下導包
+import java.net.InetAddress;
+import net.sf.odinms.client.messages.ServernoticeMapleClientMessageCallback;
+import net.sf.odinms.net.MaplePacket;
+import net.sf.odinms.net.channel.ChannelServer;
+import net.sf.odinms.net.world.remote.WorldLocation;
+import net.sf.odinms.server.MaplePortal;
+import net.sf.odinms.server.maps.MapleMap;
+
+因為之前新增時~要用推理來新增有哪些導包~我沒有詳細紀錄下來新增哪些導包~所以以上導包 新增完應該是沒問題
+
+再來找到這段文字
+} else if (itemType == 517) {
+                                // 49 00 24 00 50 E3 4E 00 05 00 4A 61 7A 7A 79 2B A3 41 01
+                                MaplePet pet = c.getPlayer().getPet(0);
+                                if (pet == null) {
+                                        c.getSession().write(MaplePacketCreator.enableActions());
+                                        return;
+                                }
+                                String newName = slea.readMapleAsciiString();
+                                pet.setName(newName);
+                                c.getSession().write(MaplePacketCreator.updatePet(pet, true));
+                                c.getSession().write(MaplePacketCreator.enableActions());
+                                c.getPlayer().getMap().broadcastMessage(c.getPlayer(), MaplePacketCreator.changePetName(c.getPlayer(), newName, 1), true);
+                                MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false);
+
+在下面新增:
+} else if(itemType == 504){ // vip傳送石
+                                byte rocktype;
+                                rocktype = slea.readByte();
+
+                                if (rocktype == 0x00) {
+                                        int mapId = slea.readInt();
+                                        MapleMap target = cserv.getMapFactory().getMap(mapId);
+                                        MaplePortal targetPortal = target.getPortal(0);
+                                              if (target.getId() != 180000000) {
+                                                c.getPlayer().changeMap(target, targetPortal);
+                                        } else {
+                                                MapleInventoryManipulator.addById(c, itemId, (short)1, "Teleport Rock Error (Not found)");
+                                                new ServernoticeMapleClientMessageCallback(1, c).dropMessage("Player could not be found.");
+                                                c.getSession().write(MaplePacketCreator.enableActions());
+                                        }
+                                } else {
+                                        String name = slea.readMapleAsciiString();
+                                        MapleCharacter victim = cserv.getPlayerStorage().getCharacterByName(name);
+                                        if (victim != null) {
+                                                MapleMap target = victim.getMap();
+                                                WorldLocation loc = c.getChannelServer().getWorldInterface().getLocation(name);
+                                                if (loc.map != 180000000) {
+                                                if (!victim.isHidden()) {
+                                                c.getPlayer().changeMap(target, target.findClosestSpawnpoint(victim.getPosition()));
+                                                }else{
+                                                        MapleInventoryManipulator.addById(c, itemId, (short)1, "Teleport Rock Error (Not found)");
+                                                        new ServernoticeMapleClientMessageCallback(1, c).dropMessage("Player could not be found.");
+                                                        c.getSession().write(MaplePacketCreator.enableActions());
+                                                }
+                                                }else{
+                                                        MapleInventoryManipulator.addById(c, itemId, (short)1, "Teleport Rock Error (Can't Teleport)");
+                                                        new ServernoticeMapleClientMessageCallback(1, c).dropMessage("You cannot teleport to this map.");
+                                                        c.getSession().write(MaplePacketCreator.enableActions());
+                                                }
+                                        } else {
+                                                MapleInventoryManipulator.addById(c, itemId, (short)1, "Teleport Rock Error (Not found)");
+                                                new ServernoticeMapleClientMessageCallback(1, c).dropMessage("Player could not be found.");
+                                                c.getSession().write(MaplePacketCreator.enableActions());
+                                        }
+                                }
+
+======================================
+在 int itemType = itemId/10000; 下面添加:
+ChannelServer cserv = c.getChannelServer();
+MapleInventoryManipulator.removeById(c, MapleInventoryType.CASH, itemId, 1, true, false);

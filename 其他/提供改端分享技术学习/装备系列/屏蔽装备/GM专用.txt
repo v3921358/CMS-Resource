@@ -1,0 +1,21 @@
+打开：  \src\net\sf\odinms\server\MapleInventoryManipulator.java
+
+
+   找到：public static void equip(MapleClient c, byte src, byte dst) {  
+
+
+在这段的  return;
+        }
+
+下面增加：
+
+  if (!c.getPlayer().isGM()) {
+            switch (source.getItemId()) {
+                case 1002140: //隐屏GM帽子不能给普通玩家使用
+                case 5390001: //隐屏喇叭不能给普通玩家使用
+    //如果需要增加其他的就 添加 case 代码;  即可
+                    removeAllById(c, source.getItemId(), false);
+                    c.getPlayer().dropMessage(1, "GTFO WHO GAVE YOU THIS ITEM ?");
+                    return;
+            }
+        }

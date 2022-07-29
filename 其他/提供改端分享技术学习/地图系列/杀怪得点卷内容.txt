@@ -1,0 +1,14 @@
+打怪得点卷
+打开mapleMap.java
+
+
+找到
+if(dropOwner.getBuffedValue(MapleBuffStat.MESOUP) != null) {
+tempmeso = (int) (tempmeso * dropOwner.getBuffedValue(MapleBuffStat.MESOUP).doubleValue() / 100.0);
+                    }
+
+
+在下面添加:
+int addnx;                                          addnx = 2;                                          if (addnx > 0) {                                          dropOwner.modifyCSPoints(0, addnx);                                          dropOwner.getClient().getSession().write(MaplePacketCreator.serverNotice(5, "击退怪物、疯哥奖励你 (" + addnx +")点点卷."));    
+-------------------------------分割线
+注意打怪得点卷内容 addnx = 2;  后面的数字2可以任意调动！就是杀死没只怪得到的点卷

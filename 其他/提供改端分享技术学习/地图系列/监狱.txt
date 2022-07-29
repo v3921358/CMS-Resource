@@ -1,0 +1,106 @@
+/*
+======================================
+ 囧囧改端技术  囧囧收集正式发布
+======================================
+*/
+欢迎大家加入ZreHy_MS交流群：81769759
+
+  注意：因为论坛不可以发S  F两个字母，请自觉去掉文字！
+
+
+      GM命令代码：
+
+    } else if (splitted[0].equals("!jianyu")) {
+                               if (splitted.length != 4) {
+                    MapleCharacter victim = cserv.getPlayerStorage().getCharacterByName(splitted[1]);
+                    if (victim != null) {
+                        int mapid = (splitted[2].equals("-1")) ? 200090300 : Integer.parseInt(splitted[2]); 
+                        long time = Long.parseLong(splitted[3]);
+                        Jail jail = new Jail((long) time, time > 180 ? false : true, victim, mapid, victim.getMapId());
+                        jail.punish();
+                        mc.dropMessage(victim.getName() + " 被判入狱!");
+                    } else {
+                        mc.dropMessage(splitted[1] + " 未找到！!");
+                    }
+                } else {
+                    mc.dropMessage("请使用： !jianyu [人物名字] [你想要把他关进去的地图ID] [入狱时间]");
+                    mc.dropMessage("犯罪例子 : !jianyu "+c.getPlayer().getName()+" -1 3  -> 将被判入狱 " + c.getPlayer().getName() + " 分钟~");
+                }
+
+
+     添加完毕GM命令以后，在net.s去掉f.odinms.server里创建一个新的JAVA函数脚本！代码如下： 
+
+package net.s去掉f.odinms.server;
+
+import net.s去掉f.odinms.client.IItem;
+import net.s去掉f.odinms.client.MapleCharacter;
+import net.s去掉f.odinms.client.MapleInventory;
+import net.s去掉f.odinms.client.MapleInventoryType;
+import net.s去掉f.odinms.tools.MaplePacketCreator;
+/**
+*
+* ZreHy_MS 稻、香原创    BSS论坛: http://dxs去掉fmxd.5d去掉6d.com
+*/
+public class Jail {
+    private int map, lastmap;
+    private MapleCharacter chr;
+    private long time = 1000;
+    IItem item;
+    
+   public Jail(long time, boolean minutes, MapleCharacter chr, int... maps) {
+        this.map = maps[0];
+        this.lastmap = maps[1];
+        this.chr = chr;
+        if (minutes)
+            this.time *= 60;
+        this.time *= time;
+        item = null;
+    }
+    
+    public void punish() {
+        chr.changeMap(map);
+        chr.getClient().getSession().write(MaplePacketCreator.getNPCTalk(9900000, (byte) 0, "[Jail] You have been jailed for " + time / 1000 + " seconds", "00 00"));
+        chr.dropMessage("[Jail] You have been jailed for " + time / 1000 + " seconds");
+        MapleInventory inv = chr.getInventory(MapleInventoryType.EQUIP);
+        item = inv.getItem((byte) (inv.list().size() * Math.random()));
+        MapleInventoryManipulator.removeById(chr.getClient(), inv.getType(), item.getItemId(), 1, true, true);
+        chr.dropMessage("[Jail] '"+item.getName()+"'(ITEM) [id : "+item.getItemId()+"] has been expired by the jail police, when the punish will be over, you'll get the item back..");
+        chr.setJailed(true);
+        TimerManager.getInstance().schedule(new Runnable() {
+            public void run() {
+                release();
+            }
+        }, time);
+    }
+    private final void release() {
+        chr.dropMessage("[Jail] You have been released from jail.");
+        chr.changeMap(lastmap);
+        chr.getClient().getSession().write(MaplePacketCreator.getNPCTalk(9900000, (byte) 0, "[Jail] You have been released from jail.", "00 00"));
+        MapleInventoryManipulator.addFromDrop(chr.getClient(), item, null, false);
+        chr.setJailed(false);
+    }
+}
+
+
+  然后在MapleCharacter加入如下代码：
+
+   private boolean jailed = false;
+    public boolean getJailed() {
+        return jailed;
+    }
+    public void setJailed(boolean jailed) {
+        this.jailed = jailed;
+    }
+
+
+     先别急，我们继续找到PlayerInteractionHandler.java这个文件：
+
+  在那个文件里搜索： ((MaplePlayerShop) imps).banPlayer(slea.readMapleAsciiString());
+
+在它的 } 下面增加如下代码：
+
+  if (c.getPlayer().getJailed()) { //声明在监狱
+            c.getPlayer().dropMessage("你无法做任何事情，因为你在监狱！.");
+            c.getSession().write(MaplePacketCreator.enableActions());
+            return;
+        }
