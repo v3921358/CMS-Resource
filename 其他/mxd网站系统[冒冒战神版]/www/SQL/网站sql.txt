@@ -1,0 +1,2 @@
+ALTER TABLE `accounts` ADD COLUMN `money` int(11) NOT NULL DEFAULT '0'
+ALTER TABLE `accounts` ADD COLUMN `jfmoney` int(11) NOT NULL DEFAULT '0'

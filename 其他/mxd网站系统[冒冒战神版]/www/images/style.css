@@ -1,0 +1,92 @@
+html {
+	background-color: #ebebeb;
+	border-top: 10px solid #000000;
+}
+body {
+	padding: 0;
+	width: 850px;
+	margin: 0 auto;
+	background-repeat: repeat-y;
+	background-position: top left;
+}
+
+body,td,th {
+	font-size: 12px;
+}
+a,a:link,a:visited {
+	color: #000000;
+	text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+	color: #000000;
+}
+#main {
+	margin-right: auto;
+	margin-left: 0px;
+}
+#main #header {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	color: #666666;
+	text-decoration: none;
+	font-weight: bold;
+}
+#main #footer {
+	color: #999999;
+	font-size: 12px;
+	text-align: center;
+	height: 50px;
+	line-height: 50px;
+	margin-top: 20px;
+}
+#main #nav {
+	margin-bottom: 20px;
+	background-color: #232323;
+	height: 25px;
+}
+#main #nav ul {
+	margin: 0px;
+	padding: 0px;
+	list-style-type: none;
+}
+#main #nav ul li {
+	list-style-type: none;
+	float: left;
+}
+#main #nav ul li a, #main #nav ul li a:link, #main #nav ul li a:visited {
+	width: 80px;
+	list-style-type: none;
+	line-height: 25px;
+	color: #FFFFFF;
+	font-size: 12px;
+	font-weight: bold;
+	text-align: center;
+	text-decoration: none;
+	height: 25px;
+	display: block;
+}
+#main #nav ul li a:hover {
+	width: 80px;
+	list-style-type: none;
+	line-height: 2em;
+	color: #FFFFFF;
+	font-size: 12px;
+	font-weight: bold;
+	display: block;
+	text-align: center;
+	text-decoration: underline;
+	height: 25px;
+	background-color: #004160;
+}
+.box {
+	font-size: 12px;
+	height: 13px;
+	width: 80px;
+}
+.r {
+	color: #FF0000;
+}
+.b {
+	color: #FFFFFF;
+}
