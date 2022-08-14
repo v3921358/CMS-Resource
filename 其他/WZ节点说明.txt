@@ -1,0 +1,567 @@
+﻿======================================
+Skill.wz类 
+hs 技能简介级别号 与String.wz相连 
+req 要求其它技能级别达到x时才可加此技能 
+masterLevel 技能初始级别上限 4转技能大部分为10 需要用技能书提升 
+mob 对怪物的影响效果(头顶上- -) 
+skillType 技能类型 被动1 主动辅助 2 主动攻击式辅助 3 
+disable 值为1时禁止提升技能级别 
+invisible 技能是否可见 值为0或不存在此项时可见 
+elemAttr 攻击属性 f为火 其它暂且不在此添加 
+action 技能发动时执行的动作 延迟由此产生 
+prop 发动几率 有多种类型 1 被动技能发动几率(如终极箭)  2 技能特殊效果发动几率(爆炸箭昏迷) 
+mastery 武器熟练度 游戏中的%是按照该值*5 如60%熟练对应的是12 
+mobCount 技能攻击数量 
+attackCount     bulletCount  技能攻击次数  
+cooltime 冷冻时间 技能连续使用的时间间隔 
+damage 伤害% 按照角色的攻击值 
+action技能无延迟
+range 攻击长度 本处为单向攻击长度 
+hpCon HP消耗 
+mpCon MP消耗 
+lt.X 技能影响范围 右上X 
+lt.Y 技能影响范围 右上Y 
+rb.X 技能影响范围 左下X 
+rb.Y 技能影响范围 右下Y 
+iconMouseOver 
+iconDisabled 
+icon 
+effect 
+之类的都为图象效果 不作解释 
+======================================
+Mob.wz类 
+acc 怪物攻击的命中值 
+bodyAttack 英文翻译:身体碰撞  改0可以做到碰怪无敌 
+eva 回避值 
+exp 击杀后获得的经验值 
+fs 不明 常值为10 
+level 怪物级别 
+maxHP 怪物最大血值 
+maxMP 怪物最大魔值 
+MADamage 魔法攻击 
+MDDamage 魔法防御 
+PADamage 物理攻击 
+PDDamage 物理防御 
+speed 移动速度 
+undead 是否为不死系(决定着牧师是否可治疗造成伤害) 
+怪物攻击部分: 
+attack(1 2 3 4) 
+attackAfter 攻击效果影响时间 
+conMP 耗费的魔量 
+knockback 击退角色 
+range 攻击影响范围 
+tremble 屏幕震动(1震动 0不震动) 
+type 攻击类型 
+======================================
+Character.wz类 
+afterImage 攻击的划痕 
+attack 此处意义不明 
+attackSpeed 攻击速度 
+cash 是否现金道具(0不是 1是) 
+incACC 增加命中 
+incDEX 增加敏捷 
+incINT 增加智力 
+incLUK 增加运气 
+incSTR 增加力量 
+incPAD 增加物理攻击 
+incHP 增加血值 
+incMP 增加魔值 
+incMAD 增加魔法攻击 
+incMDD 增加魔法防御 
+incPAD 增加物理攻击 
+incPDD 增加物理防御 
+reqDEX 装备所要求的敏捷 
+reqINT 装备要求的智力 
+reqJob 装备要求的职业 
+reqLevel 装备要求的级别 
+reqLUK 装备要求的幸运 
+reqSTR 装备要求的力量 
+tuc 可升级次数 
+knockback 击退怪物几率 
+notSale 无法出售 
+only 固有道具 
+price 出售价格(卖到店里的价格=这个价格的2分之1) 
+timeLimited 时间限制 
+tradeBlock 不可交易 
+equipTradeBlock 装备后不可交易 
+exp 武器升级需要的武器经验值 
+incPADMax 升级时增加的最大攻击 
+incPADMin 升级时增加的最小攻击 
+incMADMax 升级时增加的最大魔法攻击 
+incMADMin 升级时增加的最小魔法攻击 
+incDEXMax 升极时增加的最大敏捷 
+incDEXMin 升极时增加的最小敏捷 
+incSTRMax 升级时增加的最大力量 
+incSTRMin 升级时增加的最小力量 
+incLUKMax 升级时增加的最大幸运 
+incLUKMin 升级时增加的最小幸运 
+incINTMax 升级时增加的最大智力 
+incINTMin 升级时增加的最小智力 
+=========================================
+Item.wz类 
+slotMax 折叠最大数量 
+recoveryHP 恢复HP 
+recoveryMP 恢复MPmcType 消耗类型 
+consumeOnPickup 拾起消耗(一拣到就自动使用) 
+party 全组队恢复? 
+hpR HP恢复百分比 
+mpR MP恢复百分比 
+berserk 增加角色伤害% 
+booster 减少攻击延迟(类似快速箭之类的) 
+time 持续时间 
+reward(奖赏)→count 获得数量 
+reward(奖赏)→item 获得的物品ID 
+reward(奖赏)→prob 获得的几率(这里是万分之X) 
+=========================================
+Etc.wz类 
+物品锻造类 
+catalyst 允许使用的催化剂 
+itemNum 制造出的数量 
+meso 需要的金钱 
+recipe(所需的材料)→count 需要的数量 
+recipe(所需的材料)→item 需要的材料ID 
+reqLevel 要求角色级别 
+reqSkillLevel 要求锻造技能级别 
+reqItem  要求拥有的道具 
+=========================================
+TamingMob.wz类 
+fatigue 疲劳一定时间(估计1分钟)内增加的值 
+jump 骑上骑宠后角色的跳跃值 
+speed 骑上骑宠后角色的移动速度 
+swim 骑上骑宠后角色的游泳速度 
+=========================================
+Morph.wz类 
+jump 变身后角色的跳跃力 
+speed 变身后角色的移动速度 
+swim 变身后角色的游泳速度 
+=========================================
+Quest.wz类 
+nextQuest 下一个任务 
+exp 任务完成奖励经验 
+money 任务完成奖励的金钱 
+npc 任务所要找的NPC 
+job 任务所要求的职业 
+count 任务所要求的物品数量 
+id 任务所要求的物品ID 
+end 任务结束时间 
+start 任务开始时间 
+interval 重复接到任务的间隔 
+normalAutoStart 任务自动开始 
+=========================================
+Map.wz类 
+bgm 地图背景音乐 
+cloud 云? 
+fieldLimit 地图限制类型 
+forcedReturn 强制返回 999999999貌似是附近的主城或者本地图 
+hideMinimap 是否隐藏迷你地图 
+mapMark 地图标记 
+mobRate 怪物比例 
+returnMap 返回地图 
+town 是否为村庄主城 
+version 版本? 
+VRBottom 地图底部 
+VRLeft 地图左边 
+VRRight 地图右边 
+VRTop 地图顶边 
+地板部分 
+next 下一个地板 
+prev 上一个地板 
+x1 地板的左边X 
+x2 地板的右边X 
+y1 地板的上边y 
+y2 地板的下边y 
+ToolTip 提示的文本 
+User 地图进入者 这个项展开有对使用者攻击的加成 幸运 力量等 以及对武器装备的改变 CS效果 
+=========================================
+Map（地图目录）
+version 版本
+cloud 云雾
+0＝没有云雾 1＝有云雾效果
+town 城镇
+0＝不是 1＝是
+swim 游泳
+0＝没有 1有
+returnMap 回城地图
+forcedReturn 强制到达地图
+mobRate 怪物暴率（不确定）
+bgm 背景音乐
+mapMark 地图标签
+VRTop 地图尺寸高
+VRLeft 地图尺寸左
+VRBottom 地图尺寸底
+VRRight 地图尺寸右
+decHP 扣除HP
+protectItem 保护物品
+recovery 恢复HP倍数
+effect 地图效果
+bS 地图目录
+
+Character（装备目录）
+reqJob 装备职业
+-1＝新手 0＝全职业 1＝战士 2＝魔法师 3＝战士&魔法师 4＝弓箭手 8＝飞侠 9＝战士&飞侠 13＝战士&弓箭手&飞侠
+reqLevel 需要等级
+reqSTR 需要力量
+reqDEX 需要敏捷
+reqINT 需要智力
+reqLUK 需要运气
+reqPOP 需要人气
+incPAD 增加攻击力
+incMAD 增加魔法力
+incPDD 增加物理防御力
+incMDD 增加魔法防御力
+incSTR 增加力量
+incDEX 增加敏捷
+incINT 增加智力
+incLUK 增加运气
+incMHP 增加HP总值
+incMMP 增加MP总值
+incACC 增加命中率
+incEVA 增加回避率
+incSPEED 增加移动速度
+incjump 增加跳跃力
+knockback 攻击后退率
+tuc 升级次数
+price 商店出售价格
+attackSpeed 攻击次数
+3比较快 4＝快 5＝快 6普通 7＝慢 8＝慢 9＝比较慢
+cash 现金装备
+0＝不是 1是
+
+
+Item（道具目录）
+slotMax 单位最大个数
+price 商店卖出价格
+only 最多允许数目
+moveTo 到达地图
+success 成功率
+hp 恢复HP
+mp 恢复MP
+hpR 恢复HP%
+mpR 恢复MP%
+PAD 增加物理攻击
+PDD 增加物理防御
+MAD 增加魔法攻击
+MDD 增加魔法防御
+acc 增加命中率
+eva 增加回避率
+peed 增加移动速度
+jump 增加跳跃力
+mesoupbyitem 增加金钱暴率％
+time 持续时间
+poison 毒
+darkness 黑暗
+weakness 虚弱
+seal 封印
+morph 变身
+quest 任务道具
+reqSkillLevel 需要技能等级
+masterLevel 提升技能等级
+recoveryHP 坐下恢复HP
+tradeBlock 交易限制
+dropBlock 丢弃限制
+notSale 卖出限制
+
+
+Skill（技能目录）
+hs 等级
+hpCon 消耗HP
+mpCon 消耗MP
+mobCount 攻击怪物数目
+attackCount 攻击次数
+damage 攻击％
+mdd 攻击力
+mad 魔法力
+speed 增加移动速度
+jump 增加跳跃力
+acc 增加命中率
+eva 增加回避率
+mastery 熟练度
+prop 几率
+range 攻击距离
+time 持续时间
+cooltime 冷却时间
+x 在不同的技能有不同的作用
+y 在不同的技能有不同的作用
+
+
+
+Mob（怪物目录）
+level 等级
+maxHP HP
+maxMP MP
+PADamage 物理攻击
+PDDamage 物理防御
+MADamage 魔法攻击
+MDDamage 魔法防御
+jump 跳跃力
+speed 移动速度
+acc 命中率
+eva 回避率
+exp 经验值
+undead 不死
+pushed 打退
+hpRecovery HP恢复
+mpRecovery MP恢复
+
+
+[box=lightblue]对于各个扩展名为“wz”的文件，其内容的介绍：
+1 Base：该文件不明内容，抽取价值也不大。技术好的可以探究一下。
+2 Character：人物的各种发型、肤色、动作的图片以及坐标，还包括所有装备（现金装备也包括）。
+3 Effect（包括很多东西，逐个解说）：BasicEFF：打怪时、受伤时的数字，升级、点卷、完成任务转职及各种常规特效，等的图片及其坐标；
+ItemEFF：各种戒指特效、御守特效等，其图片及坐标；
+MapEFF：地图中出现的黑影、水泡等图片及坐标（仅8张图）；
+PetEFF：宠物升级、旋转特效图片及坐标；
+SetEFF：现金装备穿上后的特效及GM特效图片、坐标；
+SkillName1~4：4种职业买了现金道具攻击特效后，施放1 2转技能头顶会出现英文的特效，其图片及坐标；
+Summon：施放黑包及各种怪物（部分BOSS的召唤特效直接包括在Mob里了，这里没有）召唤时特效的图片及坐标；
+Tomb：角色死亡时掉落墓碑的图片及坐标。
+
+4 ETC（同样包括很多东西，逐个解说）（这个里面的所有小文件夹中大多没有图片，抽到的东西只能在“数据资料”中察看）：
+BlockReason：账号禁止连接时（不是封号）出现的提示内容（无图片，在数据资料中可以察看提示的内容）；
+CashPackage：不知道是干什么的，望高人指教。。（这里面没图片，也是只能在数据资料中看内容）；
+Category：商城中各种现金道具分类的文字解说（也就是“推荐商品”、“打折”、“脸饰”、“套服”等）；
+ChatBlockReason：也是某种情况下系统出现的提示，不过都是问号。估计是家族任务和海盗组队任务中，聊天框自动出现的蓝字提示；
+Commodity：各种现金道具的价格等资料；
+Curse：在聊天中被系统强迫变成*的词汇（例如“”打出去就变成**。发现这里面很多坏蛋的名字也是***。。。。。）
+EmotionEffect：这个有图片。。其实就是现金表情“汗”。。。。
+ForbiddenName：不知道干吗的。。。这里面都是一些骂人（尤其是骂GM和SD的），和Curse的不一样，这个不会变成**。。。估计是如果说出这些词就会被官方记录，可能封号。。。。（推测而已。。）
+MakeCharInfo：都是些数字，不知是干吗的。。
+OXQuiz：都是问号，不知道什么东西。。。。
+PredictCard：塔罗牌占卜的相关说明文字；
+QuestCategory：任务分类的文字（如彩虹岛、职业、活动）；
+ScanBlock：里面N个小文件，全TMD是“NONE”。。。不知道是什么；
+ScriptInfo：任务中与NPC对话时，往往要从多个话中选择1个，这个文件就是关于选择的话的内容（我说不明白，请大家自己抽取了之后，到“数据资料”里看）；
+Swindle：里面没东西。。。（都是NONE）；
+Tips：冒险岛帮助的全部内容。
+
+5 Item：消耗、其他、设置、宠物等，其图片、使用效果及坐标等。
+6 Map：包括大地图、各个地点的小地图（有些小地图在游戏中不能看，但是数据包里也有，比如天空组队任务的黑暗之室，它的小地图包括该地图里面台阶的轨迹。但是，很遗憾，主教复活任务的那个地图虽有小地图，但是没有台阶的轨迹……），以及在地图中人物的运行速度，各种礼花类消耗品的效果。还包括地图的背景、绳子、前置景等。
+7 Mob：包括怪物属性、图片、坐标。
+8 Morph：使用变身药水后变成的各种怪物的各种动作的图片及坐标。
+9 NPC：所有NPC图片、坐标、所说的话的代码（说的话的具体内容在String里）。
+10 Quest（里面的小文件逐个解说）：
+Act：任务的奖励；
+Check：无法提取其中内容；
+QuestInfo：任务的名称及内容解说；
+Say：任务过程中NPC说的话。
+
+11 Reactor：各种可敲箱子类的图片及相关数据。
+12 Skill：各职业所有技能（包括管理员技能）图片及效果资料。
+13 Sound：所有音乐、音效。
+14 String：冒险岛内所有中文解说的文字（包括小地图名称、技能名称及其文字解说、怪物官方名称、物品官方名称、怪物手册对怪物的文字介绍等）。
+15 TamingMob：3种骑兽的资料（没有图片）。
+16 UI：冒险岛内各类按钮、鼠标、提示框等效果图、坐标。 [/box]
+========================================
+以下技能属性部分：
+MaxLevel 最高等级
+MasterLevel 技能上限（一般在四转技能出现，指未使用能手册时的等级）
+Mastery 熟练度
+damage 攻击伤害（%）
+damR 伤害增加（%）
+damL 伤害减少（%）
+combatOrders 指可以通过骑士三转“战斗指令”提高到30级以上的技能 
+criticaldamageMin 最小暴击伤害增加（%）（被动技能是永久，部分技能是发动时引发该属性项目）
+criticaldamageMax 最大暴击伤害增加（%）
+cr 增加最小暴击几率
+x 自定义值（由服务端控制）
+y 自定义值（由服务端控制）
+z 自定义值（由服务端控制）
+u 自定义值（由服务端控制）
+v 自定义值（由服务端控制）
+w 自定义值（由服务端控制）
+req 需要前置技能（后面前置技能的技能代码）
+padskill 指定属性对指定技能有效
+hpCon 消耗HP
+mpCon 消耗MP
+finaAttack 是否引发终极攻击
+range 有效范围（多指可变动的团体辅助技能发动有效距离和技能攻击范围）
+lt 向前上有效范围（多指团体辅助技能发动有效距离和技能攻击范围）（横向,纵向）
+rb 向后下有效范围（多指团体辅助技能发动有效距离和技能攻击范围）（横向,纵向）
+MobCount 攻击怪物数目
+AttackCount 攻击次数
+time 持续时间（多指辅助技能持续时间）
+SelfDestruction爆炸攻击力（多指机械师召唤出来的机器人爆炸之后对周围怪物造成的攻击力）（%）
+cooltime 技能冷却时间
+mhpR HP上限增加
+MmpR MP上限增加
+hp 回复HP（值和频率由技能属性而定）
+mp 回复MP（值和频率由技能属性而定）
+prop 几率，效果由技能属性判定
+speed 移动速度（增加或减少）
+jump 跳跃力（增加或减少）
+asrR 提高角色的属性抗性
+terR 减少角色进入异常状态的几率
+pad(epad，padR) 攻击力增加
+pdd(epdd，pddR) 防御力增加
+mad(emad，madR) 魔法攻击力增加
+mdd(emdd，mddR) 魔法防御力增加
+acc（accR）命中率增加
+eva（evaR） 回避率增加
+exp（expR） 经验值增加
+ignoreMobpdpR 攻击时无视怪物防御力的几率
+itemCon 消耗物品（后面的是物品代码）
+itemConsume 消耗“消耗”物品（后面是消耗物品代码）
+itemConNo 消耗物品数量
+dot 怪物进入异常状态所造成的伤害（该异常状态指进入后会受到伤害的异常状态，中毒，灼伤等）
+dottime 怪物进入异常状态的时间
+dotInterval 怪物进入异常状态受到伤害的间隔
+bulletCount 子弹消耗攻击次数
+bulletConsume 消耗指定目标的数目
+weapon 使用技能武器限制
+Subweapon 使用技能副手武器限制
+elemAttr 技能属性
+
+以下贴图部分：
+repeat 重复播放
+delay 延迟（延迟内的数字按照 数字/100(秒) 计算）
+hitafter 出现下一次伤害的延迟
+origin 原点（贴图原点）
+prepare 准备
+effect 主要显示效果
+effect0 主要显示效果附加
+spcial 主要显示特别效果附加
+ball 远距离攻击贴图
+filp 附加远距离攻击贴图
+hit 怪物受到伤害贴图
+mob 怪物受到的异常状态贴图
+tile 附加在技能范围内的密集贴图（全屏技能专有）
+afterimage 泛指攻击时的武器效果贴图
+
+elemAttr=f  属性技能
+combatOrders=1  战斗命令  所有4转技能都有这个
+psd=1 psdskill 冰雷解释为 该技能的特殊属性如cr criticaldamage什么的 只对对应的psdskill技能有效
+keydown是按住技能键以后 角色的动画 参照暴风和金属风暴啥的
+lt是left top  角色的前方和上方  rb是right bottom  角色的后方和下方
+criticaldamageMin  同理  还有criticaldamageMax 提高最大爆击伤害
+asrR  terR 据说是抵抗异常状态的几率  不过英文全称是啥就不清楚了
+无形标其实有个属性 bulletConsume =200 意思你知道的
+===========================================
+MapleStory的STRUCT解析，自己整理的东西
+当然不是很全，但一般需要的都有
+如果不会看这个，就等于一把好钢笔放在不会写钢笔字的人手里＝ ＝
+其中有写不知道的就不写了
+只整理了部分的，还有的话，我会即使添加
+
+版权extractor.sjxsoft.com的bfydid所有，禁止转载，盗版必究
+Map（地图目录）
+version 版本
+cloud 云雾
+0＝没有云雾 1＝有云雾效果
+town 城镇
+0＝不是 1＝是
+swim 游泳
+0＝没有 1有
+returnMap 回城地图
+forcedReturn 强制到达地图
+mobRate 怪物暴率（不确定）
+bgm 背景音乐
+mapMark 地图标签
+VRTop 地图尺寸高
+VRLeft 地图尺寸左
+VRBottom 地图尺寸底
+VRRight 地图尺寸右
+decHP 扣除HP
+protectItem 保护物品
+recovery 恢复HP倍数
+effect 地图效果
+bS 地图目录
+Character（装备目录）
+reqJob 装备职业
+-1＝新手 0＝全职业 1＝战士 2＝魔法师 3＝战士&魔法师 4＝弓箭手 8＝飞侠 9＝战士&飞侠 13＝战士&弓箭手&飞侠
+reqLevel 需要等级
+reqSTR 需要力量
+reqDEX 需要敏捷
+reqINT 需要智力
+reqLUK 需要运气
+reqPOP 需要人气
+incPAD 增加攻击力
+incMAD 增加魔法力
+incPDD 增加物理防御力
+incMDD 增加魔法防御力
+incSTR 增加力量
+incDEX 增加敏捷
+incINT 增加智力
+incLUK 增加运气
+incMHP 增加HP总值
+incMMP 增加MP总值
+incACC 增加命中率
+incEVA 增加回避率
+incSPEED 增加移动速度
+incjump 增加跳跃力
+knockback 攻击后退率
+tuc 升级次数
+price 商店出售价格
+attackSpeed 攻击次数
+3比较快 4＝快 5＝快 6普通 7＝慢 8＝慢 9＝比较慢
+cash 现金装备
+0＝不是 1是
+Item（道具目录）
+slotMax 单位最大个数
+price 商店卖出价格
+only 最多允许数目
+moveTo 到达地图
+success 成功率
+hp 恢复HP
+mp 恢复MP
+hpR 恢复HP%
+mpR 恢复MP%
+PAD 增加物理攻击
+PDD 增加物理防御
+MAD 增加魔法攻击
+MDD 增加魔法防御
+acc 增加命中率
+eva 增加回避率
+peed 增加移动速度
+jump 增加跳跃力
+mesoupbyitem 增加金钱暴率％
+time 持续时间
+poison 毒
+darkness 黑暗
+weakness 虚弱
+seal 封印
+morph 变身
+quest 任务道具
+reqSkillLevel 需要技能等级
+masterLevel 提升技能等级
+recoveryHP 坐下恢复HP
+tradeBlock 交易限制
+dropBlock 丢弃限制
+notSale 卖出限制
+Skill（技能目录）
+hs 等级
+hpCon 消耗HP
+mpCon 消耗MP
+mobCount 攻击怪物数目
+attackCount 攻击次数
+damage 攻击％
+mdd 攻击力
+mad 魔法力
+speed 增加移动速度
+jump 增加跳跃力
+acc 增加命中率
+eva 增加回避率
+mastery 熟练度
+prop 几率
+range 攻击距离
+time 持续时间
+cooltime 冷却时间
+x 在不同的技能有不同的作用
+y 在不同的技能有不同的作用
+Mob（怪物目录）
+level 等级
+maxHP HP
+maxMP MP
+PADamage 物理攻击
+PDDamage 物理防御
+MADamage 魔法攻击
+MDDamage 魔法防御
+jump 跳跃力
+speed 移动速度
+acc 命中率
+eva 回避率
+exp 经验值
+undead 不死
+pushed 打退
+hpRecovery HP恢复
+mpRecovery MP恢复
+==========================================
