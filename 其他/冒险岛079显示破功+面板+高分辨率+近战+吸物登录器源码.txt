@@ -1,0 +1,400 @@
+int main()
+{
+	Enable_Debug();
+	ULONG64 pid = GetPIDForProcess(L"MapleStory.exe");
+	HANDLE handle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, pid);
+	if (handle)
+	{
+		ULONG addr_temp = 1385655400;
+		SIZE_T lpNumberOfBytesWritten;
+		if (WriteProcessMemory(handle, (void*)13642571, &addr_temp, 4, &lpNumberOfBytesWritten))
+		{
+			addr_temp = 2179763139;
+			WriteProcessMemory(handle, (void*)10855524, &addr_temp, 4, &lpNumberOfBytesWritten);
+			addr_temp = 2240484469;
+			WriteProcessMemory(handle, (void*)10479445, &addr_temp, 4, &lpNumberOfBytesWritten);
+			addr_temp = 1374456771;
+			WriteProcessMemory(handle, (void*)10856777, &addr_temp, 4, &lpNumberOfBytesWritten);
+			addr_temp = 4294967230;
+			WriteProcessMemory(handle, (void*)7957490, &addr_temp, 4, &lpNumberOfBytesWritten);
+			addr_temp = 1797760184;
+			WriteProcessMemory(handle, (void*)1987638317, &addr_temp, 4, &lpNumberOfBytesWritten);
+			addr_temp = 1797783736;
+			WriteProcessMemory(handle, (void*)2001066480, &addr_temp, 4, &lpNumberOfBytesWritten);
+
+
+
+
+
+			addr_temp = 2776862864;
+			WriteProcessMemory(handle, (void*)0x00958D81, &addr_temp, 4, &lpNumberOfBytesWritten);//近战
+
+			addr_temp = 0x6B2800B8;
+			WriteProcessMemory(handle, (void*)0x007868CF, &addr_temp, 4, &lpNumberOfBytesWritten);//面板破功
+			WriteProcessMemory(handle, (void*)0x008C8BAE, &addr_temp, 4, &lpNumberOfBytesWritten);
+			WriteProcessMemory(handle, (void*)0x0078876C, &addr_temp, 4, &lpNumberOfBytesWritten);
+			WriteProcessMemory(handle, (void*)0x007869A9, &addr_temp, 4, &lpNumberOfBytesWritten);
+
+			double temp_s = 2147483647.98438;
+			WriteProcessMemory(handle, (void*)0x00B064B8, &temp_s, 8, &lpNumberOfBytesWritten);//实际破功
+			
+			/*crc
+				00D02B4B
+				00A5A464
+				009FE755
+				00A5A949
+				00796BF2
+
+				破功
+				00B064B8 显示伤害
+				008C8BAE 物理面板破功0078876C 魔法面板破功
+				007869A9 魔法攻击力破攻
+				007868CF 物理攻击力破攻
+
+				宠吸
+				0050D7A6
+				0050D7B7
+
+				分辨率
+				00A00FA0
+				00A00FA5*/
+			//攻击不停基址 MapleStory.exe+7DD490]+295c+8
+
+			char temp1111[] = { 233, 197, 90, 109, 0, 144, 144, 144, 144, 144 };
+			WriteProcessMemory4(handle, 0x0050D79A, temp1111, sizeof(temp1111));
+			char temp2222[] = { 131, 61, 95, 50, 190, 0, 0, 116, 19, 15, 31, 64, 0, 83, 139, 93, 12, 137,
+				59, 137, 67, 4, 91, 233, 49, 165, 146, 255, 141, 69, 200, 80, 255, 21, 52, 23, 190, 0, 233, 21, 165, 146, 255 };
+			WriteProcessMemory4(handle, 0x00BE3264, temp2222, sizeof(temp2222));
+
+
+
+
+			ULONG 高度 = 1200;
+			ULONG 宽度 = 1600;
+
+			WriteProcessMemory2(handle, 0x00A00FA0 + 1, 高度);// 遊戲窗口高度768ok
+			WriteProcessMemory2(handle, 0x00A00FA5 + 1, 宽度);// 遊戲窗口宽度1024ok
+			WriteProcessMemory2(handle, 0x009EC61A + 1, -(高度 / 2));// 遊戲內容框架高度，这个影响商城
+			WriteProcessMemory2(handle, 0x009EC620 + 1, -(宽度 / 2));// 遊戲內容框架寬度，这个影响商城
+			WriteProcessMemory2(handle, 0x005CA9AC + 2, -(高度 / 2));// 鼠標左側高度ok
+			WriteProcessMemory2(handle, 0x005CA9B8 + 2, -(宽度 / 2));// 鼠標左側寬度ok
+			WriteProcessMemory2(handle, 0x009FFF01 + 1, 高度);// 鼠標右側高度768ok
+			WriteProcessMemory2(handle, 0x009FFF06 + 1, 宽度);// 鼠標右側寬度1024ok
+			WriteProcessMemory2(handle, 0x0057609F + 1, -(高度 / 2));// 登入介面框高度ok
+			WriteProcessMemory2(handle, 0x005760A5 + 1, -(宽度 / 2));// 登入介面框寬度ok
+			WriteProcessMemory2(handle, 0x00BD178C, 高度 / 2);// NPC對話右側高度300最终384ok
+			WriteProcessMemory2(handle, 0x00BD1788, 宽度 / 2);// NPC對話右側寬度512最终512ok
+			WriteProcessMemory2(handle, 0x00BD35E4, 高度 / 2);// NPC對話左側高度384最终384ok
+			WriteProcessMemory2(handle, 0x00BD35E0, 宽度 / 2);// NPC對話左側寬度512最终512ok
+			// ————————————————————————————————,
+			WriteProcessMemory2(handle, 0x009AFFC0 + 1, 宽度);// 寬度1024ok
+			WriteProcessMemory2(handle, 0x009AFFCD + 1, 高度);// 高度768ok
+			WriteProcessMemory2(handle, 0x008D6FE8 + 1, 宽度);// 寬度1024ok
+			WriteProcessMemory2(handle, 0x008D6FE3 + 1, 高度);// 高度768ok
+			// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x008D8D74 + 1, 高度 - 93);// 狀態黑色背景高度507最终675 ok
+			WriteProcessMemory2(handle, 0x008D8D02 + 1, 高度 - 93);// 狀態藍色背景高度507最终675ok
+			WriteProcessMemory2(handle, 0x008D6D3B + 1, 高度 - 22);// 狀態藍色背景顯示高度746最终746ok
+			WriteProcessMemory2(handle, 0x008D6D40 + 1, 宽度);// 狀態藍色背景顯示寬度1024最终1024ok
+			WriteProcessMemory2(handle, 0x00841181 + 1, 高度 - 22);// 狀態黑色背景顯示高度304最终746ok
+			WriteProcessMemory2(handle, 0x00841186 + 1, 宽度);// 狀態黑色背景顯示寬度629最终1024ok
+			WriteProcessMemory2(handle, 0x008DD6F6 + 1, 高度 - 19);// 體力前景顯示高度749最终749ok
+			WriteProcessMemory2(handle, 0x008DDE76 + 1, 高度 - 19);// 法力前景顯示高度749最终749ok
+			WriteProcessMemory2(handle, 0x008DE5C1 + 1, 高度 - 19);// 經驗前景顯示高度749最终749ok
+			WriteProcessMemory2(handle, 0x008DEECC + 1, 高度 - 56);// 狀態背景顯示高度544最终712ok
+			WriteProcessMemory2(handle, 0x008DEF5B + 1, 高度 - 51);// 玩家狀態文字顯示高度549最终717ok
+			WriteProcessMemory2(handle, 0x008D4C75 + 1, 高度 - 22);// 玩家狀態文字顯示固定高度746 ok
+			WriteProcessMemory2(handle, 0x008D4C7A + 1, 宽度);// 玩家狀態文字顯示固定寬度1024 ok
+			WriteProcessMemory2(handle, 0x008E4936 + 1, 高度 - 81);// 聊天屏幕-號高度519最终687 ok
+			WriteProcessMemory2(handle, 0x008E49C8 + 1, 高度 - 81);// 聊天屏幕+號高度519最终687 ok
+			WriteProcessMemory2(handle, 0x008E4A6C + 1, 高度 - 80);// 聊天文字輸入框高度520最终688 ok
+			WriteProcessMemory2(handle, 0x008E4AD7 + 1, 高度 - 85);// 聊天對象選擇高度515最终683 ok
+			WriteProcessMemory2(handle, 0x008D9842 + 1, 高度 - 91);// 聊天屏幕高度509最终677 ok
+			WriteProcessMemory2(handle, 0x008D98B4 + 1, 高度 - 90);// 聊天紀錄滾軸高度510最终678 ok
+			WriteProcessMemory2(handle, 0x008D7458 + 1, 高度 - 33);// 玩家狀態背景顯示高度735最终735ok
+			WriteProcessMemory2(handle, 0x008DCE4B + 1, 高度 - 46);// 等級高度554最终722ok
+			WriteProcessMemory2(handle, 0x008DCEC9 + 1, 高度 - 53);// 職業高度547最终715ok
+			WriteProcessMemory2(handle, 0x008DCF68 + 1, 高度 - 38);// 職業高度562最终730ok
+
+			WriteProcessMemory2(handle, 0x008D745D + 1, 宽度 - 1148-234);// 玩家狀態背景顯示寬度218最终218ok
+			WriteProcessMemory2(handle, 0x008581D9 + 1, 宽度 - 683 - 234);// 目錄選項寬度 683最终683 ok
+			WriteProcessMemory2(handle, 0x008D82F3 + 1, 宽度 - 628 - 234);// 熱鍵選項按鈕寬度 738最终738 ok
+			WriteProcessMemory2(handle, 0x008589EE + 1, 宽度 - 657 - 234);// 熱鍵選項寬度 709最终709 ok
+			// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x008D7F75 + 1, 宽度 - 794 - 234);// 購物商城按鈕寬度 573最终572 ok
+			WriteProcessMemory2(handle, 0x008D8020 + 1, 宽度 - 747 - 234);// 聊天室按鈕寬度 618最终619 ok
+			WriteProcessMemory2(handle, 0x008D80CB + 1, 宽度 - 701 - 234);// 拍賣按鈕寬度 663最终665 ok
+			WriteProcessMemory2(handle, 0x008D8197 + 1, 宽度 - 656 - 234);// 目录按鈕寬度 713最终710 ok
+			WriteProcessMemory2(handle, 0x008D8262 + 1, 宽度 - 610 - 234);// 界面按鈕寬度 713最终756 ok
+			// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x008D82F3 + 1, 宽度 - 628 - 234);// 键盘设置按鈕寬度 738最终738 ok
+			WriteProcessMemory2(handle, 0x008D83F2 + 1, 宽度 - 598 - 234);// 快捷鍵按鈕寬度736最终768 ok
+			WriteProcessMemory2(handle, 0x008E428F + 1, 宽度 - 598 - 234);// 開啟關閉快捷鍵按鈕寬度 768 最终768 ok
+			WriteProcessMemory2(handle, 0x0052DFC7 + 1, 宽度 - 781 - 234);// 任務完成提示寬度 464最终585 ok
+			WriteProcessMemory2(handle, 0x008E4170 + 1, 宽度 - 224 - 234);// 快捷鍵顯示寬度572最终1142 ok
+			WriteProcessMemory2(handle, 0x008D8DED + 1, 宽度 - 649 - 234);// 白色方框背景寬度 714 最终717 ok
+			WriteProcessMemory2(handle, 0x008D8E63 + 1, 宽度 - 647 - 234);// 提示圖標寬度 714 最终720 ok
+
+			WriteProcessMemory2(handle, 0x008581D3 + 1, 高度 - 226);// 目錄選項高度 399最终542 ok
+			WriteProcessMemory2(handle, 0x008D82EE + 1, 高度 - 85);// 熱鍵選項按鈕高度 515最终683 ok
+			WriteProcessMemory2(handle, 0x008589E8 + 1, 高度 - 278);// 熱鍵選項高度 320最终490 ok
+			// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x008D7F70 + 1, 高度 - 57);// 購物商城按鈕高度 543最终711 ok
+			WriteProcessMemory2(handle, 0x008D801B + 1, 高度 - 57);// 聊天室按鈕高度 543最终711 ok
+			WriteProcessMemory2(handle, 0x008D80C6 + 1, 高度 - 57);// 拍賣按鈕高度 543最终711 ok
+			WriteProcessMemory2(handle, 0x008D8192 + 1, 高度 - 57);// 目录按鈕高度 515最终711 ok
+			WriteProcessMemory2(handle, 0x008D825D + 1, 高度 - 57);// 界面按鈕高度 515最终711 ok
+			// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x008D82EE + 1, 高度 - 85);// 键盘设置按鈕高度 515最终683 ok
+			WriteProcessMemory2(handle, 0x008D83ED + 1, 高度 - 85);// 快捷鍵按鈕高度515最终683 ok
+			WriteProcessMemory2(handle, 0x008E428A + 1, 高度 - 85);// 開啟關閉快捷鍵按鈕高度 515 最终683 ok
+			WriteProcessMemory2(handle, 0x008D677E + 1, 高度 - 148);// 快捷鍵模板顯示高度 689最终620ok
+			WriteProcessMemory2(handle, 0x008D6785 + 1, 宽度 - 224);// 快捷鍵模板顯示寬度 800最终800ok
+			WriteProcessMemory2(handle, 0x008E411C + 2, 高度 - 68);// 快捷鍵模板顯示高度 769最终700ok
+			WriteProcessMemory2(handle, 0x0052DFB3 + 1, 高度 - 102);// 任務完成提示高度 508最终666
+			WriteProcessMemory2(handle, 0x008D8DE7 + 1, 高度 - 85);// 白色方框背景高度 515 最终683ok
+			WriteProcessMemory2(handle, 0x008D8E5D + 1, 高度 - 82);// 提示圖標高度 518 最终686 ok008D8F4C
+			WriteProcessMemory2(handle, 0x008D8F4C + 1, 高度 - 86);// 抵用券显示框
+			WriteProcessMemory2(handle, 0x008E4798 + 1, 高度 - 81);// 抵用券数量显示
+			;// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x008E4443 + 1, 高度 - 162);// 装备按鈕高度 515最终611 ok606
+			WriteProcessMemory2(handle, 0x008E4448 + 1, 宽度 - 216);// 装备按鈕寬度 663，最终581 ok808
+			WriteProcessMemory2(handle, 0x008E53F6 + 1, 高度 - 162);// 装备闪烁高度 515最终645 ok640
+			WriteProcessMemory2(handle, 0x008E53FB + 1, 宽度 - 216);// 装备闪烁寬度 614最终614 ok842
+
+			WriteProcessMemory2(handle, 0x008E44C0 + 1, 高度 - 162);// 背包按鈕高度 515最终683 ok606
+			WriteProcessMemory2(handle, 0x008E44C5 + 1, 宽度 - 182);// 背包按鈕寬度 618最终618 ok842
+			WriteProcessMemory2(handle, 0x008E5499 + 1, 高度 - 162);// 背包闪烁高度 515最终683 ok606
+			WriteProcessMemory2(handle, 0x008E549E + 1, 宽度 - 182);// 背包闪烁寬度 618最终618 ok842
+
+			WriteProcessMemory2(handle, 0x008E453D + 1, 高度 - 128);// 能力值按鈕高度 515最终645 ok640
+			WriteProcessMemory2(handle, 0x008E4542 + 1, 宽度 - 216);// 能力值按鈕寬度 663最终580 ok808
+			WriteProcessMemory2(handle, 0x008E5353 + 1, 高度 - 128);// 能力值闪烁图标高度560最终640ok
+			WriteProcessMemory2(handle, 0x008E5358 + 1, 宽度 - 216);// 能力值闪烁图标宽度560最终1150ok
+
+			WriteProcessMemory2(handle, 0x008E45BA + 1, 高度 - 128);// 技能按鈕高度 515最终645 ok640
+			WriteProcessMemory2(handle, 0x008E45BF + 1, 宽度 - 182);// 技能按鈕寬度 614最终614 ok842
+			WriteProcessMemory2(handle, 0x008E5152 + 1, 高度 - 128);// 技能按鈕高度 515最终645 ok640
+			WriteProcessMemory2(handle, 0x008E5157 + 1, 宽度 - 182);// 技能按鈕寬度 614最终614 ok842
+
+			;// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x007B9AC9 + 2, (高度 - 600) / 2 + 297);// BUFF圖示高度 361最终381ok
+			WriteProcessMemory2(handle, 0x007B9AE7 + 3, (宽度 - 800) / 2 + 397);// BUFF圖示寬度 509最终509ok
+			WriteProcessMemory2(handle, 0x007B9BD2 + 2, (高度 - 600) / 2 + 297);// BUFF冷卻高度 361最终381ok
+			WriteProcessMemory2(handle, 0x007B9BF0 + 3, (宽度 - 800) / 2 + 397);// BUFF冷卻寬度 509最终509ok
+			WriteProcessMemory2(handle, 0x007B9CD2 + 3, -(宽度 - 3));// BUFF文字說明寬度
+			WriteProcessMemory2(handle, 0x007B9EB8 + 3, -(宽度 - 3));// BUFF右鍵取消寬度
+			WriteProcessMemory2(handle, 0x008AC830 + 1, 高度 - 235);// 高度443最终611经验显示
+			WriteProcessMemory2(handle, 0x008F93B9 + 1, 宽度 - 1);// 功能按鈕文字提示寬度 1023
+			WriteProcessMemory2(handle, 0x008F93CC + 1, 高度 - 1);// 功能按鈕文字提示高度 767
+			WriteProcessMemory2(handle, 0x0099EBBC + 1, 宽度 / 2 - 133);// 藍色系統彈窗提示寬度 267最终379
+			WriteProcessMemory2(handle, 0x008AC98D + 1, 高度 - 157);// 高度443经验显示位置
+			WriteProcessMemory2(handle, 0x008E33C0 + 2, -(宽度 - 216));// 快捷键背景可控寬度ok
+			;// ————————————————————————————————
+			WriteProcessMemory2(handle, 0x009E9D20 + 3, -宽度);// 宽度-768
+			WriteProcessMemory2(handle, 0x009E9D8C + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x009E9E98 + 3, 宽度);// 宽度1024
+			WriteProcessMemory2(handle, 0x0066E60E + 1, 宽度 / 2);// 寬度512
+			WriteProcessMemory2(handle, 0x008AC8EE + 1, 宽度 - 296);// 寬度504
+			WriteProcessMemory2(handle, 0x0045B1A6 + 1, 宽度 + 100);// 猜寬度 1024最终1124
+			WriteProcessMemory2(handle, 0x0045AB28 + 1, 宽度 + 100);// 猜寬度 900最终1124
+			WriteProcessMemory2(handle, 0x0045AC0A + 1, 宽度 - 225);// 寬度 575最终799
+			WriteProcessMemory2(handle, 0x0045B0C0 + 1, 宽度 - 225);// 寬度 743最终799
+			WriteProcessMemory2(handle, 0x0063C5C5 + 1, 宽度 / 2 - 219);// 寬度219最终293
+			WriteProcessMemory2(handle, 0x0063C5CE + 1, 宽度 / 2 - 239);// 寬度239最终273
+			WriteProcessMemory2(handle, 0x004FD494 + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x00468F8F + 1, 宽度 - 55);// 寬度1311
+			WriteProcessMemory2(handle, 0x0046B019 + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x004E33A0 + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x005B7123 + 1, 宽度);// 寬度800
+			WriteProcessMemory2(handle, 0x004FD3E3 + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x005462B2 + 1, 宽度 / 2 - 129);// 寬度271
+			WriteProcessMemory2(handle, 0x005C2FDC + 1, 宽度 / 2 - 125);// 寬度275
+			WriteProcessMemory2(handle, 0x005CB0F1 + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x005CB67E + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x0064C98C + 1, 宽度 / 2 - 216);// 寬度184
+			WriteProcessMemory2(handle, 0x0065ACF9 + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x0066D6A4 + 2, 宽度);// 寬度800
+			WriteProcessMemory2(handle, 0x007F8207 + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x008A8FA9 + 1, 宽度 / 2 - 143);// 寬度257
+			WriteProcessMemory2(handle, 0x0066D6B5 + 1, -(宽度 / 2));// 寬度
+			WriteProcessMemory2(handle, 0x00751828 + 1, 3 * 宽度 * 高度);
+			WriteProcessMemory2(handle, 0x00751841 + 1, 宽度* 高度);
+			WriteProcessMemory2(handle, 0x007518B2 + 1, 宽度);// 寬度800
+			WriteProcessMemory2(handle, 0x008E3371 + 1, 宽度 - 342);// 寬度572
+			WriteProcessMemory2(handle, 0x008F224E + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x009A36AE + 1, 宽度 - 100);// 寬度924
+			WriteProcessMemory2(handle, 0x00A2E4F9 + 1, 宽度 / 2 - 129);// 寬度271
+			WriteProcessMemory2(handle, 0x007517A4 + 1, 4 * 宽度 * 高度);
+			WriteProcessMemory2(handle, 0x0099EBB4 + 1, 宽度 / 2 - 143);// 寬度266
+			WriteProcessMemory2(handle, 0x00575D7D + 1, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x009A36A6 + 2, 宽度);// 寬度1024
+			WriteProcessMemory2(handle, 0x007F7AD5 + 1, 宽度);// 寬度800最终1024
+			WriteProcessMemory2(handle, 0x007F7C0E + 1, 宽度);// 寬度1024最终1024
+			WriteProcessMemory2(handle, 0x007F8357 + 2, 宽度);// 寬度800最终1024
+			WriteProcessMemory2(handle, 0x007F7F1A + 2, 宽度);// 寬度800最终1024
+			WriteProcessMemory2(handle, 0x008DCDF2 + 1, 宽度);// 宽度1024
+
+
+
+			WriteProcessMemory3(handle, 0x0064C984 + 1);// 字節
+			WriteProcessMemory3(handle, 0x005C2FDA + 1);// 字節
+			WriteProcessMemory3(handle, 0x008AC98A + 2);// 字節
+			WriteProcessMemory3(handle, 0x008AC82D + 2);// 字節
+			WriteProcessMemory3(handle, 0x008D677B + 2);// 字節
+
+
+
+
+
+
+
+			WriteProcessMemory2(handle, 0x009E9F02 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x0066E675 + 1, 高度 / 2);// 高度384
+			WriteProcessMemory2(handle, 0x0063C5B4 + 1, 高度 / 2 - 150);// 高度150最终234
+			WriteProcessMemory2(handle, 0x0063C5BD + 1, 高度 / 2 - 130);// 高度170最终254
+			WriteProcessMemory2(handle, 0x004FD483 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x0046B007 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x004E33B5 + 2, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x004FD3CA + 1, 高度);// 高度600
+			WriteProcessMemory2(handle, 0x005CB10A + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x005CB697 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x0065ACF4 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x0066D69D + 2, 高度);// 高度600
+			WriteProcessMemory2(handle, 0x0066D6AD + 1, -(高度 / 2));// 高度
+			WriteProcessMemory2(handle, 0x007518B7 + 1, 高度);// 高度600
+			WriteProcessMemory2(handle, 0x007C8FFD + 1, 高度 - 80);// 高度520
+			WriteProcessMemory2(handle, 0x008ACBFA + 1, 高度 - 96);// 高度504
+			WriteProcessMemory2(handle, 0x008E3306 + 1, 高度 - 93);// 高度507
+			WriteProcessMemory2(handle, 0x008F226A + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x0099EBA9 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x009A3691 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x00575D78 + 1, 高度);// 高度768
+			WriteProcessMemory2(handle, 0x0052D886 + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052DD77 + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052DA9F + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052D694 + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052DB72 + 1, 高度 - 92);// 高度498最终676
+			WriteProcessMemory2(handle, 0x0052E1A9 + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052E39B + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052E5CF + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052E7C3 + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052E9C1 + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x0052EDF9 + 1, 高度 - 92);// 高度508最终676
+			WriteProcessMemory2(handle, 0x008DEFEA + 1, 高度 - 51);// 高度548最终717ok
+			WriteProcessMemory2(handle, 0x008DF113 + 1, 高度 - 54);// 高度546最终714ok
+			WriteProcessMemory2(handle, 0x008DF407 + 1, 高度 - 52);// 高度548最终716ok
+			WriteProcessMemory2(handle, 0x008DF4BE + 1, 高度 - 52);// 高度548最终716ok
+			WriteProcessMemory2(handle, 0x008DF737 + 1, 高度 - 52);// 高度548最终716ok
+			WriteProcessMemory2(handle, 0x008DF7E9 + 1, 高度 - 52);// 高度548最终716ok
+			WriteProcessMemory2(handle, 0x008DFA5C + 1, 高度 - 52);// 高度548最终716ok
+			WriteProcessMemory2(handle, 0x008D9966 + 1, 高度 - 90);// 高度510最终678
+			WriteProcessMemory2(handle, 0x008D9A24 + 1, 高度 - 36);// 高度580最终732
+			WriteProcessMemory2(handle, 0x008D9903 + 6, 高度 - 114);// 高度486最终654
+			WriteProcessMemory2(handle, 0x008D998E + 1, 高度 - 87);// 高度513最终681
+			WriteProcessMemory2(handle, 0x008DADE2 + 1, 高度 - 91);// 高度509最终677
+			WriteProcessMemory2(handle, 0x008DAE57 + 1, 高度 - 90);// 高度510最终678
+			WriteProcessMemory2(handle, 0x008D773E + 1, 高度 - 275);// 高度325最终493
+			WriteProcessMemory2(handle, 0x008DC282 + 3, 高度 - 40);// 高度560最终728
+			WriteProcessMemory2(handle, 0x008DC28F + 3, 高度 - 24);// 高度576最终744
+			WriteProcessMemory2(handle, 0x008DC344 + 3, 高度 - 41);// 高度559最终727
+			WriteProcessMemory2(handle, 0x008DC351 + 3, 高度 - 26);// 高度574最终742
+			WriteProcessMemory2(handle, 0x008DCDED + 1, 高度 - 22);// 高度746最终746
+			WriteProcessMemory2(handle, 0x008E33C9 + 2, -(高度 - 173));// 高度ok
+			WriteProcessMemory2(handle, 0x008E36A8 + 1, 高度 - 20);// 高度748最终748ok
+			WriteProcessMemory2(handle, 0x008E3944 + 1, 高度 - 20);// 高度748最终748ok
+			WriteProcessMemory2(handle, 0x007F7C09 + 1, 高度);// 高度768最终768
+			WriteProcessMemory2(handle, 0x008DEC14 + 1, 高度 - 19);// 高度581最终749ok
+			;// ------------------------------------------------------------------------------
+			WriteProcessMemory2(handle, 0x008E52CA + 1, 高度 - 40);// 高度560最终728ok商城闪烁图标
+
+
+			WriteProcessMemory2(handle, 0x00468F99 + 1, 宽度 - 828 - 234);// 退出按钮显示位置宽度ok
+			WriteProcessMemory2(handle, 0x00BE30BD, 宽度 - 806 - 234);// 商场框架显示宽度560
+			WriteProcessMemory2(handle, 0x00468F39 + 1, 宽度 - 808 - 234);// 商场选项框架宽度558
+			WriteProcessMemory2(handle, 0x00468F7F + 1, 宽度 - 391 - 234);// 商场热销栏宽度 975ok
+			WriteProcessMemory2(handle, 0x00BE3063, 宽度 - 391 - 234);// 商场搜索按钮宽度
+			WriteProcessMemory2(handle, 0x00BE31D5, 宽度 - 806 - 234);// 商场每日特卖宽度
+			WriteProcessMemory2(handle, 0x00BE316A, (宽度 - 800) / 2);// 商场预览框隐藏宽度
+			;// ------------------------------------------------------------------------------商场里面的1024*768
+
+			WriteProcessMemory2(handle, 0x00468F94 + 1, 高度 - 151);// 退出按钮显示位置高度 ok
+			WriteProcessMemory2(handle, 0x00468F4D + 1, 高度 - 338);// 商场框架背景高度430
+			WriteProcessMemory2(handle, 0x00BE30B7, 高度 - 588);// 商场框架显示高度430
+
+			WriteProcessMemory2(handle, 0x00BE311D, 高度 - 260);// 商场框架人物背包栏高度 508
+			WriteProcessMemory2(handle, 0x00BE3121, (宽度 - 800) / 2);// 商场人物背包宽度
+
+			WriteProcessMemory2(handle, 0x00BE3135, 高度 - 364);// 商场背包高度
+			WriteProcessMemory2(handle, 0x00BE313A, (宽度 - 800) / 2);// 商场背包宽度
+
+			WriteProcessMemory2(handle, 0x00BE316F, (高度 - 600) / 2);// 商场预览框高度
+			WriteProcessMemory2(handle, 0x00BE3177, (宽度 - 800) / 2);// 商场预览框宽度
+
+			WriteProcessMemory2(handle, 0x00BE3194, 212);// 商场预览框底图隐藏宽度
+			WriteProcessMemory2(handle, 0x00BE3199, (高度 - 600) / 2 + 40);// 商场预览框底图高度
+			WriteProcessMemory2(handle, 0x00BE319F, (宽度 - 800) / 2 + 24);// 商场预览框底图宽度
+
+			WriteProcessMemory2(handle, 0x00468F72 + 3, 高度 - 528);// 商场热销栏高度 240 ok
+			WriteProcessMemory2(handle, 0x00468F52 + 1, 高度 - 356);// 商城隐形底框高度412
+			WriteProcessMemory2(handle, 0x00BE3057, 高度 - 588);// 商场搜索按钮高度
+			
+			ULONG buffer = 100;
+			WriteProcessMemory(handle, (void*)(0x00468F37 + 1), &buffer, 1, &lpNumberOfBytesWritten);// 商场选项框架高度
+
+			WriteProcessMemory2(handle, 0x00BE31CF, 高度 - 588);// 商场每日特卖高度
+			WriteProcessMemory2(handle, 0x00BE31FF, 高度 - 233);// 登录界面摇杆按钮高度
+			WriteProcessMemory2(handle, 0x00BE3205, (宽度 - 800) / 2 + 76);// 登录界面摇杆按钮宽度
+
+			WriteProcessMemory2(handle, 0x00BE322F, 高度 - 233);// 登录成功摇杆按钮高度
+			WriteProcessMemory2(handle, 0x00BE3235, (宽度 - 800) / 2 + 76);// 登录成功摇杆按钮宽度
+
+
+			char temp1[] = { 233, 193, 160, 119, 0, 144, 144 };
+			WriteProcessMemory4(handle, 0x00468FB1, temp1,sizeof(temp1));// 搜索按钮宽度，把现有值存入到下面内存
+			char temp2[] = { 255, 53, 87, 48, 190, 0, 255, 53, 99, 48, 190, 0, 104, 184, 143, 70, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE3077, temp2, sizeof(temp2));// 商场搜索按钮返回到最原始位置
+
+			char temp3[] = { 233, 121, 161, 119, 0, 144, 144 };
+			WriteProcessMemory4(handle, 0x00468F57, temp3, sizeof(temp3));// 商场框架显示宽度，把现有值存入到下面内存
+			char temp4[] = { 255, 53, 183, 48, 190, 0, 255, 53, 189, 48, 190, 0, 104, 94, 143, 70, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE30D5, temp4, sizeof(temp4));// 商场框架显示返回到最原始位置
+
+			char temp5[] = { 233, 229, 161, 119, 0, 144, 141 };
+			WriteProcessMemory4(handle, 0x00468F1B, temp5, sizeof(temp5));// 商场角色背包宽度，把现有值存入到下面内存
+			char temp6[] = { 255, 53, 29, 49, 190, 0, 255, 53, 33, 49, 190, 0, 104, 33, 143, 70, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE3105, temp6, sizeof(temp6));// 商场角色背包返回到最原始位置
+
+			char temp7[] = { 233, 81, 162, 119, 0, 144, 141 };
+			WriteProcessMemory4(handle, 0x00468EFC, temp7, sizeof(temp7));// 商场背包宽度，把现有值存入到下面内存
+			char temp8[] = { 255, 53, 53, 49, 190, 0, 255, 53, 58, 49, 190, 0, 104, 2, 143, 70, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE3152, temp8, sizeof(temp8));// 商场背包返回到最原始位置
+
+			char temp9[] = { 233, 152, 162, 119, 0, 144, 144 };
+			WriteProcessMemory4(handle, 0x00468EDF, temp9, sizeof(temp9));// 商场预览框宽度，把现有值存入到下面内存
+			char temp11[] = { 255, 53, 106, 49, 190, 0, 255, 53, 111, 49, 190, 0, 255, 53, 119, 49, 190, 0, 104, 230, 142, 70, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE317C, temp11, sizeof(temp11));// 商场预览框返回到最原始位置
+
+			char temp12[] = { 233, 175, 60, 115, 0, 144, 144, 144, 144 };
+			WriteProcessMemory4(handle, 0x004AF4FD, temp12, sizeof(temp12));// 商场预览框底图宽度，把现有值存入到下面内存
+			char temp13[] = { 255, 53, 148, 49, 190, 0, 255, 53, 153, 49, 190, 0, 255, 53, 159, 49, 190, 0, 104, 6, 245, 74, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE31B1, temp13, sizeof(temp13));// 商场预览框底图返回到最原始位置
+
+			char temp14[] = { 233, 9, 111, 119, 0, 144, 144 };
+			WriteProcessMemory4(handle, 0x0046C2D9, temp14, sizeof(temp14));// 商场每日特卖高度，把现有值存入到下面内存
+			char temp15[] = { 255, 53, 207, 49, 190, 0, 255, 53, 213, 49, 190, 0, 104, 224, 194, 70, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE31E7, temp15, sizeof(temp15));// 商场每日特卖返回到最原始位置
+
+			char temp16[] = { 233, 117, 106, 89, 0, 144, 144 };
+			WriteProcessMemory4(handle, 0x0064C79D, temp16, sizeof(temp16));// 登录界面摇杆按钮高度，把现有值存入到下面内存
+			char temp17[] = { 255, 53, 255, 49, 190, 0, 255, 53, 5, 50, 190, 0, 104, 164, 199, 100, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE3217, temp17, sizeof(temp17));// 登录界面摇杆按钮返回到最原始位置
+
+			char temp18[] = { 233, 211, 125, 90, 0, 144, 144 };
+			WriteProcessMemory4(handle, 0x0063B46F, temp18, sizeof(temp18));// 登录成功摇杆按钮高度，把现有值存入到下面内存
+			char temp19[] = { 255, 53, 47, 50, 190, 0, 255, 53, 53, 50, 190, 0, 104, 118, 180, 99, 0, 195 };
+			WriteProcessMemory4(handle, 0x00BE3247, temp19, sizeof(temp19));// 登录成功摇杆按钮返回到最原始位置
+
+		}
+	}
+}
